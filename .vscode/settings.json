@@ -1,0 +1,48 @@
+{
+  // 🔁 Associe les fichiers .twig au HTML pour l’autocomplétion
+  "files.associations": {
+    "*.twig": "html",
+    "*.php": "php",
+    "*.env": "ini"
+  },
+
+  // 🎨 Active Emmet dans les fichiers twig
+  "emmet.includeLanguages": {
+    "twig": "html"
+  },
+
+  // 🧠 Intellisense pour PHP
+  "intelephense.environment.phpVersion": "8.2",
+  "intelephense.diagnostics.undefinedFunctions": false,
+
+  // 🧼 Formattage avec PHP CS Fixer
+  "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
+  "php-cs-fixer.onsave": true,
+  "php-cs-fixer.rules": "@Symfony",
+
+  // 🧙‍♂️ Extensions spécifiques Symfony (ex: twig functions, routing, etc.)
+  "twig.languageServer.enabled": true,
+  "twig.languageServer.trace.server": "verbose",
+
+  // ✨ Tailwind CSS IntelliSense (utile si tu utilises le CDN ou `tailwind.config.js`)
+  "tailwindCSS.includeLanguages": {
+    "html": "html",
+    "twig": "html"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["class\\s*=\\s*\"([^\"]*)", 1],
+    ["class:\\s*'([^']*)", 1]
+  ],
+
+  // 🛡️ Sécurité : désactive les erreurs inutiles
+  "php.validate.enable": true,
+  "php.validate.executablePath": "php",
+
+  // ⚡ Formatage auto si tu as Prettier en plus
+  "[twig]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // 🐘 Chemin vers PHP si besoin
+  "php.executablePath": "C:/laragon/bin/php/php-8.2.0-Win32-vs16-x64/php.exe"
+}
