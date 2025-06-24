@@ -1,20 +1,109 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Blender Collection{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/laragon/www/charles_LINDECKER/BlenderAdd-OnListe/app_blenderCollection/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>C:/laragon/www/charles_LINDECKER/BlenderAdd-OnListe/app_blenderCollection/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+    <section>
+        <article id="hero" class="w-full h-[350px] lg:h-[450px] 
+        bg-[url('/img/bg2.jpg')] bg-[length:190%_auto] bg-[20%_69%]
+         flex flex-col justify-center px-12">
+            <h1 class=" font-bold text-4xl md:text-5xl lg:text-7xl text-white">Blender Add-on Collection</h1>
+            <h2 class=" text-lg md:text-xl lg:text-2xl mt-2 text-white">Find free and open source add-on collections.</h2>
+            <div class=" mt-4 flex flex-row gap-2">
+                <button class=" bg-white rounded-md px-16 py-2
+                 flex flex-row items-center justify-center gap-2">
+                    <svg width="26" height="31" viewBox="0 0 26 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.55208 22.7917H23.3854V2.99999H4.63542C4.08288 2.99999 3.55298 3.21948 3.16228 3.61019C2.77158 4.00089 2.55208 4.53079 2.55208 5.08333V22.7917ZM4.63542 0.916656H24.4271C24.7034 0.916656 24.9683 1.0264 25.1637 1.22175C25.359 1.4171 25.4688 1.68206 25.4688 1.95832V23.8333C25.4688 24.1096 25.359 24.3746 25.1637 24.5699C24.9683 24.7653 24.7034 24.875 24.4271 24.875H1.51042L0.46875 26.7479V5.08333C0.46875 3.97826 0.907737 2.91845 1.68914 2.13705C2.47054 1.35564 3.53035 0.916656 4.63542 0.916656Z" fill="#1B1C1C"/>
+                        <path d="M4.11458 24.875C3.70018 24.875 3.30275 25.0396 3.00973 25.3326C2.7167 25.6257 2.55208 26.0231 2.55208 26.4375C2.55208 26.8519 2.7167 27.2493 3.00973 27.5423C3.30275 27.8354 3.70018 28 4.11458 28H23.3854V24.875H4.11458ZM4.11458 22.7917H25.4688V28C25.4688 28.5525 25.2493 29.0824 24.8586 29.4731C24.4679 29.8638 23.938 30.0833 23.3854 30.0833H4.11458C3.14765 30.0833 2.22032 29.6992 1.53659 29.0155C0.852864 28.3318 0.46875 27.4044 0.46875 26.4375C0.46875 25.4706 0.852864 24.5432 1.53659 23.8595C2.22032 23.1758 3.14765 22.7917 4.11458 22.7917ZM8.80208 2.99999V11.1667L11.9271 8.66666L15.0521 11.1667V2.99999H8.80208ZM6.71875 0.916656H17.1354V13.3333C17.1351 13.5293 17.0796 13.7213 16.9751 13.8871C16.8706 14.053 16.7214 14.186 16.5447 14.2708C16.3681 14.3557 16.171 14.389 15.9762 14.3669C15.7815 14.3447 15.5969 14.2681 15.4438 14.1458L11.9271 11.3333L8.41042 14.1458C8.25725 14.2681 8.07268 14.3447 7.87792 14.3669C7.68316 14.389 7.48612 14.3557 7.30943 14.2708C7.13274 14.186 6.98358 14.053 6.8791 13.8871C6.77461 13.7213 6.71903 13.5293 6.71875 13.3333V0.916656Z" fill="#1B1C1C"/>
+                    </svg>
+                    <p class=" text-black-950 text-lg">Create Yours</p>
+                </button>
+                <button class="bg-grey-850 bg-opacity-25 rounded-md px-12 py-2
+                 flex flex-row items-center justify-center gap-2">
+                    <p class=" text-white text-lg">Learn More</p>
+                </button>
+            </div>
+        </article>
+    </section>
+    <section class=" px-12 mt-4">
+        <article class=" bg-white dark:bg-black-900 p-6 rounded-lg
+        flex flex-col gap-4">
+            <div class=" flex flex-row justify-between items-center ">
+                <div class=" flex flex-row justify-center items-center gap-4">
+                    <svg width="50" height="41" viewBox="0 0 50 41" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M46.7072 0.102085C47.0904 -0.00922515 47.4943 -0.0298402 47.8869 0.0418685C48.2795 0.113577 48.65 0.275644 48.9692 0.515251C49.2883 0.754858 49.5473 1.06543 49.7258 1.42242C49.9042 1.7794 49.9971 2.173 49.9972 2.57209L49.9947 16.8521C49.9939 17.3297 49.8602 17.7976 49.6088 18.2036C49.3573 18.6096 48.9979 18.9377 48.5707 19.1511C48.1435 19.3646 47.6653 19.4551 47.1897 19.4124C46.714 19.3698 46.2596 19.1957 45.8772 18.9096L41.7722 15.8221L31.3222 29.7421C30.7132 30.5522 29.8269 31.1093 28.8329 31.3067C27.8389 31.5041 26.8069 31.328 25.9347 30.8121L25.5597 30.5621L17.2172 24.2946L6.17216 39.0071C5.12216 40.4071 3.20966 40.7746 1.72966 39.9271L1.36966 39.6896C0.702314 39.1882 0.240713 38.4606 0.0713513 37.6433C-0.0980099 36.8259 0.0364932 35.9749 0.449656 35.2496L0.687156 34.8896L13.3797 17.9846C13.9883 17.1734 14.8751 16.6155 15.8699 16.418C16.8646 16.2206 17.8973 16.3974 18.7697 16.9146L19.1422 17.1646L27.4822 23.4296L36.2872 11.7046L32.1697 8.61209C31.8133 8.34328 31.5329 7.98643 31.356 7.57655C31.1791 7.16668 31.1118 6.71787 31.1607 6.27414C31.2096 5.83042 31.3731 5.40703 31.635 5.04553C31.8969 4.68402 32.2483 4.39681 32.6547 4.21208L32.9972 4.08709L46.7097 0.0995849L46.7072 0.102085Z" fill="currentColor"/>
+                    </svg>
+                    <h2 class=" text-3xl font-semibold">Collection</h2>
+                </div>
+                <a href="" class=" font-semibold">View all</a>
+            </div>
+            <div class=" flex flex-row items-center justify-center gap-4">
+                <div class="relative w-2/4 h-64 lg:h-[450px] rounded-lg overflow-hidden p-4 flex flex-col justify-end bg-cover bg-center" style="background-image: url('/img/exemple/ex2.webp');">
+                    <div class="absolute bottom-0 left-0 w-full h-32 z-10 pointer-events-none"
+                        style="
+                            backdrop-filter: blur(4px);
+                            -webkit-backdrop-filter: blur(4px);
+                            mask-image: linear-gradient(to top, black 80%, transparent);
+                            -webkit-mask-image: linear-gradient(to top, black 80%, transparent);
+                        ">
+                    </div>
+                    <div class="relative z-20 text-white">
+                        <h3 class="text-3xl font-semibold">ND</h3>
+                        <div class="mt-2">
+                            <p class="flex items-center gap-2 text-sm">
+                            by HugeMenace | <span>15K</span>
+                            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="#BBBBBB" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="#BBBBBB" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            </p>
+                            <p class="text-sm">Non-Destructive Modeling Toolkit</p>
+                            </div>
+                        </div>
+                </div>
+                <div class="relative w-2/4 h-64 lg:h-[450px] rounded-lg overflow-hidden p-4 flex flex-col justify-end bg-cover bg-center" style="background-image: url('/img/exemple/ex1.webp');">
+                    <div class="absolute bottom-0 left-0 w-full h-32 z-10 pointer-events-none"
+                        style="
+                            backdrop-filter: blur(4px);
+                            -webkit-backdrop-filter: blur(4px);
+                            mask-image: linear-gradient(to top, black 80%, transparent);
+                            -webkit-mask-image: linear-gradient(to top, black 80%, transparent);
+                        ">
+                    </div>
+                    <div class="relative z-20 text-white">
+                        <h3 class="text-3xl font-semibold">UniV</h3>
+                        <div class="mt-2">
+                            <p class="flex items-center gap-2 text-sm">
+                            by Oxicid | <span>43K</span>
+                            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="#BBBBBB" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="#BBBBBB" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            </p>
+                            <p class="text-sm">UV Toolkit</p>
+                            </div>
+                        </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <img src="" alt="">
+                    <p>by HugeMenace | <span>15K</span></p>
+                    <h3></h3>
+                </div>
+            </div>
+        </article>
+        <article></article>
+        <article></article>
+    </section>
+    <div class=" w-full my-4 flex items-center justify-center">
+        <a href="#top">
+            <svg width="60" height="61" viewBox="0 0 60 61" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21.5655 30.5195H24.6618C25.4766 30.5195 26.1394 31.1819 26.1394 31.9967V40.7897C26.1394 41.8102 26.9693 42.6403 27.9896 42.6403H32.0107C33.031 42.6403 33.8607 41.8102 33.8607 40.7897V31.9967C33.8607 31.182 34.5237 30.5195 35.3385 30.5195H38.4348C38.9519 30.5195 39.3236 30.3444 39.4813 30.0264C39.6392 29.7088 39.5539 29.3067 39.2416 28.8946L31.1542 18.2345C30.8506 17.8347 30.4407 17.614 29.9999 17.614C29.5593 17.614 29.1494 17.8347 28.8457 18.2345L20.7584 28.8946C20.4459 29.3067 20.3608 29.7089 20.5186 30.0264C20.6765 30.3444 21.0484 30.5195 21.5655 30.5195Z" fill="white"/>
+                <path d="M29.9998 18.614C30.0806 18.614 30.2124 18.6483 30.3572 18.8386L38.4441 29.4978V29.4988C38.449 29.5053 38.4532 29.5121 38.4578 29.5183C38.4505 29.5184 38.443 29.5193 38.4353 29.5193H35.3386C33.9721 29.5193 32.8611 30.6293 32.8611 31.9968V40.7898C32.861 41.2584 32.478 41.6404 32.0105 41.6404H27.99C27.5223 41.6404 27.1394 41.2582 27.1394 40.7898V31.9968C27.1394 30.6293 26.0285 29.5193 24.6619 29.5193H21.5652C21.5568 29.5193 21.5487 29.5185 21.5408 29.5183C21.5454 29.512 21.5504 29.5054 21.5554 29.4988L29.6414 18.8386L29.6423 18.8396C29.7873 18.6488 29.9189 18.6141 29.9998 18.614Z" stroke="currentColor" stroke-opacity="0.733333" stroke-width="2"/>
+            <path d="M30 0.126953C13.4581 0.126953 0.000244141 13.5848 0.000244141 30.127C0.000244141 46.6691 13.4581 60.127 30 60.127C46.542 60.127 59.9998 46.6691 59.9998 30.127C59.9998 13.5848 46.542 0.126953 30 0.126953ZM30 7.95332C42.2267 7.95332 52.1738 17.9001 52.1738 30.127C52.1738 42.3538 42.2267 52.3006 30 52.3006C17.7734 52.3006 7.82614 42.3538 7.82614 30.127C7.82614 17.9001 17.7735 7.95332 30 7.95332Z" fill="white"/>
+            <path d="M30.0002 1.12695C45.9898 1.12708 59.0002 14.1371 59.0002 30.127C59.0002 46.1168 45.9898 59.1268 30.0002 59.127C14.0106 59.127 1.00024 46.1169 1.00024 30.127C1.00024 14.137 14.0106 1.12695 30.0002 1.12695ZM30.0002 6.95312C17.2215 6.95312 6.82642 17.3478 6.82642 30.127C6.82642 42.9061 17.2213 53.3008 30.0002 53.3008C42.779 53.3007 53.1741 42.906 53.1741 30.127C53.1741 17.3479 42.779 6.95325 30.0002 6.95312Z" stroke="currentColor" stroke-opacity="0.733333" stroke-width="2"/>
+            </svg>
+        </a>
+    </div>
 {% endblock %}
