@@ -25,7 +25,7 @@
             </div>
         </article>
     </section>
-    <section class=" px-12 mt-4">
+    <section class=" px-12 mt-4 flex flex-col gap-8">
         <article class=" bg-white dark:bg-black-900 p-6 rounded-lg
         flex flex-col gap-4">
             <div class=" flex flex-row justify-between items-center ">
@@ -33,67 +33,216 @@
                     <svg width="50" height="41" viewBox="0 0 50 41" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M46.7072 0.102085C47.0904 -0.00922515 47.4943 -0.0298402 47.8869 0.0418685C48.2795 0.113577 48.65 0.275644 48.9692 0.515251C49.2883 0.754858 49.5473 1.06543 49.7258 1.42242C49.9042 1.7794 49.9971 2.173 49.9972 2.57209L49.9947 16.8521C49.9939 17.3297 49.8602 17.7976 49.6088 18.2036C49.3573 18.6096 48.9979 18.9377 48.5707 19.1511C48.1435 19.3646 47.6653 19.4551 47.1897 19.4124C46.714 19.3698 46.2596 19.1957 45.8772 18.9096L41.7722 15.8221L31.3222 29.7421C30.7132 30.5522 29.8269 31.1093 28.8329 31.3067C27.8389 31.5041 26.8069 31.328 25.9347 30.8121L25.5597 30.5621L17.2172 24.2946L6.17216 39.0071C5.12216 40.4071 3.20966 40.7746 1.72966 39.9271L1.36966 39.6896C0.702314 39.1882 0.240713 38.4606 0.0713513 37.6433C-0.0980099 36.8259 0.0364932 35.9749 0.449656 35.2496L0.687156 34.8896L13.3797 17.9846C13.9883 17.1734 14.8751 16.6155 15.8699 16.418C16.8646 16.2206 17.8973 16.3974 18.7697 16.9146L19.1422 17.1646L27.4822 23.4296L36.2872 11.7046L32.1697 8.61209C31.8133 8.34328 31.5329 7.98643 31.356 7.57655C31.1791 7.16668 31.1118 6.71787 31.1607 6.27414C31.2096 5.83042 31.3731 5.40703 31.635 5.04553C31.8969 4.68402 32.2483 4.39681 32.6547 4.21208L32.9972 4.08709L46.7097 0.0995849L46.7072 0.102085Z" fill="currentColor"/>
                     </svg>
-                    <h2 class=" text-3xl font-semibold">Collection</h2>
+                    <h2 class=" text-3xl font-semibold">Trend</h2>
                 </div>
                 <a href="" class=" font-semibold">View all</a>
             </div>
             <div class=" flex flex-row items-center justify-center gap-4">
-                <div class="relative w-2/4 h-64 lg:h-[450px] rounded-lg overflow-hidden p-4 flex flex-col justify-end bg-cover bg-center" style="background-image: url('/img/exemple/ex2.webp');">
-                    <div class="absolute bottom-0 left-0 w-full h-32 z-10 pointer-events-none"
-                        style="
-                            backdrop-filter: blur(4px);
-                            -webkit-backdrop-filter: blur(4px);
-                            mask-image: linear-gradient(to top, black 80%, transparent);
-                            -webkit-mask-image: linear-gradient(to top, black 80%, transparent);
-                        ">
-                    </div>
-                    <div class="relative z-20 text-white">
-                        <h3 class="text-3xl font-semibold">ND</h3>
-                        <div class="mt-2">
-                            <p class="flex items-center gap-2 text-sm">
-                            by HugeMenace | <span>15K</span>
-                            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="#BBBBBB" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="#BBBBBB" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            </p>
-                            <p class="text-sm">Non-Destructive Modeling Toolkit</p>
+
+                {% set addons = [
+                    {
+                        bg: 'ex2.webp',
+                        title: 'ND',
+                        author: 'HugeMenace',
+                        views: '15K',
+                        desc: 'Non-Destructive Modeling Toolkit'
+                    },
+                    {
+                        bg: 'ex1.webp',
+                        title: 'UniV',
+                        author: 'Oxicid',
+                        views: '43K',
+                        desc: 'UV Toolkit'
+                    }
+                ] %}
+
+                {% for addon in addons %}
+                    <div class="relative w-2/4 h-[200px] lg:h-[300px] rounded-lg overflow-hidden p-4 flex flex-col justify-end bg-cover bg-center"
+                        style="background-image: url('/img/exemple/{{ addon.bg }}');">
+                        <div class="absolute bottom-0 left-0 w-full h-32 z-10 pointer-events-none"
+                            style="
+                                backdrop-filter: blur(4px);
+                                -webkit-backdrop-filter: blur(4px);
+                                mask-image: linear-gradient(to top, black 80%, transparent);
+                                -webkit-mask-image: linear-gradient(to top, black 80%, transparent);
+                            ">
+                        </div>
+                        <div class="relative z-20 text-white">
+                            <h3 class="text-3xl font-semibold">{{ addon.title }}</h3>
+                            <div class="mt-2">
+                                <p class="flex items-center gap-2 text-sm">
+                                    by {{ addon.author }} | <span>{{ addon.views }}</span>
+                                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </p>
+                                <p class="text-sm">{{ addon.desc }}</p>
                             </div>
                         </div>
-                </div>
-                <div class="relative w-2/4 h-64 lg:h-[450px] rounded-lg overflow-hidden p-4 flex flex-col justify-end bg-cover bg-center" style="background-image: url('/img/exemple/ex1.webp');">
-                    <div class="absolute bottom-0 left-0 w-full h-32 z-10 pointer-events-none"
-                        style="
-                            backdrop-filter: blur(4px);
-                            -webkit-backdrop-filter: blur(4px);
-                            mask-image: linear-gradient(to top, black 80%, transparent);
-                            -webkit-mask-image: linear-gradient(to top, black 80%, transparent);
-                        ">
                     </div>
-                    <div class="relative z-20 text-white">
-                        <h3 class="text-3xl font-semibold">UniV</h3>
-                        <div class="mt-2">
-                            <p class="flex items-center gap-2 text-sm">
-                            by Oxicid | <span>43K</span>
-                            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="#BBBBBB" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="#BBBBBB" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            </p>
-                            <p class="text-sm">UV Toolkit</p>
-                            </div>
-                        </div>
-                </div>
+                {% endfor %}
+
             </div>
-            <div>
-                <div>
-                    <img src="" alt="">
-                    <p>by HugeMenace | <span>15K</span></p>
-                    <h3></h3>
+            <div class=" flex lg:flex-row flex-col justify-center items-center gap-4 mx-4 my-8 ">
+                <div class=" flex flex-row gap-4">
+                    {% for i in 3..4 %}
+                        <div class=" w-2/4 flex flex-col gap-2"> 
+                            <img class="h-[150px] w-[300px] rounded-xl border-2 border-white"
+                            src="/img/exemple/ex{{ i }}.webp" alt="Image exemple {{ i }}">
+                            <h3 class=" text-xl font-bold">Title Sample</h3>
+                            <p class="flex items-center gap-2 text-sm ">
+                                by HugeMenace |<span class=" underline"> 15K</span>
+                                <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class=" flex flex-row gap-4">
+                    {% for i in 5..6 %}
+                        <div class=" w-2/4 flex flex-col gap-2"> 
+                            <img class="h-[150px] w-[300px] rounded-xl border-2 border-white"
+                            src="/img/exemple/ex{{ i }}.webp" alt="Image exemple {{ i }}">
+                            <h3 class=" text-xl font-bold">Title Sample</h3>
+                            <p class="flex items-center gap-2 text-sm ">
+                                by HugeMenace |<span class=" underline"> 15K</span>
+                                <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </p>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </article>
-        <article></article>
+        <hr class=" bg-white">
+        <article>
+            <div class=" flex flex-row justify-between items-center ">
+                <div class=" flex flex-col justify-center items-start gap-2">
+                    <div class=" flex flex-row gap-4">
+                        <svg width="26" height="31" viewBox="0 0 26 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.55208 22.7917H23.3854V2.99999H4.63542C4.08288 2.99999 3.55298 3.21948 3.16228 3.61019C2.77158 4.00089 2.55208 4.53079 2.55208 5.08333V22.7917ZM4.63542 0.916656H24.4271C24.7034 0.916656 24.9683 1.0264 25.1637 1.22175C25.359 1.4171 25.4688 1.68206 25.4688 1.95832V23.8333C25.4688 24.1096 25.359 24.3746 25.1637 24.5699C24.9683 24.7653 24.7034 24.875 24.4271 24.875H1.51042L0.46875 26.7479V5.08333C0.46875 3.97826 0.907737 2.91845 1.68914 2.13705C2.47054 1.35564 3.53035 0.916656 4.63542 0.916656Z" fill="currentColor"/>
+                            <path d="M4.11458 24.875C3.70018 24.875 3.30275 25.0396 3.00973 25.3326C2.7167 25.6257 2.55208 26.0231 2.55208 26.4375C2.55208 26.8519 2.7167 27.2493 3.00973 27.5423C3.30275 27.8354 3.70018 28 4.11458 28H23.3854V24.875H4.11458ZM4.11458 22.7917H25.4688V28C25.4688 28.5525 25.2493 29.0824 24.8586 29.4731C24.4679 29.8638 23.938 30.0833 23.3854 30.0833H4.11458C3.14765 30.0833 2.22032 29.6992 1.53659 29.0155C0.852864 28.3318 0.46875 27.4044 0.46875 26.4375C0.46875 25.4706 0.852864 24.5432 1.53659 23.8595C2.22032 23.1758 3.14765 22.7917 4.11458 22.7917ZM8.80208 2.99999V11.1667L11.9271 8.66666L15.0521 11.1667V2.99999H8.80208ZM6.71875 0.916656H17.1354V13.3333C17.1351 13.5293 17.0796 13.7213 16.9751 13.8871C16.8706 14.053 16.7214 14.186 16.5447 14.2708C16.3681 14.3557 16.171 14.389 15.9762 14.3669C15.7815 14.3447 15.5969 14.2681 15.4438 14.1458L11.9271 11.3333L8.41042 14.1458C8.25725 14.2681 8.07268 14.3447 7.87792 14.3669C7.68316 14.389 7.48612 14.3557 7.30943 14.2708C7.13274 14.186 6.98358 14.053 6.8791 13.8871C6.77461 13.7213 6.71903 13.5293 6.71875 13.3333V0.916656Z" fill="currentColor"/>
+                        </svg>
+                        <h2 class=" text-3xl font-semibold">Collection</h2>
+                    </div>
+                    <p>Extend Blender capabilitiees with these add-ons collection by the community.</p>
+                </div>
+                <a href="" class=" font-semibold">View all</a>
+            </div>
+            <hr class="border-t-2 border-black-900 mt-2">
+            <div class=" flex flex-col mt-2 justify-center items-center">
+                <div class=" flex flex-col lg:flex-row gap-2">
+                    <div class=" flex flex-row gap-2 justify-center items-center">
+                        <div class=" flex flex-col w-[325px] h-[475px] bg-black-900 pb-6 rounded-3xl">
+                            <img class=" rounded-t-3xl"
+                             src="/img/exemple/ex3.webp" alt="">
+                            <div class=" mx-4 my-4">
+                                <p class=" uppercase text-xs text-grey-500">Collection</p>
+                                <h4 class=" text-xl font-bold mb-6">Title Sample</h4>
+                                <p class=" text-lg mb-2">Synchronize 3D views between workspaces</p>
+                                <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1">
+                                    <a href="" class=" m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">3D View</a>
+                                    <a href="" class=" my-1 p-1 rounded-md text-xs border-[1px] border-grey-500">User Interface</a>
+                                </div>
+                                <p class=" text-grey-500  font-thin">MultLabs</p>
+                                <div class=" flex flex-row justify-between text-grey-500">
+                                    <div class=" flex flex-row">
+                                        <svg width="91" height="19" viewBox="0 0 91 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10.5 0.0317383L12.7451 6.94157H20.0106L14.1327 11.2121L16.3779 18.1219L10.5 13.8514L4.62215 18.1219L6.86729 11.2121L0.989435 6.94157H8.25486L10.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M28.5 0.0317383L30.7451 6.94157H38.0106L32.1327 11.2121L34.3779 18.1219L28.5 13.8514L22.6221 18.1219L24.8673 11.2121L18.9894 6.94157H26.2549L28.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M45.5 0.0317383L47.7451 6.94157H55.0106L49.1327 11.2121L51.3779 18.1219L45.5 13.8514L39.6221 18.1219L41.8673 11.2121L35.9894 6.94157H43.2549L45.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M62.5 0.0317383L64.7451 6.94157H72.0106L66.1327 11.2121L68.3779 18.1219L62.5 13.8514L56.6221 18.1219L58.8673 11.2121L52.9894 6.94157H60.2549L62.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M80.5 0.0317383L82.7451 6.94157H90.0106L84.1327 11.2121L86.3779 18.1219L80.5 13.8514L74.6221 18.1219L76.8673 11.2121L70.9894 6.94157H78.2549L80.5 0.0317383Z" fill="#F6AD00"/>
+                                        </svg>
+                                        <p>(56)</p>
+                                    </div>
+                                    <p class="flex flex-row justify-center items-center gap-2 text-sm ">
+                                        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span class=" underline"> 15K</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" flex flex-col w-[325px] h-[475px] bg-black-900 pb-6 rounded-3xl">
+                            <img class=" rounded-t-3xl"
+                             src="/img/exemple/ex3.webp" alt="">
+                            <div class=" mx-4 my-4">
+                                <p class=" uppercase text-xs text-grey-500">Collection</p>
+                                <h4 class=" text-xl font-bold mb-6">Title Sample</h4>
+                                <p class=" text-lg mb-2">Synchronize 3D views between workspaces</p>
+                                <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1">
+                                    <a href="" class=" m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">3D View</a>
+                                    <a href="" class=" my-1 p-1 rounded-md text-xs border-[1px] border-grey-500">User Interface</a>
+                                </div>
+                                <p class=" text-grey-500  font-thin">MultLabs</p>
+                                <div class=" flex flex-row justify-between text-grey-500">
+                                    <div class=" flex flex-row">
+                                        <svg width="91" height="19" viewBox="0 0 91 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10.5 0.0317383L12.7451 6.94157H20.0106L14.1327 11.2121L16.3779 18.1219L10.5 13.8514L4.62215 18.1219L6.86729 11.2121L0.989435 6.94157H8.25486L10.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M28.5 0.0317383L30.7451 6.94157H38.0106L32.1327 11.2121L34.3779 18.1219L28.5 13.8514L22.6221 18.1219L24.8673 11.2121L18.9894 6.94157H26.2549L28.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M45.5 0.0317383L47.7451 6.94157H55.0106L49.1327 11.2121L51.3779 18.1219L45.5 13.8514L39.6221 18.1219L41.8673 11.2121L35.9894 6.94157H43.2549L45.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M62.5 0.0317383L64.7451 6.94157H72.0106L66.1327 11.2121L68.3779 18.1219L62.5 13.8514L56.6221 18.1219L58.8673 11.2121L52.9894 6.94157H60.2549L62.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M80.5 0.0317383L82.7451 6.94157H90.0106L84.1327 11.2121L86.3779 18.1219L80.5 13.8514L74.6221 18.1219L76.8673 11.2121L70.9894 6.94157H78.2549L80.5 0.0317383Z" fill="#F6AD00"/>
+                                        </svg>
+                                        <p>(56)</p>
+                                    </div>
+                                    <p class="flex flex-row justify-center items-center gap-2 text-sm ">
+                                        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span class=" underline"> 15K</span>
+                                    </p>
+                                </div>
+                            </div>
+                       </div> 
+                    </div>
+                    <div class=" flex flex-row gap-2 justify-center items-center">
+                        <div class=" flex flex-col w-[325px] h-[475px] bg-black-900 pb-6 rounded-3xl">
+                            <img class=" rounded-t-3xl"
+                             src="/img/exemple/ex3.webp" alt="">
+                            <div class=" mx-4 my-4">
+                                <p class=" uppercase text-xs text-grey-500">Collection</p>
+                                <h4 class=" text-xl font-bold mb-6">Title Sample</h4>
+                                <p class=" text-lg mb-2">Synchronize 3D views between workspaces</p>
+                                <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1">
+                                    <a href="" class=" m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">3D View</a>
+                                    <a href="" class=" my-1 p-1 rounded-md text-xs border-[1px] border-grey-500">User Interface</a>
+                                </div>
+                                <p class=" text-grey-500  font-thin">MultLabs</p>
+                                <div class=" flex flex-row justify-between text-grey-500">
+                                    <div class=" flex flex-row">
+                                        <svg width="91" height="19" viewBox="0 0 91 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10.5 0.0317383L12.7451 6.94157H20.0106L14.1327 11.2121L16.3779 18.1219L10.5 13.8514L4.62215 18.1219L6.86729 11.2121L0.989435 6.94157H8.25486L10.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M28.5 0.0317383L30.7451 6.94157H38.0106L32.1327 11.2121L34.3779 18.1219L28.5 13.8514L22.6221 18.1219L24.8673 11.2121L18.9894 6.94157H26.2549L28.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M45.5 0.0317383L47.7451 6.94157H55.0106L49.1327 11.2121L51.3779 18.1219L45.5 13.8514L39.6221 18.1219L41.8673 11.2121L35.9894 6.94157H43.2549L45.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M62.5 0.0317383L64.7451 6.94157H72.0106L66.1327 11.2121L68.3779 18.1219L62.5 13.8514L56.6221 18.1219L58.8673 11.2121L52.9894 6.94157H60.2549L62.5 0.0317383Z" fill="#F6AD00"/>
+                                            <path d="M80.5 0.0317383L82.7451 6.94157H90.0106L84.1327 11.2121L86.3779 18.1219L80.5 13.8514L74.6221 18.1219L76.8673 11.2121L70.9894 6.94157H78.2549L80.5 0.0317383Z" fill="#F6AD00"/>
+                                        </svg>
+                                        <p>(56)</p>
+                                    </div>
+                                    <p class="flex flex-row justify-center items-center gap-2 text-sm ">
+                                        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span class=" underline"> 15K</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
         <article></article>
     </section>
     <div class=" w-full my-4 flex items-center justify-center">
