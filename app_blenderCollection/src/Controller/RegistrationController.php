@@ -5,15 +5,16 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\RegistrationForm;
 use App\Security\EmailVerifier;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Form\FormError;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
 class RegistrationController extends AbstractController
@@ -29,10 +30,20 @@ class RegistrationController extends AbstractController
         $form = $this->createForm(RegistrationForm::class, $user);
         $form->handleRequest($request);
 
+
+
+
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
+            $confirm  = $form->get('confirmPassword')->getData();
 
+            if ($plainPassword !== $confirm) {
+                $this->addFlash('verify_email_error', 'Passwords do not match.');
+                return $this->render('security/register.html.twig', [
+                    'error' => 'Password and Confirmpassword dont match.',
+                ]); 
+            }
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
