@@ -17,32 +17,98 @@
         <div class=" w-3/4 bg-[#CDD5D9] bg-opacity-90 flex flex-col justify-center rounded-lg p-6
         text-white dark:text-black-900 ">
             <h2 class=" text-lg mb-6">Register to continue to <span class=" font-bold">Blender Collection.</span></h2>
-            <form method="post" action="{{ path('app_register') }}" class=" flex flex-col gap-4">
 
-                <label for="name" class=" font-bold text-xl">Name <span class=" text-red-600">*</span></label>
-                <input type="text" id="name" name="name" placeholder="Enter your full name" class=" block p-2 rounded px-6 bg-white">
-                <label for="email" class=" font-bold text-xl">Email <span class=" text-red-600">*</span></label>
-                <input type="text" id="email" name="email" placeholder="name@exemple.com" class=" block p-2 rounded px-6 bg-white">
-                <label for="plainPassword" class=" font-bold text-xl">Password <span class=" text-red-600">*</span></label>
-                <input placeholder="Enter your password" type="password" id="plainPassword" name="plainPassword" class=" block p-2 rounded px-6 bg-white">
-                <label for="confirmPassword" class=" font-bold text-xl">Confirm Password <span class=" text-red-600">*</span></label>
-                <input placeholder="Confirm your password" type="password" id="confirmPassword" name="confirmPassword" class=" block p-2 rounded px-6 bg-white">
+            {{ form_start(registrationForm, {
+                'attr': {
+                    'class': 'flex flex-col gap-4',
+                    'id': 'register_form'
+                }
+            }) }}
 
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
+                {# Name #}
+                <label for="{{ registrationForm.name.vars.id }}" class="font-bold text-xl">
+                    Name <span class="text-red-600">*</span>
+                </label>
+                {{ form_widget(registrationForm.name, {
+                    'attr': {
+                        'placeholder': 'Enter your full name',
+                        'class': 'block p-2 rounded px-6 bg-white'
+                    }
+                }) }}
+                {% for error in registrationForm.name.vars.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+                {% endfor %}
 
-                <div class=" flex flex-row justify-start items-center gap-4">
-                    <input type="checkbox" name="agreeTerms" id="agreeTerms" class="appearance-none rounded-md border bg-white border-gray-400 w-5 h-5 checked:bg-green-600 ">
-                    <p class=" select-none text-lg">I have read and agree to the <a href="" class=" underline">Privacy Policy.</a><span class="text-red-600"> *</span></p>
+                {# Email #}
+                <label for="{{ registrationForm.email.vars.id }}" class="font-bold text-xl">
+                    Email <span class="text-red-600">*</span>
+                </label>
+                {{ form_widget(registrationForm.email, {
+                    'attr': {
+                        'placeholder': 'name@example.com',
+                        'class': 'block p-2 rounded px-6 bg-white'
+                    }
+                }) }}
+                {% for error in registrationForm.email.vars.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+                {% endfor %}
+
+                {# Password #}
+                <label for="{{ registrationForm.plainPassword.vars.id }}" class="font-bold text-xl">
+                    Password <span class="text-red-600">*</span>
+                </label>
+                {{ form_widget(registrationForm.plainPassword, {
+                    'attr': {
+                        'placeholder': 'Enter your password',
+                        'class': 'block p-2 rounded px-6 bg-white'
+                    }
+                }) }}
+                {% for error in registrationForm.plainPassword.vars.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+                {% endfor %}
+
+                {# Confirm Password #}
+                <label for="{{ registrationForm.confirmPassword.vars.id }}" class="font-bold text-xl">
+                    Confirm Password <span class="text-red-600">*</span>
+                </label>
+                {{ form_widget(registrationForm.confirmPassword, {
+                    'attr': {
+                        'placeholder': 'Confirm your password',
+                        'class': 'block p-2 rounded px-6 bg-white'
+                    }
+                }) }}
+                {% for error in registrationForm.confirmPassword.vars.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+                {% endfor %}
+
+                {# Agree Terms #}
+                <div class="flex flex-row justify-start items-center gap-4">
+                    {{ form_widget(registrationForm.agreeTerms, {
+                        'attr': {
+                            'class': 'appearance-none rounded-md border bg-white border-gray-400 w-5 h-5 checked:bg-green-600'
+                        }
+                    }) }}
+                    <p class="select-none text-lg">
+                        I have read and agree to the <a href="#" class="underline">Privacy Policy.</a>
+                        <span class="text-red-600">*</span>
+                    </p>
                 </div>
+                {% for error in registrationForm.agreeTerms.vars.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+                {% endfor %}
 
-                <button type="submit" class="block text-white font-bold py-2 px-4 rounded bg-[linear-gradient(to_right,#4AA5F7_0%,#6086FF_100%)] mb-8 mt-1">Continue</button>
+                {# Submit #}
+                <button type="submit"
+                        class="block text-white font-bold py-2 px-4 rounded bg-[linear-gradient(to_right,#4AA5F7_0%,#6086FF_100%)] mb-8 mt-1">
+                    Continue
+                </button>
 
-            </form>
+            {{ form_end(registrationForm) }}
             <p class=" w-full text-center text-xs">Already have an account? <a href="{{ path('app_login') }}" class=" underline">Sign in</a></p>
         </div>
     </main>
     <script>
-    window.addEventListener('turbo:load', () => {
+    window.addEventListener('DOMContentLoaded', () => {
         // Scroll vers une div précise si besoin
         const element = document.getElementById('content');
         if (element) {
@@ -51,24 +117,4 @@
     });
     </script>
 
-
-{#     {% for flash_error in app.flashes('verify_email_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
-
-    <h1>Register</h1>
-
-    {{ form_errors(registrationForm) }}
-
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email, {
-            label: 'Email*'
-        }) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password*'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
-
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }} #}
 {% endblock %}

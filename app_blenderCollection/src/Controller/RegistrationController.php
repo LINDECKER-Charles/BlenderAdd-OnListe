@@ -26,30 +26,44 @@ class RegistrationController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
+        if ($this->getUser()){
+            return $this->redirectToRoute('app_home');
+        }
+        
         $user = new User();
         $form = $this->createForm(RegistrationForm::class, $user);
         $form->handleRequest($request);
 
 
-
-
         if ($form->isSubmitted() && $form->isValid()) {
+            
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
             $confirm  = $form->get('confirmPassword')->getData();
+            
+            if($plainPassword !== $confirm){
+                $form->get('plainPassword')->addError(new \Symfony\Component\Form\FormError('Le mot de passe confirmé est différent.'));
+                return $this->render('registration/register.html.twig', [
+                    'registrationForm' => $form,
+                ]);
+            }
 
-            if ($plainPassword !== $confirm) {
-                $this->addFlash('verify_email_error', 'Passwords do not match.');
-                return $this->render('security/register.html.twig', [
-                    'error' => 'Password and Confirmpassword dont match.',
+            if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/', $plainPassword)) {
+                $form->get('plainPassword')->addError(
+                    new FormError('Mot de passe trop faible. Il doit contenir au moins 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.')
+                );
+                return $this->render('registration/register.html.twig', [
+                    'registrationForm' => $form,
                 ]); 
             }
+            /* dd('Je suis dans le contrôleur'); */
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
             $entityManager->persist($user);
             $entityManager->flush();
 
+            /* dd('Je suis dans le contrôleur'); */
             // generate a signed url and email it to the user
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
@@ -61,7 +75,7 @@ class RegistrationController extends AbstractController
 
             // do anything else you need here, like send an email
 
-            return $this->redirectToRoute('_profiler');
+            return $this->redirectToRoute('app_home');
         }
 
         return $this->render('registration/register.html.twig', [
