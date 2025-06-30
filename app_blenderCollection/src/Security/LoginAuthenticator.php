@@ -43,9 +43,9 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
                 if (!$user) {
                     throw new CustomUserMessageAuthenticationException('Compte Introuvable');
                 }
-                if (!$user->isVerified()) {
+/*                 if (!$user->isVerified()) {
                     throw new CustomUserMessageAuthenticationException('Veuillez vérifier votre email avant de vous connecter.');
-                }
+                } */
 
                 return $user;
             }),

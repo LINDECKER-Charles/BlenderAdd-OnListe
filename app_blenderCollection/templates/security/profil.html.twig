@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil{% endblock %}
+
+{% block body %}
+    <section class="min-h-screen bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
+        <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6">
+            <!-- Avatar -->
+            <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar') }}">
+                <input id="avatar-input" type="file" name="avatar" accept="image/*" class="hidden" onchange="document.getElementById('upload-avatar-form').submit()">
+                
+                <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" onclick="document.getElementById('avatar-input').click()">
+                {% if user.pathImg %}
+                    <img src="{{ user.pathImg }}" alt="Avatar" class="w-full h-full object-cover">
+                {% else %}
+                    <img src="/img/profil_template.png" alt="Default avatar" class="w-full h-full object-cover">
+                {% endif %}
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 text-black-990 ">
+                        {# Mettre icon update #}
+                        <span class=" text-sm font-semibold p-2 dark:bg-black-950 dark:text-white rounded-full bg-white">Change</span>
+                    </div>
+                </div>
+            </form>
+
+
+
+            <div class="text-center flex flex-col gap-2">
+                <!-- Nom + Email + Role -->
+                <div class=" flex flex-col gap-2">
+                    {# Nom #}
+                    <div class=" flex flex-row justify-center items-center gap-2">
+                        <h1 class="text-2xl font-bold flex items-center gap-2">{{ user.name }}</h1>
+                        <button onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
+                            <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
+                                <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {# Email #}
+                    <div class=" flex flex-row justify-center items-center gap-2">
+                        <p class="text-grey-400 flex items-center justify-center gap-2">{{ user.email }}</p>
+                        <button onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
+                            <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
+                                <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {# Role + Verification #}
+                    <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1 justify-center items-center text-center">
+                        <div>
+                            {% if user.roles %}
+                                {% for role in user.roles %}
+                                    {% if role == 'ROLE_USER' %}
+                                        <p title="You are member" class="role m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">Membre</p>
+                                    {% else %}
+                                        <p title="{{ role }}" class="role m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">{{ role }}</p>
+                                    {% endif %}
+
+                                {% endfor %}
+                            {% else %}
+                                <p title="{{ role }}" class="role m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">Membre</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            {% if user.isVerified %}
+                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-blue-500 text-white">
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414L9 13.414l4.707-4.707z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Vérifié
+                                </span>
+                            {% else %}
+                                <div class=" inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-yellow-500 dark:text-white text-white">
+                                    <p>Non vérifié</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1 justify-center items-center text-center">
+                        {% if user.description %}
+                            <div class="max-w-2xl mx-auto mt-6 bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
+                                <div class=" flex flex-row items-center gap-2">
+                                    <button onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
+                                        <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
+                                            <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                    <h2 class="text-xl font-semibold mb-2">Description</h2>
+                                </div>
+                                <div class="prose dark:prose-invert max-w-none">
+                                    {{ descriptionHtml|raw }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="max-w-2xl mx-auto mt-6 text-black-950 dark:text-white bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
+                                <div class=" flex flex-row items-center gap-2">
+                                    <button onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
+                                        <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
+                                            <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                    <h2 class="text-xl font-semibold mb-2">Description</h2>
+                                </div>
+                                <p class="text-sm italic">No description provided yet.</p>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="flash-dismissable transition-opacity duration-500 opacity-100 px-4 py-1 rounded shadow text-white
+                                    {% if label == 'success' %} dark:text-blue-500 text-blue-500
+                                    {% elseif label == 'error' %} dark:text-red-600 text-red-600
+                                    {% elseif label == 'warning' %} dark:text-yellow-600 text-yellow-600 
+                                    {% else %} dark:text-white {% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {# Modal #}
+            <div>
+                <!-- MODAL Email -->
+                <div id="editEmailModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
+                        <h2 class="text-xl font-semibold mb-4">Edit your email</h2>
+                        <form method="POST" action="{{ path('app_update_email') }}">
+                            <input type="text" name="name" value="{{ user.email }}" class="w-full px-4 py-2 border rounded-md bg-white text-black-950" required>
+                            <div class="flex justify-end gap-3 mt-4">
+                                <button type="button" onclick="toggleModalEmail()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cacnel</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- MODAL Nom -->
+                <div id="editNameModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
+                        <h2 class="text-xl font-semibold mb-4">Edit your name</h2>
+                        <form method="POST" action="{{ path('app_update_name') }}">
+                            <input type="text" name="name" value="{{ user.name }}" class="w-full px-4 py-2 border rounded-md bg-white text-black-950" required>
+                            <div class="flex justify-end gap-3 mt-4">
+                                <button type="button" onclick="toggleModalName()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- MODAL Description -->
+                <div id="editDescriptionModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
+                        <h2 class="text-xl font-semibold mb-4">Edit your description (Markdown supported)</h2>
+                        <form method="POST" action="{{ path('app_update_description') }}">
+                        <textarea 
+                            name="description" 
+                            rows="12"
+                            class="w-full px-4 py-2 border rounded-md bg-white text-black-950 
+                                focus:outline-none focus:ring-0 active:outline-none active:ring-0 resize-none"
+                            placeholder="Décrivez votre univers..."
+                            required>{{ user.description }}</textarea>
+                            <div class="flex justify-end gap-3 mt-4">
+                                <button type="button" onclick="toggleModalDescription()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <script>
+                function toggleModalName() {
+                    const modal = document.getElementById('editNameModal');
+                    modal.classList.toggle('hidden');
+                }
+                function toggleModalEmail() {
+                    const modal = document.getElementById('editEmailModal');
+                    modal.classList.toggle('hidden');
+                }
+                function toggleModalDescription() {
+                    const modal = document.getElementById('editDescriptionModal');
+                    modal.classList.toggle('hidden');
+                }
+                document.querySelectorAll('.flash-dismissable').forEach((el) => {
+                    setTimeout(() => {
+                        el.classList.remove('opacity-100');
+                        el.classList.add('opacity-0');
+                        setTimeout(() => el.remove(), 1000); // correspond à duration-500
+                    }, 4000);
+                });
+            </script>
+            <!-- Trait -->
+            <div class="w-full h-px bg-white opacity-20 my-4"></div>
+
+            <!-- Mes Collections -->
+            <div class="w-full flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Mes Collections</h2>
+            <a href="#" class="text-sm text-grey-300 hover:underline">View all</a>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+            {% for i in 1..8 %}
+                <div class="bg-black-900 p-4 rounded-lg shadow-lg">
+                <img src="/img/exemple/ex{{ i }}.webp" alt="Addon {{ i }}" class="rounded-md mb-2 h-32 w-full object-cover">
+                <h3 class="text-lg font-bold">Synchronize Workspaces</h3>
+                <p class="text-xs text-grey-500">by HugeMenace · 15K vues</p>
+                <div class="flex items-center gap-1 mt-2 text-yellow-400">
+                    {% for star in 1..5 %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                    {% endfor %}
+                </div>
+                </div>
+            {% endfor %}
+            </div>
+
+            <!-- View More -->
+            <div class="mt-8">
+                <button class="px-6 py-2 border rounded-md
+                 dark:text-white dark:border-white text-black-950 border-black-950
+                 dark:hover:bg-white dark:hover:text-black-950
+                 hover:bg-black-950 hover:text-white
+                 transition-all duration-300">
+                    View more →
+                </button>
+            </div>
+        </div>
+    </section>
+{% endblock %}

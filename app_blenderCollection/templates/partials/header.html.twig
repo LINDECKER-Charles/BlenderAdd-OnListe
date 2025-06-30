@@ -18,7 +18,7 @@
                 <a href="">Contact</a>
             </div>
         </div>
-        <div class=" flex flex-col md:flex-row justify-around items-center gap-8">
+        <div class=" flex flex-col md:flex-row items-center gap-8 justify-between">
             <div class=" flex flex-row gap-4 items-center">
                 <div class="flex flex-row justify-between items-center
                 bg-white dark:bg-grey-950 px-4 rounded-md border-2 border-grey-300 dark:border-white min-h-14
@@ -45,26 +45,31 @@
                     </div>
                 </a>
             </div>
-            <div class=" flex flex-row gap-12 items-center">
-                <a href="">
-                    <div class=" flex flex-row items-center gap-4">
+            <div class=" flex flex-row gap-8">
+                <div class=" flex flex-row items-center gap-4">
+                    {% if app.user %}
+                        {# L'utilisateur est connecté #}
+                        <div class=" flex flex-col gap-2 items-center">
+{#                             <div>
+                                <svg width="61" height="61" viewBox="0 0 61 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M42.996 18.8464C42.996 12.2284 37.5021 6.84639 30.7466 6.84639C23.9911 6.84639 18.4972 12.2284 18.4972 18.8464C18.4972 25.4644 23.9911 30.8464 30.7466 30.8464C37.5021 30.8464 42.996 25.4644 42.996 18.8464ZM54.5839 60.8464H49.1207C47.4303 60.8464 46.0584 59.5024 46.0584 57.8464C46.0584 56.1904 47.4303 54.8464 49.1207 54.8464H50.4344C52.5535 54.8464 54.1184 52.7554 53.3161 50.8324C49.6076 41.9403 40.8983 36.8464 30.7466 36.8464C20.595 36.8464 11.8856 41.9403 8.17713 50.8324C7.3748 52.7554 8.93971 54.8464 11.0588 54.8464H12.3725C14.063 54.8464 15.4349 56.1904 15.4349 57.8464C15.4349 59.5024 14.063 60.8464 12.3725 60.8464H6.90931C3.08138 60.8464 0.0680359 57.4173 0.879557 53.7543C3.10894 43.6773 10.0697 36.2403 19.2384 32.8653C15.0552 29.5683 12.3725 24.5164 12.3725 18.8464C12.3725 8.19339 21.8169 -0.296634 32.9485 0.972366C41.0147 1.89037 47.6967 8.18723 48.9063 16.0562C49.9475 22.8393 47.1148 29.0343 42.2549 32.8653C51.4235 36.2403 58.3843 43.6773 60.6137 53.7543C61.4252 57.4173 58.4119 60.8464 54.5839 60.8464ZM39.9337 57.8464C39.9337 59.5024 38.5617 60.8464 36.8713 60.8464H24.6219C22.9315 60.8464 21.5596 59.5024 21.5596 57.8464C21.5596 56.1904 22.9315 54.8464 24.6219 54.8464H36.8713C38.5617 54.8464 39.9337 56.1904 39.9337 57.8464Z" fill="black"/>
+                                </svg>
+                            </div> #}
+                            <p><a href="{{ path('app_profil') }}" class="underline">Profil</a></p>
+                            <p><a href="{{ path('app_logout') }}" class="underline">Déconnexion</a></p>
+                        </div>
+                    {% else %}
+                        <div>
+                            <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 13.4996H18.5007M18.5007 13.4996L14.1255 9.74951M18.5007 13.4996L14.1255 17.2498" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M9.75146 7.25073C9.7666 4.53184 9.88717 3.05939 10.8477 2.09888C11.9461 1.00049 13.7139 1.00049 17.2496 1.00049H18.4996C22.0353 1.00049 23.8032 1.00049 24.9015 2.09888C25.9999 3.19727 25.9999 4.9651 25.9999 8.50078V18.5012C25.9999 22.0368 25.9999 23.8046 24.9015 24.903C23.941 25.8636 22.4685 25.9842 19.7494 25.9993M9.75146 19.7512C9.7666 22.4701 9.88717 23.9425 10.8477 24.903C11.6494 25.7047 12.8075 25.9213 14.7492 25.9798" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <p><a href="{{ path('app_login') }}">Sign in</a></p>
+                    {% endif %}
 
-                {% if app.user %}
-                    {# L'utilisateur est connecté #}
-                    <div>
-                        <a href="{{ path('app_logout') }}" class="underline">Déconnexion</a>
-                    </div>
-                {% else %}
-                    <div>
-                        <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 13.4996H18.5007M18.5007 13.4996L14.1255 9.74951M18.5007 13.4996L14.1255 17.2498" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9.75146 7.25073C9.7666 4.53184 9.88717 3.05939 10.8477 2.09888C11.9461 1.00049 13.7139 1.00049 17.2496 1.00049H18.4996C22.0353 1.00049 23.8032 1.00049 24.9015 2.09888C25.9999 3.19727 25.9999 4.9651 25.9999 8.50078V18.5012C25.9999 22.0368 25.9999 23.8046 24.9015 24.903C23.941 25.8636 22.4685 25.9842 19.7494 25.9993M9.75146 19.7512C9.7666 22.4701 9.88717 23.9425 10.8477 24.903C11.6494 25.7047 12.8075 25.9213 14.7492 25.9798" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <p><a href="{{ path('app_login') }}">Sign in</a></p>
-                {% endif %}
-                </a>
-                <div id="theme-toggle" class="transition-all duration-300 ease-in-out cursor-pointer relative w-fit">
+            </div>
+            <div id="theme-toggle" class="transition-all duration-300 ease-in-out cursor-pointer relative w-fit">
                     <!-- Moon / Dark -->
                     <div class="absolute inset-0 flex flex-row items-center gap-4 transition-all duration-300 ease-in-out
                     opacity-0 scale-90 translate-y-2
@@ -73,7 +78,7 @@
                             <path d="M16.6908 35C9.26566 35 2.87283 30.5799 0 24.2274L2.16812 22.0593C4.13507 23.0186 6.34502 23.5569 8.68069 23.5569C16.8965 23.5569 23.5566 16.8966 23.5566 8.68077C23.5566 6.34499 23.0184 4.13509 22.0592 2.16824L24.2272 -3.8147e-06C30.5797 2.87291 34.9997 9.26574 34.9997 16.691C34.9997 26.8028 26.8026 35 16.6908 35Z" fill="currentColor"/>
                             <path d="M14.4025 8.68077L8.68101 14.4023L2.95947 8.68077L8.68101 2.9592L14.4025 8.68077Z" fill="currentColor"/>
                         </svg>
-                        <p class="font-semibold">Dark</p>
+                        <p class="font-semibold select-none">Dark</p>
                     </div>
 
                     <!-- Sun / Light -->
@@ -93,9 +98,8 @@
                                 <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
                             </g>
                         </svg>
-                        <p class="font-semibold text-black-950">Light</p>
+                        <p class="font-semibold text-black-950 select-none">Light</p>
                     </div>
-                </div>
             </div>
         </div>
     </nav>

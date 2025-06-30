@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Forgot password{% endblock %}
+
+{% block body %}
+<main id="content" class="min-h-screen w-full flex flex-col justify-center items-center bg-[url('/img/bg3.jpg')] bg-cover bg-center gap-8">
+    <a href="{{ path('app_home') }}">
+        <div class=" flex flex-row items-center gap-4 text-white">
+            <svg width="90" height="73" viewBox="0 0 90 73" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M27.566 47.1031C27.5886 48.2743 27.963 50.5536 28.5225 52.3328C29.7364 56.1677 31.7752 59.6914 34.496 62.6572C37.4141 65.8615 40.9761 68.4156 44.9496 70.1527C49.2731 72.0546 53.9497 73.0247 58.6742 72.9995C63.3988 73.0084 68.0722 72.023 72.3898 70.1076C76.3593 68.3559 79.9173 65.7933 82.8344 62.5851C85.5503 59.6079 87.5868 56.0777 88.8034 52.2382C89.9696 48.5193 90.2887 44.5871 89.7373 40.7292C89.2118 37.0328 87.9145 33.4878 85.9294 30.3238C84.0898 27.3802 81.7366 24.7897 78.9814 22.6751H78.9904L50.8735 1.11206L50.8013 1.058C48.956 -0.356413 45.8565 -0.351909 43.8262 1.06701C41.7734 2.49945 41.5388 4.86882 43.366 6.35981L43.357 6.36882L55.0874 15.8914L19.3412 15.9274H19.2961C16.3409 15.9319 13.4985 17.8643 12.9345 20.3148C12.3616 22.8058 14.3648 24.8688 17.4372 24.8824V24.8914L35.5517 24.8598L3.22085 49.6346L3.09903 49.7247C0.0491192 52.0581 -0.934432 55.9319 0.983042 58.3869C2.9321 60.8824 7.07836 60.8869 10.1598 58.4004L27.8006 43.986C27.8006 43.986 27.548 45.9319 27.566 47.0986V47.1031ZM72.9041 53.6211C69.2677 57.3148 64.1785 59.4139 58.6742 59.4274C53.1564 59.4364 48.0717 57.3554 44.4308 53.6662C42.6577 51.8644 41.3493 49.7968 40.5462 47.5941C39.7734 45.4493 39.4678 43.1646 39.6498 40.8925C39.8319 38.6204 40.4974 36.4132 41.6019 34.4184C42.6999 32.4461 44.1672 30.7027 45.9241 29.2833C49.5345 26.3869 54.0338 24.82 58.6652 24.8463C63.2928 24.8065 67.7926 26.3608 71.4062 29.2472C73.1626 30.6601 74.6301 32.3974 75.7285 34.3643C76.8217 36.3329 77.4873 38.5093 77.682 40.7517C77.8831 43.0495 77.5782 45.3634 76.7887 47.531C75.946 49.8156 74.6212 51.8926 72.9041 53.6211ZM46.9167 41.049C47.0103 39.5997 47.401 38.185 48.0645 36.8926C48.728 35.6002 49.6503 34.4576 50.7742 33.5355C53.1035 31.6026 56.0425 30.5543 59.0712 30.5761C62.0981 30.5573 65.0346 31.6053 67.3637 33.5355C68.4867 34.4574 69.4084 35.5994 70.0719 36.8909C70.7354 38.1825 71.1265 39.5961 71.2213 41.0445C71.3882 44.1211 70.152 46.986 67.9728 49.1076C65.5766 51.3902 62.3829 52.6491 59.0712 52.6166C55.5386 52.6166 52.3759 51.2653 50.1606 49.1031C49.0718 48.0724 48.2183 46.8193 47.6585 45.4294C47.0987 44.0395 46.8457 42.5454 46.9167 41.049Z" fill="white"/>
+            </svg>
+            <h1 class=" text-5xl font-bold">Collection</h1>
+        </div>
+    </a>
+
+    <div class="w-3/4 bg-[#CDD5D9] bg-opacity-90 flex flex-col justify-center rounded-lg p-6 text-black-900">
+        {% for flash_error in app.flashes('reset_password_error') %}
+            <div class="mb-4 p-3 bg-red-100 text-red-800 rounded text-sm font-medium">
+                {{ flash_error }}
+            </div>
+        {% endfor %}
+
+        <h2 class="text-lg mb-6">Reset your password for <span class="font-bold">Blender Collection</span></h2>
+
+        <p class="text-sm text-black-800 mb-4">Enter your email address below, and we'll send you a link to reset your password.</p>
+
+        {{ form_start(requestForm, {
+            'attr': {
+                'class': 'flex flex-col gap-4',
+                'id': 'register_form'
+            }
+        }) }}
+            <label for="{{ requestForm.email.vars.id }}" class="font-bold text-xl">
+                Email <span class="text-red-600">*</span>
+            </label>
+            {{ form_widget(requestForm.email, {
+                'attr': {
+                    'placeholder': 'name@example.com',
+                    'class': 'block p-2 rounded px-6 bg-white'
+                }
+            }) }}
+            {{ form_errors(requestForm.email) }}
+
+            <button type="submit" class="block text-white font-bold py-2 px-4 rounded bg-[linear-gradient(to_right,#4AA5F7_0%,#6086FF_100%)] mb-4">
+                Send reset link
+            </button>
+
+        {{ form_end(requestForm) }}
+
+        <div class="flex justify-between text-sm underline mt-2">
+            <p><a href="{{ path('app_login') }}">Back to login</a></p>
+            <p><a href="{{ path('app_register') }}">Create an account</a></p>
+        </div>
+    </div>
+</main>
+
+<script>
+    window.addEventListener('turbo:load', () => {
+        const element = document.getElementById('content');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+</script>
+{% endblock %}

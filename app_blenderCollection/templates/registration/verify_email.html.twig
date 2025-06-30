@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Email confirmé !{% endblock %}
+
+{% block body %}
+    <section id="content" class="w-full h-screen flex flex-col justify-center items-center gap-6 bg-gradient-to-b from-green-200 to-green-50 dark:from-gray-700 dark:to-black-950 transition-colors duration-300">
+        <svg width="96" height="96" viewBox="0 0 24 24" fill="none" class="text-blue-500 dark:text-blue-500">
+            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 
+            10-10S17.52 2 12 2zm-1 15-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"/>
+        </svg>
+        <h1 class="text-3xl md:text-4xl font-bold text-blue-500 dark:text-blue-500">Adresse e-mail confirmée</h1>
+        <p class="text-center max-w-xl text-grey-700 dark:text-grey-300">
+            Merci de confirmer ton adresse ! Tu peux maintenant te connecter et profiter pleinement des collections d’add-ons.
+        </p>
+        <a href="{{ path('app_login') }}" class="mt-4 px-8 py-3 bg-blue-500 hover:bg-gray-600 text-white rounded-md transition-colors duration-300">
+            Poursuivre
+        </a>
+    </section>
+    <script>
+    window.addEventListener('DOMContentLoaded', () => {
+        // Scroll vers une div précise si besoin
+        const element = document.getElementById('content');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+    </script>
+{% endblock %}

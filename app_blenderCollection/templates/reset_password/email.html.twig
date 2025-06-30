@@ -1,0 +1,33 @@
+<h1 style="font-size: 24px; color: #4AA5F7; font-weight: bold;">🔑 Reset your password</h1>
+
+<p style="font-size: 16px; color: #333;">
+    You (or someone else) requested a password reset for your Blender Collection account.
+    <br><br>
+    Click the link below to set a new password:
+</p>
+
+<p style="margin: 20px 0;">
+    <a href="{{ url('app_reset_password', {token: resetToken.token}) }}" style="background: linear-gradient(to right, #4AA5F7, #6086FF); padding: 12px 24px; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+        Reset my password
+    </a>
+</p>
+
+<p style="font-size: 14px; color: #555;">
+    Or copy and paste this URL into your browser:
+    <br>
+    <a href="{{ url('app_reset_password', {token: resetToken.token}) }}" style="color: #4AA5F7;">
+        {{ url('app_reset_password', {token: resetToken.token}) }}
+    </a>
+</p>
+
+<p style="font-size: 14px; color: #888;">
+    This link will expire in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
+</p>
+
+<hr style="margin-top: 30px; border: none; border-top: 1px solid #eee;">
+
+<p style="font-size: 12px; color: #aaa;">
+    If you didn't request this, you can safely ignore this email.
+</p>
+
+<p style="font-size: 14px; font-weight: bold; color: #444;">— Blender Collection Team</p>

@@ -40,9 +40,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50)]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::BLOB, nullable: true)]
-    private $img = null;
-
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
@@ -72,6 +69,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\OneToMany(targetEntity: Poste::class, mappedBy: 'usser')]
     private Collection $postes;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $pathImg = null;
 
     public function __construct()
     {
@@ -162,18 +162,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getImg()
-    {
-        return $this->img;
-    }
-
-    public function setImg($img): static
-    {
-        $this->img = $img;
 
         return $this;
     }
@@ -312,6 +300,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $poste->setUsser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPathImg(): ?string
+    {
+        return $this->pathImg;
+    }
+
+    public function setPathImg(?string $pathImg): static
+    {
+        $this->pathImg = $pathImg;
 
         return $this;
     }

@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reset Password Debug Page{% endblock %}
+
+{% block body %}
+<main class="min-h-screen w-full flex flex-col justify-center items-center bg-[url('/img/bg3.jpg')] bg-cover bg-center gap-8 px-4">
+    <div class="w-full max-w-2xl bg-[#CDD5D9] bg-opacity-90 rounded-lg p-8 text-black-900">
+        <h1 class="text-3xl font-bold mb-4">Hello {{ controller_name }}! ✅</h1>
+
+        <p class="mb-4">
+            This friendly message is coming from:
+        </p>
+
+        <ul class="list-disc list-inside space-y-2 text-sm text-gray-800">
+            <li>
+                Your controller at 
+                <code class="bg-gray-100 px-2 py-1 rounded">
+                    src/Controller/ResetPasswordController.php
+                </code>
+            </li>
+            <li>
+                Your template at 
+                <code class="bg-gray-100 px-2 py-1 rounded">
+                    templates/reset_password/index.html.twig
+                </code>
+            </li>
+        </ul>
+    </div>
+</main>
+{% endblock %}
