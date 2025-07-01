@@ -18,14 +18,19 @@
         <p class="text-sm text-gray-700 mb-6">
             Your reset token has been validated. Please enter a new password below.
         </p>
-
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }}">
-                    {{ message }}
-                </div>
+        <div>
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="flash-dismissable transition-opacity duration-500 opacity-100 px-4 py-1 rounded shadow text-white
+                                    {% if label == 'success' %} dark:text-blue-500 text-blue-500
+                                    {% elseif label == 'error' %} dark:text-red-600 text-red-600
+                                    {% elseif label == 'warning' %} dark:text-yellow-600 text-yellow-600 
+                                    {% else %} dark:text-white {% endif %}">
+                            {{ message }}
+                    </div>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
+        </div>
         {{ form_start(resetForm, { attr: { class: 'flex flex-col gap-4' } }) }}
             {{ form_errors(resetForm) }}
             <label for="resetForm_plainPassword_first" class="font-bold text-xl">New password <span class="text-red-600">*</span></label>

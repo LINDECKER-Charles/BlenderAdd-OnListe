@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 
 class SecurityController extends AbstractController
 {
@@ -22,7 +23,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
 
         if ($this->getUser()) {
@@ -62,11 +63,15 @@ class SecurityController extends AbstractController
 
 
     #[Route('/updateName', name: 'app_update_name', methods: ['POST'])]
-    public function updateName(Request $request, EntityManagerInterface $em): Response
+    public function updateName(Request $request, EntityManagerInterface $em, UserRepository $userRepository): Response
     {
         $user = $this->getUser();
 
         $newName = trim($request->request->get('name'));
+        if($userRepository->findOneBy(['name' => $newName])){
+            $this->addFlash('error', 'Name is taken!');
+            return $this->redirectToRoute('app_profil');
+        }
         if ($newName && $user) {
             $user->setName($newName);
             $em->flush();

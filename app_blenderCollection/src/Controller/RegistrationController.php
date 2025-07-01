@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\RegistrationForm;
 use App\Security\EmailVerifier;
+use Anhskohbo\NoCaptcha\NoCaptcha;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Form\FormError;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,7 +30,8 @@ class RegistrationController extends AbstractController
         if ($this->getUser()){
             return $this->redirectToRoute('app_home');
         }
-        
+
+
         $user = new User();
         $form = $this->createForm(RegistrationForm::class, $user);
         $form->handleRequest($request);

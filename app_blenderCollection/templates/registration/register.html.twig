@@ -16,11 +16,11 @@
         </a>
         <div class=" w-3/4 bg-[#CDD5D9] bg-opacity-90 flex flex-col justify-center rounded-lg p-6
         text-white dark:text-black-900 ">
-            <h2 class=" text-lg mb-6">Register to continue to <span class=" font-bold">Blender Collection.</span></h2>
+            <h2 class=" text-lg mb-6 text-black-950">Register to continue to <span class=" font-bold">Blender Collection.</span></h2>
 
             {{ form_start(registrationForm, {
                 'attr': {
-                    'class': 'flex flex-col gap-4',
+                    'class': 'flex flex-col gap-4 text-black-950',
                     'id': 'register_form'
                 }
             }) }}
@@ -54,32 +54,66 @@
                 {% endfor %}
 
                 {# Password #}
-                <label for="{{ registrationForm.plainPassword.vars.id }}" class="font-bold text-xl">
-                    Password <span class="text-red-600">*</span>
-                </label>
-                {{ form_widget(registrationForm.plainPassword, {
-                    'attr': {
-                        'placeholder': 'Enter your password',
-                        'class': 'block p-2 rounded px-6 bg-white'
+                <div class="mb-4" style="position: relative;">                
+                    <label for="{{ registrationForm.plainPassword.vars.id }}" class="font-bold text-xl">
+                        Password <span class="text-red-600">*</span>
+                    </label>
+                    {{ form_widget(registrationForm.plainPassword, {
+                        'attr': {
+                            'placeholder': 'Enter your password',
+                            'class': 'block p-2 rounded px-6 bg-white w-full mt-3'
+                        }
+                    }) }}
+                    <i id="togglePassword" class="fas fa-eye"
+                        onclick="togglePassword()"
+                        style="position: absolute; top: 65%; right: 1rem; transform: translateY(-25%); cursor: pointer;">
+                    </i>
+                    {% for error in registrationForm.plainPassword.vars.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+                    {% endfor %}
+                </div>
+                <script>
+                    function togglePassword() {
+                    const passwordInput = document.getElementById("registration_form_plainPassword");
+                    const toggleIcon = document.getElementById("togglePassword");
+                    const isPassword = passwordInput.type === "password";
+
+                    passwordInput.type = isPassword ? "text" : "password";
+                    toggleIcon.classList.toggle("fa-eye");
+                    toggleIcon.classList.toggle("fa-eye-slash");
                     }
-                }) }}
-                {% for error in registrationForm.plainPassword.vars.errors %}
-                    <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
-                {% endfor %}
+                </script>
 
                 {# Confirm Password #}
-                <label for="{{ registrationForm.confirmPassword.vars.id }}" class="font-bold text-xl">
-                    Confirm Password <span class="text-red-600">*</span>
-                </label>
-                {{ form_widget(registrationForm.confirmPassword, {
-                    'attr': {
-                        'placeholder': 'Confirm your password',
-                        'class': 'block p-2 rounded px-6 bg-white'
+                <div class="mb-4" style="position: relative;">                
+                    <label for="{{ registrationForm.confirmPassword.vars.id }}" class="font-bold text-xl">
+                        Confirm Password <span class="text-red-600">*</span>
+                    </label>
+                    {{ form_widget(registrationForm.confirmPassword, {
+                        'attr': {
+                            'placeholder': 'Confirm your password',
+                            'class': 'block p-2 rounded px-6 bg-white w-full mt-3'
+                        }
+                    }) }}
+                    <i id="togglePassword2" class="fas fa-eye"
+                        onclick="togglePassword2()"
+                        style="position: absolute; top: 65%; right: 1rem; transform: translateY(-25%); cursor: pointer;">
+                    </i>
+                    {% for error in registrationForm.confirmPassword.vars.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+                    {% endfor %}
+                </div>
+                <script>
+                    function togglePassword2() {
+                    const passwordInput = document.getElementById("registration_form_confirmPassword");
+                    const toggleIcon = document.getElementById("togglePassword2");
+                    const isPassword = passwordInput.type === "password";
+
+                    passwordInput.type = isPassword ? "text" : "password";
+                    toggleIcon.classList.toggle("fa-eye");
+                    toggleIcon.classList.toggle("fa-eye-slash");
                     }
-                }) }}
-                {% for error in registrationForm.confirmPassword.vars.errors %}
-                    <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
-                {% endfor %}
+                </script>
 
                 {# Agree Terms #}
                 <div class="flex flex-row justify-start items-center gap-4">
@@ -104,7 +138,7 @@
                 </button>
 
             {{ form_end(registrationForm) }}
-            <p class=" w-full text-center text-xs">Already have an account? <a href="{{ path('app_login') }}" class=" underline">Sign in</a></p>
+            <p class=" w-full text-center text-xs text-black-950">Already have an account? <a href="{{ path('app_login') }}" class=" underline">Sign in</a></p>
         </div>
     </main>
     <script>

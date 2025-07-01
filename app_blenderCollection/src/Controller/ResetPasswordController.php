@@ -106,22 +106,27 @@ class ResetPasswordController extends AbstractController
         // The token is valid; allow the user to change their password.
         $form = $this->createForm(ChangePasswordForm::class);
         $form->handleRequest($request);
+        /* dd($form->isValid()); */
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                // Token usage and password reset
+                $this->resetPasswordHelper->removeResetRequest($token);
+                /** @var string $plainPassword */
+                $plainPassword = $form->get('plainPassword')->getData();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // A password reset token should be used only once, remove it.
-            $this->resetPasswordHelper->removeResetRequest($token);
+                $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+                $this->entityManager->flush();
 
-            /** @var string $plainPassword */
-            $plainPassword = $form->get('plainPassword')->getData();
+                $this->cleanSessionAfterReset();
 
-            // Encode(hash) the plain password, and set it.
-            $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
-            $this->entityManager->flush();
-
-            // The session is cleaned up after the password has been changed.
-            $this->cleanSessionAfterReset();
-
-            return $this->redirectToRoute('app_home');
+                $this->addFlash('success', 'Votre mot de passe a été modifié avec succès !');
+                return $this->redirectToRoute('app_home');
+            } else {
+                // Affichage des erreurs
+                foreach ($form->getErrors(true) as $error) {
+                    $this->addFlash('error', $error->getMessage());
+                }
+            }
         }
 
         return $this->render('reset_password/reset.html.twig', [
