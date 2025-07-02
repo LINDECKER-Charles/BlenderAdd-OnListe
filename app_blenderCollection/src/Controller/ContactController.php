@@ -59,5 +59,23 @@ class ContactController extends AbstractController
 
         return $this->render('contact/index.html.twig');
     }
+
+    #[Route('/terms-service', name: 'app_terms_service')]
+    public function termsService(){
+        return $this->render('contact/terms-service.html.twig');
+    }
+    #[Route('/privacy-policy', name: 'app_privacy_policy')]
+    public function privacyPolicy(): Response
+    {
+        return $this->render('contact/privacy-policy.html.twig');
+    }
+    #[Route('/legal-notice', name: 'app_legal_notice')]
+    public function legalNotice(): Response
+    {
+        return $this->render('contact/legal-notice.html.twig');
+    }
+
+
+
 }
 
