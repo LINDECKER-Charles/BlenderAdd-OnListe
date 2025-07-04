@@ -15,7 +15,7 @@
 
 {% block body %}
     <section class="min-h-screen bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
-        <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6">
+        <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6 select-none">
             <!-- Avatar -->
             <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar') }}">
                 <input id="avatar-input" type="file" name="avatar" accept="image/*" class="hidden" onchange="document.getElementById('upload-avatar-form').submit()">
@@ -41,7 +41,7 @@
                     {# Nom #}
                     <div class=" flex flex-row justify-center items-center gap-2">
                         <h1 class="text-2xl font-bold flex items-center gap-2">{{ user.name }}</h1>
-                        <button role="button" onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
+                        <button title="Modifier" role="button" onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
                             <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
                                 <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
@@ -51,7 +51,7 @@
                     {# Email #}
                     <div class=" flex flex-row justify-center items-center gap-2">
                         <p class="text-grey-400 flex items-center justify-center gap-2">{{ user.email }}</p>
-                        <button role="button" onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
+                        <button title="Modifier" role="button" onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
                             <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
                                 <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
@@ -76,7 +76,7 @@
                         </div>
                         <div>
                             {% if user.isVerified %}
-                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-blue-500 text-white">
+                                <span class="inline-flex items-center gap-1 px-3 py-1 font-bold rounded-full text-sm bg-blue-600 text-white dark:text-black-990">
                                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414L9 13.414l4.707-4.707z" clip-rule="evenodd"/>
                                     </svg>
@@ -108,7 +108,7 @@
                         {% else %}
                             <div class="max-w-2xl mx-auto mt-6 text-black-950 dark:text-white bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
                                 <div class=" flex flex-row items-center gap-2">
-                                    <button role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
+                                    <button title="Modifier" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
                                         <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
                                             <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
@@ -214,7 +214,7 @@
 
             <!-- Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
-            {% for i in 1..8 %}
+            {% for i in 1..6 %}
                 <div class="bg-black-900 p-4 rounded-lg shadow-lg">
                 <img src="/img/exemple/ex{{ i }}.webp" alt="Addon {{ i }}" class="rounded-md mb-2 h-32 w-full object-cover">
                 <h3 class="text-lg font-bold">Synchronize Workspaces</h3>
