@@ -2,10 +2,27 @@
 <html class=" dark">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Collection{% endblock %}</title>
-        <meta name="description" content="{% block meta_description %}Default description here{% endblock %}">
 
+        <title>{% block title %}{{ title|default('Titre par défaut') }}{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}{{ meta_description|default('Description par défaut.') }}{% endblock %}">
 
+        {# --- Open Graph --- #}
+        <meta property="og:title" content="{% block og_title %}{{ title|default('Titre par défaut') }}{% endblock %}">
+        <meta property="og:description" content="{% block og_description %}{{ meta_description|default('Description par défaut.') }}{% endblock %}">
+
+        <meta property="og:url" content="{% block og_url %}{{ app.request.uri }}{% endblock %}">
+        <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+
+        {# --- Twitter Cards --- #}
+        <meta name="twitter:card" content="{% block twitter_card %}summary_large_image{% endblock %}">
+        <meta name="twitter:title" content="{% block twitter_title %}{{ title|default('Titre par défaut') }}{% endblock %}">
+        <meta name="twitter:description" content="{% block twitter_description %}{{ meta_description|default('Description par défaut.') }}{% endblock %}">
+
+{#         <meta property="og:image" content="{% block og_image %}{{ og_image|default('/images/og-default.jpg') }}{% endblock %}">
+        <meta name="twitter:image" content="{% block twitter_image %}{{ twitter_image|default('/images/twitter-default.jpg') }}{% endblock %}"> #}
+
+        <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         {# Favicon #}
         <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
@@ -14,8 +31,7 @@
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
 
-        <!-- Font Awesome  CDN -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
         {# Tailwind CND #}
         <script src="https://cdn.tailwindcss.com"></script>
         {# Anime.js #}

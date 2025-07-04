@@ -1,6 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ user.name }}{% endblock %}
+
+{% set title = "Profil de " ~ user.name %}
+{% set meta_description = "Consultez le profil de " ~ user.name ~ " : biographie, activités, publications et plus encore sur NomDuSite." %}
+
+{% block og_type %}profile{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}index, follow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
+
 
 {% block body %}
     <section class="min-h-screen bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
@@ -30,7 +41,7 @@
                     {# Nom #}
                     <div class=" flex flex-row justify-center items-center gap-2">
                         <h1 class="text-2xl font-bold flex items-center gap-2">{{ user.name }}</h1>
-                        <button onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
+                        <button role="button" onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
                             <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
                                 <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
@@ -40,7 +51,7 @@
                     {# Email #}
                     <div class=" flex flex-row justify-center items-center gap-2">
                         <p class="text-grey-400 flex items-center justify-center gap-2">{{ user.email }}</p>
-                        <button onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
+                        <button role="button" onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
                             <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
                                 <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
@@ -82,7 +93,7 @@
                         {% if user.description %}
                             <div class="max-w-2xl mx-auto mt-6 bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
                                 <div class=" flex flex-row items-center gap-2">
-                                    <button onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
+                                    <button aria-roledescription="" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
                                         <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
                                             <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
@@ -97,7 +108,7 @@
                         {% else %}
                             <div class="max-w-2xl mx-auto mt-6 text-black-950 dark:text-white bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
                                 <div class=" flex flex-row items-center gap-2">
-                                    <button onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
+                                    <button role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
                                         <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
                                             <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
@@ -132,8 +143,8 @@
                         <form method="POST" action="{{ path('app_update_email') }}">
                             <input type="text" name="name" value="{{ user.email }}" class="w-full px-4 py-2 border rounded-md bg-white text-black-950" required>
                             <div class="flex justify-end gap-3 mt-4">
-                                <button type="button" onclick="toggleModalEmail()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cacnel</button>
-                                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
+                                <button role="button" type="button" onclick="toggleModalEmail()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cacnel</button>
+                                <button role="button" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
                             </div>
                         </form>
                     </div>
@@ -145,7 +156,7 @@
                         <form method="POST" action="{{ path('app_update_name') }}">
                             <input type="text" name="name" value="{{ user.name }}" class="w-full px-4 py-2 border rounded-md bg-white text-black-950" required>
                             <div class="flex justify-end gap-3 mt-4">
-                                <button type="button" onclick="toggleModalName()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
+                                <button role="button" type="button" onclick="toggleModalName()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
                                 <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
                             </div>
                         </form>
@@ -164,7 +175,7 @@
                             placeholder="Décrivez votre univers..."
                             required>{{ user.description }}</textarea>
                             <div class="flex justify-end gap-3 mt-4">
-                                <button type="button" onclick="toggleModalDescription()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
+                                <button role="button" type="button" onclick="toggleModalDescription()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
                                 <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
                             </div>
                         </form>
@@ -221,7 +232,7 @@
 
             <!-- View More -->
             <div class="mt-8">
-                <button class="px-6 py-2 border rounded-md
+                <button role="button" class="px-6 py-2 border rounded-md
                  dark:text-white dark:border-white text-black-950 border-black-950
                  dark:hover:bg-white dark:hover:text-black-950
                  hover:bg-black-950 hover:text-white

@@ -1,8 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Privacy Policy{% endblock %}
-{% block meta_description %}Learn how we collect, use, and protect your personal data in full compliance with GDPR. Transparent and secure data handling.
-{% endblock %}
+{% set title = "Privacy Policy"%}
+{% set meta_description = "Learn how we collect, use, and protect your personal data in full compliance with GDPR. Transparent and secure data handling." %}
+
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}index, follow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
 {% block body %}
 

@@ -1,6 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% set title = "Log in!"%}
+{% set meta_description = "Connectez-vous à votre compte pour accéder à vos informations, gérer votre profil et interagir avec la communauté sur BlenderCollection." %}
+
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
+
 
 {% block body %}
 

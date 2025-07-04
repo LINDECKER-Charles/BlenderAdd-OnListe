@@ -1,9 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
-{% block meta_description %}
-Choisissez un nouveau mot de passe pour sécuriser votre compte et reprendre l’accès à votre espace personnel.
-{% endblock %}
+{% set title = "Reset your password"%}
+{% set meta_description = "Choisissez un nouveau mot de passe pour sécuriser votre compte et reprendre l’accès à votre espace personnel." %}
+
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
 {% block body %}
 <main id="content" class="min-h-screen w-full flex flex-col justify-center items-center bg-[url('/img/bg3.jpg')] bg-cover bg-center gap-8">

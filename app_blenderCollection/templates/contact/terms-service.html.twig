@@ -1,8 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Terms of Service{% endblock %}
-{% block meta_description %}Read our Terms of Service: site access, responsibilities, copyrights, and user conduct rules.
-{% endblock %}
+{% set title = "Terms of Service"%}
+{% set meta_description = "Read our Terms of Service: site access, responsibilities, copyrights, and user conduct rules." %}
+
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}index, follow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
 {% block body %}
 

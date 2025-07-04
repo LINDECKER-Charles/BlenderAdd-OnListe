@@ -1,9 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
-{% block meta_description %}
-Inscrivez-vous gratuitement pour accéder à toutes les fonctionnalités de notre plateforme en quelques clics.
-{% endblock %}
+{% set title = "Register"%}
+{% set meta_description = "Inscrivez-vous gratuitement pour accéder à toutes les fonctionnalités de notre plateforme en quelques clics." %}
+
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
 {% block body %}
 

@@ -1,9 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Legal Notice{% endblock %}
-{% block meta_description %}Access our legal notice: publisher identity, hosting provider, intellectual property, and regulatory compliance.
-{% endblock %}
+{% set title = "Legal Notice"%}
+{% set meta_description = "Access our legal notice: publisher identity, hosting provider, intellectual property, and regulatory compliance." %}
 
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}index, follow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
 {% block body %}
 

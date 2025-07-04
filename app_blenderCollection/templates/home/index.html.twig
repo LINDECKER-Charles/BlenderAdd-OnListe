@@ -1,9 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Blender Collection{% endblock %}
-{% block meta_description %}
-Bienvenue sur notre plateforme : découvrez nos services, connectez-vous ou créez un compte en toute simplicité.
-{% endblock %}
+{% set title = "Blender Collection"%}
+{% set meta_description = "Bienvenue sur notre plateforme : découvrez nos services, connectez-vous ou créez un compte en toute simplicité." %}
+
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
+
 {% block body %}
     <section>
         <article id="hero" class="w-full h-[350px] lg:h-[450px] 

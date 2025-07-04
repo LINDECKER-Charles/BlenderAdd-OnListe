@@ -1,9 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Email confirmé !{% endblock %}
-{% block meta_description %}
-Votre adresse email a été vérifiée avec succès. Vous pouvez désormais profiter pleinement de nos services.
-{% endblock %}
+{% set title = "Email confirmé !"%}
+{% set meta_description = "Votre adresse email a été vérifiée avec succès. Vous pouvez désormais profiter pleinement de nos services." %}
+
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
 {% block body %}
     <section id="content" class="w-full h-screen flex flex-col justify-center items-center gap-6 bg-gradient-to-b from-green-200 to-green-50 dark:from-gray-700 dark:to-black-950 transition-colors duration-300">

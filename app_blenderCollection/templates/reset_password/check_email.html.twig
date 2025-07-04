@@ -1,10 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Check your email{% endblock %}
-{% block meta_description %}
-Un lien de confirmation vous a été envoyé par email. Veuillez vérifier votre boîte de réception pour activer votre compte.
-{% endblock %}
+{% set title = "Check your email"%}
+{% set meta_description = "Un lien de confirmation vous a été envoyé par email. Veuillez vérifier votre boîte de réception pour activer votre compte." %}
 
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+
+{# --- A ajouter une fois le site terminé --- #}
+{# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
+{# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 {% block body %}
 <main id="content" class="min-h-screen w-full flex flex-col justify-center items-center bg-[url('/img/bg3.jpg')] bg-cover bg-center gap-8">
     <a href="{{ path('app_home') }}">
