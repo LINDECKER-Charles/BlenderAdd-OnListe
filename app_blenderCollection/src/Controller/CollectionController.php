@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class CollectionController extends AbstractController
@@ -39,8 +40,8 @@ final class CollectionController extends AbstractController
         ]);
     }
 
-    #[Route('/api/scrape-addon', name: 'api_scrape_addon')]
-    public function scrapeAddon(Request $request, AddonsScraper $scraper): JsonResponse
+    #[Route('/api/scrape-addon/{save}', name: 'api_scrape_addon')]
+    public function scrapeAddon(bool $save, Request $request, AddonsScraper $scraper, SessionInterface $session): JsonResponse
     {
         $url = $request->query->get('url');
 
@@ -51,26 +52,17 @@ final class CollectionController extends AbstractController
         try {
             $data = $scraper->getAddOn($url);
 
-            // Récupération des cookies existants
-            $cookieName = 'valid_addons';
-            $cookieValue = $request->cookies->get($cookieName, '[]');
-            $addons = json_decode($cookieValue, true) ?? [];
+            if($save){
+                // Récupération ou initialisation de la liste
+                $addons = $session->get('valid_addons', []);
 
-            // Ajout si absent
-            if (!in_array($url, $addons)) {
-                $addons[] = $url;
+                if (!in_array($url, $addons)) {
+                    $addons[] = $url;
+                    $session->set('valid_addons', $addons);
+                }
             }
 
-            // Encodage et envoi avec la réponse
-            $response = $this->json($data);
-            $response->headers->setCookie(
-                Cookie::create($cookieName)
-                    ->withValue(json_encode($addons))
-                    ->withPath('/')
-                    ->withExpires(time() + 3600) // expire dans 1h
-            );
-
-            return $response;
+            return $this->json($data);
         } catch (\Throwable $e) {
             return $this->json(['error' => 'Scraping failed'], 500);
         }

@@ -21,7 +21,7 @@ console.log("bahahaa")
       if (controller) controller.abort();
       controller = new AbortController();
 
-      fetch(`/api/scrape-addon?url=${encodeURIComponent(url)}`, {
+      fetch(`/api/scrape-addon/0?url=${encodeURIComponent(url)}`, {
         signal: controller.signal,
       })
         .then((res) => res.json())
