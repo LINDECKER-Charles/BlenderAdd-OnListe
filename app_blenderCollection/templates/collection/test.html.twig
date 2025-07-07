@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test Scraping{% endblock %}
+
+{% block body %}
+<section class="px-6 lg:px-24 py-12 text-white">
+  <h1 class="text-3xl font-bold mb-4">Scraping Test</h1>
+  <p class="text-grey-400 mb-6">Scraping result from <span class="underline">{{ url }}</span></p>
+
+  <div class="bg-grey-900 p-6 rounded-lg shadow-lg">
+    <h2 class="text-xl font-semibold mb-2">Title</h2>
+    <p class="mb-4">{{ data.title }}</p>
+
+    <h2 class="text-xl font-semibold mb-2">Size</h2>
+    <p class="mb-4">{{ data.size ?? 'N/A' }}</p>
+
+    <h2 class="text-xl font-semibold mb-2">Tags</h2>
+    {% if data.tags is not empty %}
+      <ul class="list-disc list-inside">
+        {% for tag in data.tags %}
+          <li>{{ tag }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-grey-500">No tags found.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

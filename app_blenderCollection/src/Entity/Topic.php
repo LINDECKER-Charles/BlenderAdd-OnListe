@@ -39,6 +39,9 @@ class Topic
     #[ORM\ManyToMany(targetEntity: Categorie::class, inversedBy: 'topics')]
     private Collection $categories;
 
+    #[ORM\ManyToOne(inversedBy: 'topics')]
+    private ?Liste $topic_liste = null;
+
     public function __construct()
     {
         $this->postes = new ArrayCollection();
@@ -148,6 +151,18 @@ class Topic
     public function removeCategory(Categorie $category): static
     {
         $this->categories->removeElement($category);
+
+        return $this;
+    }
+
+    public function getTopicListe(): ?Liste
+    {
+        return $this->topic_liste;
+    }
+
+    public function setTopicListe(?Liste $topic_liste): static
+    {
+        $this->topic_liste = $topic_liste;
 
         return $this;
     }

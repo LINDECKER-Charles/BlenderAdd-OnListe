@@ -24,7 +24,6 @@
         "symfony/flex": "^2.7.1",
         "symfony/form": "7.3.*",
         "symfony/framework-bundle": "7.3.*",
-        "symfony/http-client": "7.3.*",
         "symfony/intl": "7.3.*",
         "symfony/mailer": "7.3.*",
         "symfony/mime": "7.3.*",
@@ -106,6 +105,8 @@
         "symfony/browser-kit": "7.3.*",
         "symfony/css-selector": "7.3.*",
         "symfony/debug-bundle": "7.3.*",
+        "symfony/dom-crawler": "7.3.*",
+        "symfony/http-client": "7.3.*",
         "symfony/maker-bundle": "^1.63",
         "symfony/stopwatch": "7.3.*",
         "symfony/web-profiler-bundle": "7.3.*"
