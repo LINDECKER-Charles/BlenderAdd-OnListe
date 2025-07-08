@@ -1,7 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% set title = "Email confirmé !"%}
-{% set meta_description = "Votre adresse email a été vérifiée avec succès. Vous pouvez désormais profiter pleinement de nos services." %}
+{% set title = "Email Address Confirmed !"%}
+{% set meta_description = "Your email address has been successfully verified. You can now fully enjoy our services." %}
+
 
 {% block og_type %}website{% endblock %}
 {# --- Directive SEO pour robots --- #}
@@ -17,12 +18,12 @@
             <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 
             10-10S17.52 2 12 2zm-1 15-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"/>
         </svg>
-        <h1 class="text-3xl md:text-4xl font-bold text-blue-500 dark:text-blue-500">Adresse e-mail confirmée</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-blue-500 dark:text-blue-500">Email Address Confirmed</h1>
         <p class="text-center max-w-xl text-grey-700 dark:text-grey-300">
-            Merci de confirmer ton adresse ! Tu peux maintenant te connecter et profiter pleinement des collections d’add-ons.
+            Thank you for confirming your address! You can now log in and fully enjoy our add-ons collections.
         </p>
         <a href="{{ path('app_login') }}" class="mt-4 px-8 py-3 bg-blue-500 hover:bg-gray-600 text-white rounded-md transition-colors duration-300">
-            Poursuivre
+            Continue
         </a>
     </section>
     <script>

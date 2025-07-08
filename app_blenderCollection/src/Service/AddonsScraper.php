@@ -59,6 +59,17 @@ class AddonsScraper
         return null;
     }
 
+    private function getFirstImage(Crawler $crawler): ?string
+    {
+        $imgNode = $crawler->filter('img')->first();
+
+        if ($imgNode->count() > 0) {
+            return $imgNode->attr('src');
+        }
+
+        return null;
+    }
+
     public function getAddOn(string $url): array
     {
         $client = HttpClient::create();
@@ -71,6 +82,7 @@ class AddonsScraper
             'title' => $this->getTitleAddOn($crawler),
             'tags' => $this->getTags($crawler),
             'size' => $this->getSize($crawler),
+            'image' => $this->getFirstImage($crawler),
         ];
     }
 
