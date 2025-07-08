@@ -50,7 +50,7 @@ document.addEventListener("turbo:load", function () {
                 <p class="font-semibold text-grey-400">Tags :</p>
                 <div class="flex flex-wrap gap-1">
                   ${(data.tags ?? []).map(tag => `
-                    <span class="bg-grey-700 text-black-950 text-xs px-2 py-0.5 rounded">
+                    <span class=" m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">
                       ${tag}
                     </span>
                   `).join('')}
@@ -60,12 +60,13 @@ document.addEventListener("turbo:load", function () {
               <!-- Bloc 3 : Image -->
               <div class="flex-1 flex flex-col items-center justify-center">
                 ${data.image ? `
-                  <img src="${data.image}" alt="Addon preview" class="max-w-[100px] max-h-[100px] rounded border border-grey-700">
+                  <a href="${url}">
+                    <img src="${data.image}" alt="Addon preview" class="w-full h-full object-contain rounded border border-grey-700">
+                  </a>
                 ` : `
                   <div class="text-grey-500 text-xs">Pas d’image</div>
                 `}
               </div>
-
             </div>
           `;
 

@@ -19,9 +19,6 @@ class Liste
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column]
-    private ?int $version = null;
-
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
@@ -52,6 +49,9 @@ class Liste
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $Image = null;
 
+    #[ORM\Column]
+    private ?bool $isVisible = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -72,18 +72,6 @@ class Liste
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getVersion(): ?int
-    {
-        return $this->version;
-    }
-
-    public function setVersion(int $version): static
-    {
-        $this->version = $version;
 
         return $this;
     }
@@ -213,6 +201,18 @@ class Liste
     public function setImage(?string $Image): static
     {
         $this->Image = $Image;
+
+        return $this;
+    }
+
+    public function isVisible(): ?bool
+    {
+        return $this->isVisible;
+    }
+
+    public function setIsVisible(bool $isVisible): static
+    {
+        $this->isVisible = $isVisible;
 
         return $this;
     }

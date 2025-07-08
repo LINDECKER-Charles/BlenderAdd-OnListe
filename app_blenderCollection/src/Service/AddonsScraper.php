@@ -61,10 +61,17 @@ class AddonsScraper
 
     private function getFirstImage(Crawler $crawler): ?string
     {
-        $imgNode = $crawler->filter('img')->first();
+        $imgNode = $crawler->filter('a.galleria-item img')->first();
 
         if ($imgNode->count() > 0) {
-            return $imgNode->attr('src');
+            $src = $imgNode->attr('src');
+
+            // Si l'URL est relative, on la rend absolue
+            if (str_starts_with($src, '/')) {
+                $src = 'https://extensions.blender.org' . $src;
+            }
+
+            return $src;
         }
 
         return null;

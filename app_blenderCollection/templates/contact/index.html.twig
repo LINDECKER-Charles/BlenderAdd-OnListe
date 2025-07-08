@@ -1,11 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{% endblock %}
-{% block meta_description %}
-
-{% endblock %}
-{% block body %}
-
 {% set title = "Contact"%}
 {% set meta_description = "Une question, une suggestion ? Contactez notre équipe via notre formulaire dédié. Nous vous répondrons rapidement." %}
 
@@ -16,7 +10,7 @@
 {# --- A ajouter une fois le site terminé --- #}
 {# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
 {# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
-
+{% block body %}
 <main id="content" class="min-h-screen w-full flex flex-col justify-center items-center bg-[url('/img/bg3.jpg')] bg-cover bg-center gap-8">
         <a href="{{ path('app_home') }}">
             <div class=" flex flex-row items-center gap-4 text-white">

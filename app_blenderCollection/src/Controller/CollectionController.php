@@ -2,50 +2,110 @@
 
 namespace App\Controller;
 
+use App\Entity\Addon;
+use App\Entity\Liste;
+use App\Service\AddonsManager;
 use App\Service\AddonsScraper;
+use App\Repository\ListeRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class CollectionController extends AbstractController
 {
     #[Route('/collection', name: 'app_collection')]
-    public function index(): Response
+    public function index(ListeRepository $listeRepository): Response
     {
+        $collections = $listeRepository->findBy(['isVisible' => true]);
+
         return $this->render('collection/index.html.twig', [
             'controller_name' => 'CollectionController',
+            'collections' => $collections,
         ]);
     }
+    
     #[Route('/collection/add', name: 'create_collection')]
-    public function addCollection(): Response
+    public function addCollection(Request $request, SluggerInterface $slugger, EntityManagerInterface $em): Response
     {
-        if (!$this->getUser()) {
+        $user = $this->getUser();
+
+        if (!$user) {
             return $this->redirectToRoute('app_login');
         }
-        if (!$this->getUser()->isVerified()) {
-            /* Crée une page */ /* should_verify.html.twig */
-            return $this->render('registration/should_verify.html.twig', []);
+
+        if (!$user->isVerified()) {
+            return $this->render('registration/should_verify.html.twig');
         }
+
+        if ($request->isMethod('POST')) {
+            $fullName = $request->request->get('fullName');
+            $description = $request->request->get('description');
+            $isVisible = $request->request->getBoolean('isVisible');
+
+            /** @var UploadedFile|null $imageFile */
+            $imageFile = $request->files->get('image');
+            $imageFilename = null;
+
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $imageFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+                $imageFile->move(
+                    $this->getParameter('uploads_directory'),
+                    $imageFilename
+                );
+            }
+
+            $liste = new Liste();
+            $liste->setName($fullName);
+            $liste->setDescription($description);
+            $liste->setImage($imageFilename);
+            $liste->setUsser($user);
+            $liste->setIsVisible($isVisible);
+            $liste->setDateCreation(new \DateTime());
+
+            // 🔄 Récupérer les add-ons validés dans la session
+            $sessionAddons = $request->getSession()->get('valid_addons', []);
+
+            foreach ($sessionAddons as [$url, $validated]) {
+                if ($validated && isset($url)) {
+                    // On cherche un Addon existant ou on le crée
+                    $addon = $em->getRepository(Addon::class)->findOneBy(['idBlender' => $url]);
+
+                    if (!$addon) {
+                        $addon = new Addon();
+                        $addon->setIdBlender($url);
+                        $em->persist($addon);
+                    }
+
+                    $liste->addAddon($addon);
+                }
+            }
+
+            $em->persist($liste);
+            $em->flush();
+
+            // Nettoyage session
+            $request->getSession()->remove('valid_addons');
+
+            $this->addFlash('success', 'La collection a bien été créée avec ses add-ons !');
+            return $this->redirectToRoute('create_collection');
+        }
+
+
         return $this->render('collection/add.html.twig', []);
     }
 
-    #[Route('/collection/test', name: 'scraping_test')]
-    public function testScraping(AddonsScraper $scraper): Response
-    {
-        $url = 'https://extensions.blender.org/add-ons/univ/';
-        $data = $scraper->getAddOn($url);
-
-        return $this->render('collection/test.html.twig', [
-            'data' => $data,
-            'url' => $url,
-        ]);
-    }
-
+    /* A factoriser */
     #[Route('/api/scrape-addon/', name: 'api_scrape_addon')]
-    public function scrapeAddon(Request $request, AddonsScraper $scraper, SessionInterface $session): JsonResponse
+    public function scrapeAddon(AddonsManager $am, Request $request, AddonsScraper $scraper, SessionInterface $session): JsonResponse
     {
         $url = $request->query->get('url');
 
@@ -55,23 +115,7 @@ final class CollectionController extends AbstractController
 
         try {
             $data = $scraper->getAddOn($url);
-            // Récupération ou initialisation de la liste
-            $addons = $session->get('valid_addons', []);
-
-            $alreadyExists = false;
-            foreach ($addons as $addon) {
-                if (is_array($addon) && $addon[0] === $url) {
-                    $alreadyExists = true;
-                    break;
-                }
-            }
-
-            // Si elle n'existe pas, on l’ajoute avec l’état `false`
-            if (!$alreadyExists) {
-                $addons[] = [$url, false];
-                $session->set('valid_addons', $addons);
-            }
-
+            $am->addStack($session, $data, $url);
             return $this->json($data);
         } catch (\Throwable $e) {
             return $this->json(['error' => 'Scraping failed'], 500);
@@ -79,28 +123,13 @@ final class CollectionController extends AbstractController
     }
 
     #[Route('/api/getAddOnSave', name: 'api_get_addon')]
-    public function getAddOns(Request $request, SessionInterface $session): JsonResponse
+    public function getAddOns(AddonsManager $am, Request $request, SessionInterface $session): JsonResponse
     {
         $url = $request->query->get('url');
-        $addons = $session->get('valid_addons', []);
 
-        // 1. Marquer l'URL comme validée (true)
-        foreach ($addons as $index => $addon) {
-            if (isset($addon[0]) && $addon[0] === $url) {
-                $addons[$index][1] = true;
-                break;
-            }
-        }
-        /* dd($addons); */
-        // 2. Filtrer les addons validés
-        $validated = array_filter($addons, function ($addon) {
-            return isset($addon[1]) && $addon[1] === true;
-        });
+        $addons = $am->addAddOn($url, $session);
+        $validated = $am->cleanSession($addons, $session);
 
-        // 3. Mettre à jour la session avec uniquement les validés
-        $session->set('valid_addons', array_values($validated)); // Réindexation
-
-        // 4. Gérer le cas où il n'y a rien à retourner
         if (empty($validated)) {
             return $this->json(['empty' => true]);
         }
@@ -109,28 +138,13 @@ final class CollectionController extends AbstractController
     }
 
     #[Route('/api/suprAddOnSave', name: 'api_supr_addon')]
-    public function suprAddOns(Request $request, SessionInterface $session): JsonResponse
+    public function suprAddOns(AddonsManager $am, Request $request, SessionInterface $session): JsonResponse
     {
         $url = $request->query->get('url');
-        $addons = $session->get('valid_addons', []);
 
-        // 1. Marquer l'URL comme validée (true)
-        foreach ($addons as $index => $addon) {
-            if (isset($addon[0]) && $addon[0] === $url) {
-                $addons[$index][1] = false;
-                break;
-            }
-        }
-        /* dd($addons); */
-        // 2. Filtrer les addons validés
-        $validated = array_filter($addons, function ($addon) {
-            return isset($addon[1]) && $addon[1] === true;
-        });
+        $addons = $am->suprAddOn($url, $session);
+        $validated = $am->cleanSession($addons, $session);
 
-        // 3. Mettre à jour la session avec uniquement les validés
-        $session->set('valid_addons', array_values($validated)); // Réindexation
-
-        // 4. Gérer le cas où il n'y a rien à retourner
         if (empty($validated)) {
             return $this->json(['empty' => true]);
         }
@@ -138,9 +152,5 @@ final class CollectionController extends AbstractController
 
         return $this->json(array_values($validated));
     }
-
-
-
-
 
 }

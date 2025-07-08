@@ -7,22 +7,26 @@
 {% block body %}
 
 <script type="module" src="{{ asset('js/addOnListeAdd.js') }}"></script>
-<section class="px-6 lg:px-24 py-12 text-white">
-  <h1 class="text-3xl lg:text-5xl font-bold mb-8">Create a new Collection</h1>
-
+<section class="px-6 lg:px-24 py-12 text-white flex flex-col">
+  <div class=" flex flex-row items-center gap-4 mb-8">
+    <svg width="35" height="29" viewBox="0 0 35 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10.9138 18.5669C10.9223 19.0162 11.0638 19.8904 11.2752 20.5729C11.7338 22.0438 12.5039 23.3953 13.5318 24.5329C14.6342 25.7619 15.9799 26.7416 17.481 27.4079C19.1143 28.1374 20.881 28.5095 22.6658 28.4998C24.4507 28.5032 26.2162 28.1253 27.8473 27.3906C29.3468 26.7187 30.691 25.7358 31.793 24.5052C32.819 23.3633 33.5884 22.0093 34.0479 20.5366C34.4885 19.1101 34.6091 17.6019 34.4008 16.1222C34.2022 14.7044 33.7122 13.3446 32.9622 12.131C32.2673 11.002 31.3783 10.0084 30.3374 9.19732H30.3408L19.7189 0.926542L19.6916 0.905809C18.9945 0.363294 17.8235 0.365021 17.0566 0.909265C16.281 1.45869 16.1924 2.36749 16.8827 2.93938L16.8793 2.94283L21.3108 6.59531L7.80666 6.60913H7.78962C6.67322 6.61086 5.59944 7.35207 5.38638 8.29197C5.16992 9.24742 5.92669 10.0387 7.0874 10.0439V10.0474L13.9307 10.0353L1.71676 19.5379L1.67075 19.5725C0.518556 20.4675 0.146992 21.9533 0.871371 22.895C1.60768 23.8521 3.17405 23.8539 4.33817 22.9002L11.0025 17.3713C11.0025 17.3713 10.907 18.1177 10.9138 18.5652V18.5669ZM28.0416 21.067C26.6678 22.4838 24.7452 23.2889 22.6658 23.2941C20.5813 23.2975 18.6604 22.4993 17.285 21.0843C16.6151 20.3932 16.1208 19.6001 15.8174 18.7553C15.5255 17.9326 15.41 17.0563 15.4788 16.1848C15.5476 15.3133 15.799 14.4667 16.2163 13.7016C16.6311 12.9451 17.1854 12.2764 17.8491 11.7319C19.213 10.621 20.9128 10.02 22.6624 10.0301C24.4106 10.0148 26.1105 10.611 27.4757 11.7181C28.1392 12.26 28.6936 12.9264 29.1085 13.6808C29.5215 14.4359 29.773 15.2707 29.8465 16.1308C29.9225 17.0121 29.8073 17.8997 29.5091 18.7311C29.1907 19.6074 28.6902 20.404 28.0416 21.067ZM18.2241 16.2448C18.2594 15.6889 18.407 15.1463 18.6577 14.6506C18.9084 14.1549 19.2568 13.7166 19.6814 13.3629C20.5613 12.6215 21.6716 12.2195 22.8158 12.2278C23.9593 12.2206 25.0686 12.6226 25.9485 13.3629C26.3728 13.7165 26.7209 14.1546 26.9716 14.6499C27.2222 15.1453 27.37 15.6875 27.4058 16.2431C27.4689 17.4232 27.0019 18.522 26.1786 19.3358C25.2734 20.2113 24.0669 20.6942 22.8158 20.6817C21.4812 20.6817 20.2864 20.1634 19.4496 19.3341C19.0382 18.9387 18.7158 18.4581 18.5043 17.925C18.2928 17.3919 18.1973 16.8188 18.2241 16.2448Z" fill="currentColor"/>
+    </svg>
+    <h1 class="text-3xl lg:text-5xl font-bold">Create a new Collection</h1>
+  </div>
   <form method="post" enctype="multipart/form-data" action="" class="flex flex-col gap-6">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 flex flex-col gap-6">
         <div>
           <label for="fullName" class="block mb-2 font-semibold">Full name <span class="text-red-500">*</span></label>
-          <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" class="w-full px-4 py-2 rounded bg-grey-850 border border-grey-700" required>
+          <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" class="dark:text-black-950 w-full px-4 py-2 rounded bg-grey-850 border border-grey-700" required>
         </div>
 
         <div>
-          <label for="addonUrl" class="block mb-2 font-semibold">Add-On <span class="text-red-500">*</span></label>
+          <label for="addonUrl" class="block mb-2 font-semibold">Add-On <span class="text-red-500"></span></label>
           <div class="flex flex-col lg:flex-row gap-4">
-            <input type="url" id="addon_url" name="addon_url" placeholder="Url..." class="w-full px-4 py-2 rounded bg-grey-850 border border-grey-700 dark:text-black-950" required>
-            <button type="button" id="add_addon" class="bg-white text-black-950 px-4 py-2 rounded hover:bg-grey-200">Ajouter...</button>
+            <input type="url" id="addon_url" name="addon_url" placeholder="Url..." class="w-full px-4 py-2 rounded bg-grey-850 border border-grey-700 dark:text-black-950">
+            <button type="button" id="add_addon" class="bg-white dark:text-black-950 px-4 py-2 rounded hover:bg-grey-200">Ajouter...</button>
           </div>
         </div>
 
@@ -39,21 +43,29 @@
 
         <div>
           <label for="description" class="block mb-2 font-semibold">Description</label>
-          <textarea id="description" name="description" placeholder="Describe your collection.." rows="6" class="w-full px-4 py-2 rounded bg-grey-850 border border-grey-700"></textarea>
+          <textarea id="description" name="description" placeholder="Describe your collection.." rows="6" class="dark:text-black-950 w-full px-4 py-2 rounded bg-grey-850 border border-grey-700"></textarea>
         </div>
+        <div class="flex flex-col gap-2">
+          <label for="image" class="block font-semibold">Image(Default Image first add-on)</label>
+          <input type="file" id="image" name="image" accept="image/*" class="dark:text-black-950 w-full px-4 py-2 rounded bg-grey-850 border border-grey-700">
+        </div>
+        <div class="flex items-center gap-4">
+          <label for="isVisible" class="font-semibold">Collection publique</label>
+
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="isVisible" name="isVisible" checked value="1" class="sr-only peer">
+            <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+            <div class="w-11 h-6 bg-grey-700 peer-focus:outline-none rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-300 border-[1px] border-white"></div>
+          </label>
+        </div>
+
 
         <div>
-          <button type="submit" class="bg-white text-black-950 px-6 py-2 rounded-md font-semibold hover:bg-grey-200">Ajouter...</button>
+          <button type="submit" class="bg-white text-black-950 px-6 py-2 rounded-md font-semibold hover:bg-grey-200">Créer...</button>
         </div>
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="image" class="block font-semibold">Image</label>
-        <input type="file" id="image" name="image" accept="image/*" class="w-full px-4 py-2 rounded bg-grey-850 border border-grey-700">
-        <div class="w-full aspect-square bg-grey-850 rounded mt-2 flex items-center justify-center text-grey-500 text-sm border border-grey-700">
-          Preview
-        </div>
-      </div>
+
     </div>
   </form>
 </section>
