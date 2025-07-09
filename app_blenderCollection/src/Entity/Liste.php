@@ -40,23 +40,24 @@ class Liste
     #[ORM\ManyToMany(targetEntity: Addon::class, inversedBy: 'listes')]
     private Collection $addons;
 
-    /**
-     * @var Collection<int, Topic>
-     */
-    #[ORM\OneToMany(targetEntity: Topic::class, mappedBy: 'topic_liste')]
-    private Collection $topics;
-
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $Image = null;
 
     #[ORM\Column]
     private ?bool $isVisible = null;
 
+    /**
+     * @var Collection<int, Post>
+     */
+    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'commentaire', orphanRemoval: true)]
+    private Collection $posts;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->addons = new ArrayCollection();
         $this->topics = new ArrayCollection();
+        $this->posts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -163,36 +164,6 @@ class Liste
         return $this;
     }
 
-    /**
-     * @return Collection<int, Topic>
-     */
-    public function getTopics(): Collection
-    {
-        return $this->topics;
-    }
-
-    public function addTopic(Topic $topic): static
-    {
-        if (!$this->topics->contains($topic)) {
-            $this->topics->add($topic);
-            $topic->setTopicListe($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTopic(Topic $topic): static
-    {
-        if ($this->topics->removeElement($topic)) {
-            // set the owning side to null (unless already changed)
-            if ($topic->getTopicListe() === $this) {
-                $topic->setTopicListe(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getImage(): ?string
     {
         return $this->Image;
@@ -213,6 +184,36 @@ class Liste
     public function setIsVisible(bool $isVisible): static
     {
         $this->isVisible = $isVisible;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getPosts(): Collection
+    {
+        return $this->posts;
+    }
+
+    public function addPost(Post $post): static
+    {
+        if (!$this->posts->contains($post)) {
+            $this->posts->add($post);
+            $post->setCommentaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removePost(Post $post): static
+    {
+        if ($this->posts->removeElement($post)) {
+            // set the owning side to null (unless already changed)
+            if ($post->getCommentaire() === $this) {
+                $post->setCommentaire(null);
+            }
+        }
 
         return $this;
     }

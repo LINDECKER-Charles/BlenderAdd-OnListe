@@ -58,20 +58,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Liste::class, inversedBy: 'users')]
     private Collection $favoris;
 
-    /**
-     * @var Collection<int, Topic>
-     */
-    #[ORM\OneToMany(targetEntity: Topic::class, mappedBy: 'usser')]
-    private Collection $topics;
-
-    /**
-     * @var Collection<int, Poste>
-     */
-    #[ORM\OneToMany(targetEntity: Poste::class, mappedBy: 'usser')]
-    private Collection $postes;
-
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $pathImg = null;
+
+    /**
+     * @var Collection<int, SousPost>
+     */
+    #[ORM\ManyToMany(targetEntity: SousPost::class, mappedBy: 'likes')]
+    private Collection $sousPosts;
+
+    /**
+     * @var Collection<int, Post>
+     */
+    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'commenter')]
+    private Collection $posts;
 
     public function __construct()
     {
@@ -79,6 +79,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->favoris = new ArrayCollection();
         $this->topics = new ArrayCollection();
         $this->postes = new ArrayCollection();
+        $this->sousPosts = new ArrayCollection();
+        $this->posts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -244,66 +246,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Topic>
-     */
-    public function getTopics(): Collection
-    {
-        return $this->topics;
-    }
-
-    public function addTopic(Topic $topic): static
-    {
-        if (!$this->topics->contains($topic)) {
-            $this->topics->add($topic);
-            $topic->setUsser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTopic(Topic $topic): static
-    {
-        if ($this->topics->removeElement($topic)) {
-            // set the owning side to null (unless already changed)
-            if ($topic->getUsser() === $this) {
-                $topic->setUsser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Poste>
-     */
-    public function getPostes(): Collection
-    {
-        return $this->postes;
-    }
-
-    public function addPoste(Poste $poste): static
-    {
-        if (!$this->postes->contains($poste)) {
-            $this->postes->add($poste);
-            $poste->setUsser($this);
-        }
-
-        return $this;
-    }
-
-    public function removePoste(Poste $poste): static
-    {
-        if ($this->postes->removeElement($poste)) {
-            // set the owning side to null (unless already changed)
-            if ($poste->getUsser() === $this) {
-                $poste->setUsser(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getPathImg(): ?string
     {
         return $this->pathImg;
@@ -312,6 +254,63 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPathImg(?string $pathImg): static
     {
         $this->pathImg = $pathImg;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SousPost>
+     */
+    public function getSousPosts(): Collection
+    {
+        return $this->sousPosts;
+    }
+
+    public function addSousPost(SousPost $sousPost): static
+    {
+        if (!$this->sousPosts->contains($sousPost)) {
+            $this->sousPosts->add($sousPost);
+            $sousPost->addLike($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSousPost(SousPost $sousPost): static
+    {
+        if ($this->sousPosts->removeElement($sousPost)) {
+            $sousPost->removeLike($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getPosts(): Collection
+    {
+        return $this->posts;
+    }
+
+    public function addPost(Post $post): static
+    {
+        if (!$this->posts->contains($post)) {
+            $this->posts->add($post);
+            $post->setCommenter($this);
+        }
+
+        return $this;
+    }
+
+    public function removePost(Post $post): static
+    {
+        if ($this->posts->removeElement($post)) {
+            // set the owning side to null (unless already changed)
+            if ($post->getCommenter() === $this) {
+                $post->setCommenter(null);
+            }
+        }
 
         return $this;
     }

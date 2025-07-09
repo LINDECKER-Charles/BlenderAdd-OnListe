@@ -2,14 +2,17 @@
 
 namespace App\Controller;
 
+use App\Entity\Post;
 use App\Entity\Addon;
 use App\Entity\Liste;
+use App\Entity\SousPost;
 use App\Service\BlenderAPI;
 use App\Service\AddonsManager;
 use App\Service\AddonsScraper;
 use App\Service\AddonDownloader;
 use App\Repository\ListeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +20,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -110,6 +112,7 @@ final class CollectionController extends AbstractController
     }
 
 
+    /* A bouger */
     #[Route('/api/scrape-addon/', name: 'api_scrape_addon')]
     public function scrapeAddon(AddonsManager $am, Request $request, AddonsScraper $scraper, SessionInterface $session): JsonResponse
     {
@@ -127,7 +130,6 @@ final class CollectionController extends AbstractController
             return $this->json(['error' => 'Scraping failed'], 500);
         }
     }
-
     #[Route('/api/getAddOnSave', name: 'api_get_addon')]
     public function getAddOns(AddonsManager $am, Request $request, SessionInterface $session): JsonResponse
     {
@@ -142,7 +144,6 @@ final class CollectionController extends AbstractController
 
         return $this->json(array_values($validated));
     }
-
     #[Route('/api/suprAddOnSave', name: 'api_supr_addon')]
     public function suprAddOns(AddonsManager $am, Request $request, SessionInterface $session): JsonResponse
     {
@@ -160,6 +161,9 @@ final class CollectionController extends AbstractController
     }
 
 
+
+
+    /* Affichage de la liste */
     #[Route('/liste/{id}', name: 'liste_show')]
     public function show(int $id, ListeRepository $listeRepository): Response
     {
@@ -171,9 +175,11 @@ final class CollectionController extends AbstractController
 
         return $this->render('collection/detail.html.twig', [
             'liste' => $liste,
+            'posts' => $liste->getPosts(),
         ]);
     }
 
+    /* Edition d'une collection */
     #[Route('/liste/{id}/edit/name', name: 'update_liste_name', methods: ['POST'])]
     public function updateName(Liste $liste, Request $request, EntityManagerInterface $em): Response
     {
@@ -189,7 +195,6 @@ final class CollectionController extends AbstractController
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
-
     #[Route('/liste/{id}/edit/description', name: 'update_liste_description', methods: ['POST'])]
     public function updateDescription(Liste $liste, Request $request, EntityManagerInterface $em): Response
     {
@@ -203,7 +208,6 @@ final class CollectionController extends AbstractController
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
-
     #[Route('/liste/{id}/edit/visibility', name: 'update_liste_visibility', methods: ['POST'])]
     public function updateVisibility(Liste $liste, Request $request, EntityManagerInterface $em): Response
     {
@@ -218,13 +222,10 @@ final class CollectionController extends AbstractController
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
 
+
+    /* Ajouter et retirer addon dans une collection */
     #[Route('/liste/{id}/remove-addon/{addonId}', name: 'remove_addon_from_liste', methods: ['POST'])]
-    public function removeAddonFromListe(
-        Liste $liste,
-        int $addonId,
-        EntityManagerInterface $em,
-        Request $request
-    ): Response {
+    public function removeAddonFromListe(Liste $liste, int $addonId, EntityManagerInterface $em, Request $request): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         // CSRF protection
@@ -244,14 +245,8 @@ final class CollectionController extends AbstractController
         $this->addFlash('success', 'Add-on retiré de la collection.');
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
-
     #[Route('/liste/{id}/add-addon', name: 'add_addon_to_liste', methods: ['POST'])]
-    public function addAddonToListe(
-        Liste $liste,
-        Request $request,
-        EntityManagerInterface $em,
-        AddonsScraper $scraper
-    ): Response {
+    public function addAddonToListe(Liste $liste, Request $request, EntityManagerInterface $em, AddonsScraper $scraper): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $token = $request->request->get('_token');
@@ -300,6 +295,7 @@ final class CollectionController extends AbstractController
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
 
+    /* Téléchargement de addon */
     #[Route('/liste/{id}/download', name: 'liste_download_addons', methods: ['POST'])]
     public function downloadAddonsFromListe(Liste $liste, Request $request, AddonsScraper $scraper, BlenderAPI $blenderAPI, AddonDownloader $addonDownloader): BinaryFileResponse {
 
@@ -319,6 +315,101 @@ final class CollectionController extends AbstractController
         return $addonDownloader->downloadAndZip($urls, 'collection_' . $liste->getName() . '.zip');
     }
 
+    /* Ajouter un commentaire */
+    #[Route('/liste/{id}/comment', name: 'liste_comment', methods: ['POST'])]
+    public function addComment(Liste $liste, Request $request, EntityManagerInterface $em, Security $security): Response {
 
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('app_login');
+        }
 
+        $content = trim($request->request->get('content'));
+
+        if (!$this->isCsrfTokenValid('add_comment_' . $liste->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        if ($content) {
+            $post = new Post();
+            $post->setContent($content);
+            $post->setDateCreation(new \DateTime());
+            $post->setCommentaire($liste);
+
+            $user = $security->getUser();
+            if ($user) {
+                $post->setCommenter($user);
+            }
+
+            $em->persist($post);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
+    }
+    /* Répondre à un commentaire */
+    #[Route('/post/{id}/reply', name: 'post_reply', methods: ['POST'])]
+    public function replyToPost(Post $post, Request $request, EntityManagerInterface $em): Response {
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $content = trim($request->request->get('content'));
+
+        if (!$this->isCsrfTokenValid('reply_' . $post->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        if ($content) {
+            $reply = new SousPost();
+            $reply->setContent($content);
+            $reply->setDateCreation(new \DateTime());
+            $reply->setPost($post);
+
+            $em->persist($reply);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('liste_show', ['id' => $post->getCommentaire()->getId()]);
+    }
+
+    /* Liker un commentaire */
+    #[Route('/post/{id}/like', name: 'post_like', methods: ['POST'])]
+    public function likePost(Post $post, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        if ($post->getLiker()->contains($user)) {
+            $post->removeLiker($user);
+        } else {
+            $post->addLiker($user);
+        }
+
+        $em->flush();
+
+        return $this->redirect($this->generateUrl('liste_show', ['id' => $post->getCommentaire()->getId()]) . '#post-' . $post->getId());
+    }
+    /* Liker un sous commentaire */
+    #[Route('/souspost/{id}/like', name: 'souspost_like', methods: ['POST'])]
+    public function likeSousPost(SousPost $sousPost, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        if ($sousPost->getLikes()->contains($user)) {
+            $sousPost->removeLike($user);
+        } else {
+            $sousPost->addLike($user);
+        }
+
+        $em->flush();
+
+        return $this->redirect($this->generateUrl('liste_show', ['id' => $sousPost->getPost()->getCommentaire()->getId()]) . '#post-' . $sousPost->getPost()->getId());
+    }
+
+    
 }

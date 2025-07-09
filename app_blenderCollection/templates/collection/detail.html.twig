@@ -110,6 +110,92 @@
         <p class="text-gray-500 italic">Aucun add-on associé à cette liste.</p>
     {% endif %}
 
+    {% if app.user %}
+        <h3 class="text-lg font-semibold mt-6 mb-2">Ajouter un commentaire</h3>
+
+        <form action="{{ path('liste_comment', {'id': liste.id}) }}" method="post">
+            <textarea name="content" rows="4" class="w-full p-2 dark:text-black-950 rounded border border-gray-300" placeholder="Écris ton commentaire ici..."></textarea>
+
+            <input type="hidden" name="_token" value="{{ csrf_token('add_comment_' ~ liste.id) }}">
+
+            <button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Publier
+            </button>
+        </form>
+    {% else %}
+        <p class="text-gray-500 italic mt-6">Connecte-toi pour écrire un commentaire ✍️</p>
+    {% endif %}
+
+    <h2 class="text-xl font-bold">Commentaires</h2>
+
+    {% for post in posts %}
+        <div class="bg-gray-100 rounded-lg p-4 my-4 dark:text-black-950">
+            <p class="font-semibold text-blue-700 dark:text-black-950">
+                {{ post.commenter.name ?? 'Anonyme' }} — {{ post.dateCreation|date('d/m/Y H:i') }}
+            </p>
+            <p>{{ post.content }}</p>
+            <form action="{{ path('post_like', { id: post.id }) }}" method="post" class="inline">
+                <button type="submit" class="text-pink-600 hover:underline">
+                    ❤️ {{ post.liker|length }}
+                </button>
+            </form>
+
+            <!-- Bouton Répondre -->
+            {% if app.user %}
+                <button 
+                    type="button" 
+                    onclick="toggleReplyForm('{{ post.id }}')" 
+                    class="text-sm text-blue-600 hover:underline mt-2"
+                >
+                    Répondre
+                </button>
+
+                <!-- Formulaire de réponse caché -->
+                <div id="reply-form-{{ post.id }}" class="mt-2 hidden">
+                    <form action="{{ path('post_reply', {id: post.id}) }}" method="post">
+                        <textarea 
+                            name="content" 
+                            rows="2" 
+                            class="w-full p-2 rounded dark:text-black-950 border border-gray-300 mt-2"
+                            placeholder="Ta réponse ici..."
+                        ></textarea>
+                        <input type="hidden" name="_token" value="{{ csrf_token('reply_' ~ post.id) }}">
+                        <button type="submit" class="mt-1 bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 text-sm">
+                            Envoyer la réponse
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <!-- Affichage des réponses -->
+            <div class="ml-4 mt-4 border-l-2 border-gray-400 pl-4">
+                {% for reply in post.postSpost %}
+                    <div class="bg-white p-2 rounded-md my-2 shadow-sm">
+                        <p class="text-sm text-gray-600">
+                            {{ reply.dateCreation|date('d/m/Y H:i') }}
+                        </p>
+                        <p>{{ reply.content }}</p>
+                        <form action="{{ path('souspost_like', { id: reply.id }) }}" method="post" class="inline">
+                            <button type="submit" class="text-sm text-pink-600 hover:underline">
+                                ❤️ {{ reply.likes|length }}
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <p class="text-gray-500 italic">Aucun commentaire pour le moment.</p>
+    {% endfor %}
+
+    <!-- Script pour afficher/masquer le formulaire de réponse -->
+    <script>
+        function toggleReplyForm(postId) {
+            const form = document.getElementById('reply-form-' + postId);
+            form.classList.toggle('hidden');
+        }
+    </script>
+
     {# Modal #}
     <div id="editNameModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
         <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">

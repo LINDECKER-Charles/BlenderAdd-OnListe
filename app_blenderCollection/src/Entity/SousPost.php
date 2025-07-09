@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\PosteRepository;
+use App\Repository\SousPostRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PosteRepository::class)]
-class Poste
+#[ORM\Entity(repositoryClass: SousPostRepository::class)]
+class SousPost
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -22,18 +22,15 @@ class Poste
     #[ORM\Column]
     private ?\DateTime $dateCreation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'postes')]
-    private ?User $usser = null;
+    #[ORM\ManyToOne(inversedBy: 'postSpost')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Post $post = null;
 
     /**
      * @var Collection<int, User>
      */
-    #[ORM\ManyToMany(targetEntity: User::class)]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'sousPosts')]
     private Collection $likes;
-
-    #[ORM\ManyToOne(inversedBy: 'postes')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Topic $topic = null;
 
     public function __construct()
     {
@@ -69,14 +66,14 @@ class Poste
         return $this;
     }
 
-    public function getUsser(): ?User
+    public function getPost(): ?Post
     {
-        return $this->usser;
+        return $this->post;
     }
 
-    public function setUsser(?User $usser): static
+    public function setPost(?Post $post): static
     {
-        $this->usser = $usser;
+        $this->post = $post;
 
         return $this;
     }
@@ -101,18 +98,6 @@ class Poste
     public function removeLike(User $like): static
     {
         $this->likes->removeElement($like);
-
-        return $this;
-    }
-
-    public function getTopic(): ?Topic
-    {
-        return $this->topic;
-    }
-
-    public function setTopic(?Topic $topic): static
-    {
-        $this->topic = $topic;
 
         return $this;
     }
