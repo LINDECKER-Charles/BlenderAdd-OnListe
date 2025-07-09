@@ -11,7 +11,7 @@
 <a href="{{ path('create_collection') }}" class="bg-white text-black-950 px-4 py-2 rounded-md font-semibold hover:bg-grey-200 transition">+ Create Collection</a>
     <div class="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for collection in collections %}
-            <a href=""
+            <a href="{{ path('liste_show', { id: collection.id }) }}"
                class="block bg-white bg-opacity-80 p-4 rounded-lg shadow-lg hover:scale-[1.02] transition-transform duration-200 group">
                 {% if collection.image %}
                     <img src="{{ asset('uploads/' ~ collection.image) }}"

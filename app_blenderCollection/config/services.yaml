@@ -18,6 +18,12 @@ services:
     App\Security\LoginAuthenticator:
         arguments:
             $loginLimiter: '@limiter.login'
-
+    App\Service\BlenderAPI:
+        arguments:
+            $httpClient: '@http_client'
+            $cache: '@cache.app'
+    App\Service\AddonDownloader:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
