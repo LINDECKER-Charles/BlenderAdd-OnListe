@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -77,6 +78,7 @@ final class CollectionController extends AbstractController
             $liste->setUsser($user);
             $liste->setIsVisible($isVisible);
             $liste->setDateCreation(new \DateTime());
+            $liste->setDownload(0);
 
             // 🔄 Récupérer les add-ons validés dans la session
             $sessionAddons = $request->getSession()->get('valid_addons', []);
@@ -297,7 +299,7 @@ final class CollectionController extends AbstractController
 
     /* Téléchargement de addon */
     #[Route('/liste/{id}/download', name: 'liste_download_addons', methods: ['POST'])]
-    public function downloadAddonsFromListe(Liste $liste, Request $request, AddonsScraper $scraper, BlenderAPI $blenderAPI, AddonDownloader $addonDownloader): BinaryFileResponse {
+    public function downloadAddonsFromListe(Liste $liste, Request $request, BlenderAPI $blenderAPI, AddonDownloader $addonDownloader, EntityManagerInterface $em): BinaryFileResponse {
 
         if (!$this->isCsrfTokenValid('download_addons_' . $liste->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
@@ -311,7 +313,13 @@ final class CollectionController extends AbstractController
                 $urls[] = $extension['archive_url'];
             }
         }
-
+        if(!$liste->getDownload()){
+            $liste->setDownload(1);
+        }else{
+            $liste->setDownload($liste->getDownload() + 1);
+        }
+        $em->persist($liste);
+        $em->flush();
         return $addonDownloader->downloadAndZip($urls, 'collection_' . $liste->getName() . '.zip');
     }
 
@@ -411,5 +419,25 @@ final class CollectionController extends AbstractController
         return $this->redirect($this->generateUrl('liste_show', ['id' => $sousPost->getPost()->getCommentaire()->getId()]) . '#post-' . $sousPost->getPost()->getId());
     }
 
-    
+    /* Ajouter une collection en favoris */
+    #[Route('/liste/{id}/toggle-favoris', name: 'toggle_favoris')]
+    public function toggleFavoris(Liste $liste, EntityManagerInterface $em, Security $security): RedirectResponse
+    {
+        $user = $security->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        if ($user->getFavoris()->contains($liste)) {
+            $user->removeFavori($liste);
+        } else {
+            $user->addFavori($liste);
+        }
+
+        $em->flush();
+
+        return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
+    }
+
 }

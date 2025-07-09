@@ -37,6 +37,41 @@
             ✏️
         </button>
     </div>
+
+    <div class="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-lg shadow-sm mt-6">
+        <div class="flex items-center gap-3">
+            <span class="text-yellow-500 text-xl">⭐</span>
+            <span class="text-gray-700 font-medium">
+                {{ liste.favorisCount }} personne{{ liste.favorisCount > 1 ? 's' : '' }} l’ont en favoris
+            </span>
+        </div>
+
+        {% if app.user %}
+            <form method="post" action="{{ path('toggle_favoris', {'id': liste.id}) }}">
+                <button type="submit"
+                    class="px-4 py-2 text-sm font-semibold rounded-md transition-colors duration-200 text-white
+                    {% if app.user.favoris.contains(liste) %}
+                        bg-red-500 hover:bg-red-600
+                    {% else %}
+                        bg-emerald-500 hover:bg-emerald-600
+                    {% endif %}">
+                    {% if app.user.favoris.contains(liste) %}
+                        Retirer des favoris
+                    {% else %}
+                        Ajouter aux favoris
+                    {% endif %}
+                </button>
+            </form>
+        {% else %}
+            <a href="{{ path('app_login') }}"
+                class="px-4 py-2 text-sm font-semibold rounded-md text-white bg-blue-500 hover:bg-blue-600">
+                Se connecter pour ajouter aux favoris
+            </a>
+        {% endif %}
+    </div>
+
+
+
     <p class="text-gray-600 mb-2"><strong>Date de création :</strong> {{ liste.dateCreation|date('d/m/Y') }}</p>
     <p class="text-gray-600 mb-6"><strong>Propriétaire :</strong> {{ liste.usser.name ?? 'Inconnu' }}</p>
 

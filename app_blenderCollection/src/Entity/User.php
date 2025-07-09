@@ -52,11 +52,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Liste::class, mappedBy: 'usser')]
     private Collection $listes;
 
-    /**
-     * @var Collection<int, Liste>
-     */
-    #[ORM\ManyToMany(targetEntity: Liste::class, inversedBy: 'users')]
-    private Collection $favoris;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $pathImg = null;
@@ -73,14 +68,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'commenter')]
     private Collection $posts;
 
+    /**
+     * @var Collection<int, Liste>
+     */
+    #[ORM\ManyToMany(targetEntity: Liste::class, inversedBy: 'users')]
+    private Collection $favoris;
+
     public function __construct()
     {
         $this->listes = new ArrayCollection();
-        $this->favoris = new ArrayCollection();
         $this->topics = new ArrayCollection();
         $this->postes = new ArrayCollection();
         $this->sousPosts = new ArrayCollection();
         $this->posts = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -222,23 +223,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Liste>
-     */
-    public function getFavoris(): Collection
-    {
-        return $this->favoris;
-    }
-
-    public function addFavori(Liste $favori): static
-    {
-        if (!$this->favoris->contains($favori)) {
-            $this->favoris->add($favori);
-        }
-
-        return $this;
-    }
-
     public function removeFavori(Liste $favori): static
     {
         $this->favoris->removeElement($favori);
@@ -310,6 +294,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($post->getCommenter() === $this) {
                 $post->setCommenter(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Liste>
+     */
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavori(Liste $favori): static
+    {
+        if (!$this->favoris->contains($favori)) {
+            $this->favoris->add($favori);
         }
 
         return $this;

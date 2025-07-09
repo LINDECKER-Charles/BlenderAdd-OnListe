@@ -29,12 +29,6 @@ class Liste
     private ?User $usser = null;
 
     /**
-     * @var Collection<int, User>
-     */
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'favoris')]
-    private Collection $users;
-
-    /**
      * @var Collection<int, Addon>
      */
     #[ORM\ManyToMany(targetEntity: Addon::class, inversedBy: 'listes')]
@@ -51,6 +45,15 @@ class Liste
      */
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'commentaire', orphanRemoval: true)]
     private Collection $posts;
+
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'favoris')]
+    private Collection $users;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $download = null;
 
     public function __construct()
     {
@@ -109,24 +112,6 @@ class Liste
     public function setUsser(?User $usser): static
     {
         $this->usser = $usser;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): static
-    {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->addFavori($this);
-        }
 
         return $this;
     }
@@ -214,6 +199,41 @@ class Liste
                 $post->setCommentaire(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addFavori($this);
+        }
+
+        return $this;
+    }
+
+    public function getFavorisCount(): int
+    {
+        return $this->users->count();
+    }
+
+    public function getDownload(): ?int
+    {
+        return $this->download;
+    }
+
+    public function setDownload(int $download): static
+    {
+        $this->download = $download;
 
         return $this;
     }
