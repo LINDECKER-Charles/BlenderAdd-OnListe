@@ -32,6 +32,9 @@ class SousPost
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'sousPosts')]
     private Collection $likes;
 
+    #[ORM\ManyToOne(inversedBy: 'reponse')]
+    private ?User $commenter = null;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -98,6 +101,18 @@ class SousPost
     public function removeLike(User $like): static
     {
         $this->likes->removeElement($like);
+
+        return $this;
+    }
+
+    public function getCommenter(): ?User
+    {
+        return $this->commenter;
+    }
+
+    public function setCommenter(?User $commenter): static
+    {
+        $this->commenter = $commenter;
 
         return $this;
     }

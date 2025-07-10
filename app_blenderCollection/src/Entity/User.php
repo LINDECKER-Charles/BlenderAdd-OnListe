@@ -74,6 +74,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Liste::class, inversedBy: 'users')]
     private Collection $favoris;
 
+    /**
+     * @var Collection<int, SousPost>
+     */
+    #[ORM\OneToMany(targetEntity: SousPost::class, mappedBy: 'commenter')]
+    private Collection $reponse;
+
     public function __construct()
     {
         $this->listes = new ArrayCollection();
@@ -82,6 +88,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->sousPosts = new ArrayCollection();
         $this->posts = new ArrayCollection();
         $this->favoris = new ArrayCollection();
+        $this->reponse = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -129,6 +136,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function addRole(string $role): static
+    {
+        $role = strtoupper($role);
+        if (!in_array($role, $this->roles, true)) {
+            $this->roles[] = $role;
+        }
+
+        return $this;
+    }
+
+    public function removeRole(string $role): static
+    {
+        $role = strtoupper($role);
+        $this->roles = array_filter($this->roles, fn ($r) => $r !== $role);
 
         return $this;
     }
@@ -311,6 +336,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->favoris->contains($favori)) {
             $this->favoris->add($favori);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SousPost>
+     */
+    public function getReponse(): Collection
+    {
+        return $this->reponse;
+    }
+
+    public function addReponse(SousPost $reponse): static
+    {
+        if (!$this->reponse->contains($reponse)) {
+            $this->reponse->add($reponse);
+            $reponse->setCommenter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReponse(SousPost $reponse): static
+    {
+        if ($this->reponse->removeElement($reponse)) {
+            // set the owning side to null (unless already changed)
+            if ($reponse->getCommenter() === $this) {
+                $reponse->setCommenter(null);
+            }
         }
 
         return $this;

@@ -71,20 +71,40 @@ final class CollectionController extends AbstractController
                 );
             }
 
+            // 🔄 Récupérer les add-ons validés dans la session
+            $sessionAddons = $request->getSession()->get('valid_addons', []);
+
             $liste = new Liste();
             $liste->setName($fullName);
             $liste->setDescription($description);
-            $liste->setImage($imageFilename);
+            if (!$imageFile) {
+                // On tente de prendre l'image du premier add-on si elle existe
+                if (!empty($sessionAddons) && isset($sessionAddons[0][1]['image'])) {
+                    $addonImageUrl = $sessionAddons[0][1]['image'];
+
+                    // On télécharge l'image distante et on la copie localement
+                    $imageContents = @file_get_contents($addonImageUrl);
+                    if ($imageContents !== false) {
+                        $extension = pathinfo(parse_url($addonImageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                        $generatedName = 'addon_' . uniqid() . '.' . $extension;
+                        $path = $this->getParameter('uploads_directory') . '/' . $generatedName;
+
+                        file_put_contents($path, $imageContents);
+
+                        $liste->setImage($generatedName);
+                    }
+                }
+            } else {
+                $liste->setImage($imageFilename);
+            }
+            
             $liste->setUsser($user);
             $liste->setIsVisible($isVisible);
             $liste->setDateCreation(new \DateTime());
             $liste->setDownload(0);
 
-            // 🔄 Récupérer les add-ons validés dans la session
-            $sessionAddons = $request->getSession()->get('valid_addons', []);
-
-            foreach ($sessionAddons as [$url, $validated]) {
-                if ($validated && isset($url)) {
+            foreach ($sessionAddons as [$url, $data]) {
+                if (isset($url)) {
                     // On cherche un Addon existant ou on le crée
                     $addon = $em->getRepository(Addon::class)->findOneBy(['idBlender' => $url]);
 
@@ -103,7 +123,8 @@ final class CollectionController extends AbstractController
 
             // Nettoyage session
             $request->getSession()->remove('valid_addons');
-
+            
+            $request->getSession()->getFlashBag()->clear();
             $this->addFlash('success', 'La collection a bien été créée avec ses add-ons !');
             return $this->redirectToRoute('liste_show', [
                 'id' => $liste->getId()
@@ -114,54 +135,49 @@ final class CollectionController extends AbstractController
     }
 
 
-    /* A bouger */
-    #[Route('/api/scrape-addon/', name: 'api_scrape_addon')]
-    public function scrapeAddon(AddonsManager $am, Request $request, AddonsScraper $scraper, SessionInterface $session): JsonResponse
-    {
-        $url = $request->query->get('url');
+    /* Rajouter un add-on dans la session */
+    #[Route('/api/add-addon', name: 'api_add_addon', methods: ['POST'])]
+    public function addAddon(Request $request, AddonsScraper $scraper, AddonsManager $am, SessionInterface $session): JsonResponse {
+        $url = $request->request->get('url');
 
         if (!$url) {
-            return $this->json(['error' => 'No URL provided'], 400);
+            return $this->json(['error' => 'Aucune URL fournie'], 400);
+        } else if (!$am->isValidAddonUrl($url)) {
+            return $this->json(['error' => 'URL non valide'], 400);
         }
 
         try {
             $data = $scraper->getAddOn($url);
-            $am->addStack($session, $data, $url);
-            return $this->json($data);
+            $am->addAddOn($url, $data, $session);
+            return $this->json(['success' => true]);
         } catch (\Throwable $e) {
-            return $this->json(['error' => 'Scraping failed'], 500);
+            return $this->json(['error' => 'Scraping échoué'], 500);
         }
     }
-    #[Route('/api/getAddOnSave', name: 'api_get_addon')]
-    public function getAddOns(AddonsManager $am, Request $request, SessionInterface $session): JsonResponse
+
+    #[Route('/api/remove-addon', name: 'api_remove_addon', methods: ['POST'])]
+    public function removeAddon(Request $request, AddonsManager $am, SessionInterface $session): JsonResponse {
+        $url = $request->request->get('url');
+
+        if (!$url) {
+            return $this->json(['error' => 'Aucune URL fournie'], 400);
+        }
+
+        $am->suprAddOn($url, $session);
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/api/get-session-addons', name: 'api_get_session_addons')]
+    public function getSessionAddons(SessionInterface $session): JsonResponse
     {
-        $url = $request->query->get('url');
-
-        $addons = $am->addAddOn($url, $session);
-        $validated = $am->cleanSession($addons, $session);
-
-        if (empty($validated)) {
+        $addons = $session->get('valid_addons', []);
+        if (empty($addons)) {
             return $this->json(['empty' => true]);
         }
 
-        return $this->json(array_values($validated));
+        return $this->json(array_values($addons));
     }
-    #[Route('/api/suprAddOnSave', name: 'api_supr_addon')]
-    public function suprAddOns(AddonsManager $am, Request $request, SessionInterface $session): JsonResponse
-    {
-        $url = $request->query->get('url');
-
-        $addons = $am->suprAddOn($url, $session);
-        $validated = $am->cleanSession($addons, $session);
-
-        if (empty($validated)) {
-            return $this->json(['empty' => true]);
-        }
-
-
-        return $this->json(array_values($validated));
-    }
-
 
 
 
@@ -223,7 +239,27 @@ final class CollectionController extends AbstractController
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
+    #[Route('/liste/{id}/update-image', name: 'liste_update_image', methods: ['POST'])]
+    public function updateImage(Request $request, Liste $liste, EntityManagerInterface $em, SluggerInterface $slugger): Response {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY') || $this->getUser() !== $liste->getUsser()) {
+            throw $this->createAccessDeniedException();
+        }
 
+        $image = $request->files->get('image');
+
+        if ($image && $image->isValid()) {
+            $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename.'-'.uniqid().'.'.$image->guessExtension();
+
+            $image->move($this->getParameter('uploads_directory'), $newFilename);
+
+            $liste->setImage($newFilename);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
+    }
 
     /* Ajouter et retirer addon dans une collection */
     #[Route('/liste/{id}/remove-addon/{addonId}', name: 'remove_addon_from_liste', methods: ['POST'])]
@@ -372,6 +408,7 @@ final class CollectionController extends AbstractController
             $reply->setContent($content);
             $reply->setDateCreation(new \DateTime());
             $reply->setPost($post);
+            $reply->setCommenter($this->getUser());
 
             $em->persist($reply);
             $em->flush();
@@ -379,6 +416,43 @@ final class CollectionController extends AbstractController
 
         return $this->redirectToRoute('liste_show', ['id' => $post->getCommentaire()->getId()]);
     }
+    /* Supression Commentaire */
+    #[Route('/post/{id}/delete', name: 'post_delete', methods: ['POST'])]
+    public function deletePost(Post $post, Request $request, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user || $post->getCommenter() !== $user) {
+            throw $this->createAccessDeniedException('Tu ne peux pas supprimer ce commentaire.');
+        }
+
+        if ($this->isCsrfTokenValid('delete_post_' . $post->getId(), $request->request->get('_token'))) {
+            $em->remove($post);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('liste_show', ['id' => $post->getCommentaire()->getId()]);
+    }
+
+    /* Supression d'une réponse */
+    #[Route('/souspost/{id}/delete', name: 'souspost_delete', methods: ['POST'])]
+    public function deleteSousPost(SousPost $sousPost, Request $request, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user || $sousPost->getCommenter() !== $user) {
+            throw $this->createAccessDeniedException('Tu ne peux pas supprimer cette réponse.');
+        }
+
+        if ($this->isCsrfTokenValid('delete_souspost_' . $sousPost->getId(), $request->request->get('_token'))) {
+            $em->remove($sousPost);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('liste_show', ['id' => $sousPost->getPost()->getCommentaire()->getId()]);
+    }
+
+
 
     /* Liker un commentaire */
     #[Route('/post/{id}/like', name: 'post_like', methods: ['POST'])]

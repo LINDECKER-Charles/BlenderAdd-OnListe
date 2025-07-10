@@ -3,110 +3,50 @@ document.addEventListener("turbo:load", function () {
   const input = document.querySelector("#addon_url");
   const preview = document.querySelector("#addon-preview");
 
-  if (!input || !preview) return;
-
-  let typingTimer;
-  let controller;
-  const delay = 10;
-
-  input.addEventListener("input", () => {
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-      const url = input.value.trim();
-      if (!url.startsWith("http")) {
-        preview.innerHTML = "Preview.";
-        return;
-      }
-
-      if (controller) controller.abort();
-      controller = new AbortController();
-
-      fetch(`/api/scrape-addon?url=${encodeURIComponent(url)}`, {
-        signal: controller.signal,
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            preview.innerHTML = `<p class="text-red-500">${data.error}</p>`;
-            return;
-          }
-          preview.innerHTML = `
-            <div class="w-full h-full overflow-y-auto flex flex-row justify-start gap-6 px-3 py-2 text-sm text-black-950 scrollbar-thin scrollbar-thumb-grey-600 scrollbar-track-grey-800">
-
-              <!-- Bloc 1 : Titre + Poids -->
-              <div class="flex-1 flex flex-col gap-2">
-                <div>
-                  <p class="font-semibold text-grey-400">Titre :</p>
-                  <p class="truncate">${data.title}</p>
-                </div>
-                <div>
-                  <p class="font-semibold text-grey-400">Poids :</p>
-                  <p>${data.size ?? 'Inconnu'}</p>
-                </div>
-              </div>
-
-              <!-- Bloc 2 : Tags -->
-              <div class="flex-1 flex flex-col gap-2">
-                <p class="font-semibold text-grey-400">Tags :</p>
-                <div class="flex flex-wrap gap-1">
-                  ${(data.tags ?? []).map(tag => `
-                    <span class=" m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">
-                      ${tag}
-                    </span>
-                  `).join('')}
-                </div>
-              </div>
-
-              <!-- Bloc 3 : Image -->
-              <div class="flex-1 flex flex-col items-center justify-center">
-                ${data.image ? `
-                  <a href="${url}">
-                    <img src="${data.image}" alt="Addon preview" class="w-full h-full object-contain rounded border border-grey-700">
-                  </a>
-                ` : `
-                  <div class="text-grey-500 text-xs">Pas d’image</div>
-                `}
-              </div>
-            </div>
-          `;
-
-        })
-        .catch((error) => {
-          if (error.name !== "AbortError") {
-            preview.innerHTML = `<p class="text-red-500">Erreur de chargement</p>`;
-          }
-        });
-    }, delay);
-  });
-
   const addOnButton = document.getElementById("add_addon");
   const addOnListe = document.getElementById("addOnListe");
   addOnButton.addEventListener("click", () => {
     const url = input.value.trim();
-    if (!url.startsWith("http")) {
-      preview.innerHTML = "Preview.";
+
+    if (!(url.startsWith("http") || url.startsWith("https"))) {
+      preview.innerHTML = `<p class="text-red-500 text-sm">URL invalide</p>`;
       return;
     }
+
     const confirmAdd = confirm(`Ajouter cet add-on à la collection ?\n\n${url}`);
-    if (!confirmAdd) {
-      return;
-    }
-    fetch(`/api/getAddOnSave?url=${encodeURIComponent(url)}`)
+    if (!confirmAdd) return;
+
+    fetch("/api/add-addon", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ url }),
+    })
       .then((res) => res.json())
       .then((data) => {
-        if (data.empty || data.length === 0) {
-          addOnListe.innerHTML = `<p class="text-grey-500 text-sm">Liste des add-ons</p>`;
+        if (data.error) {
+          preview.innerHTML = `<p class="text-red-500">${data.error}</p>`;
           return;
         }
 
-        renderAddOnTable(data);
-        input.value = "";  
+        // On récupère la nouvelle liste à jour
+        fetch("/api/get-session-addons")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.empty || data.length === 0) {
+              addOnListe.innerHTML = `<p class="text-grey-500 text-sm">Liste des add-ons</p>`;
+            } else {
+              renderAddOnTable(data);
+            }
+          });
+
+        input.value = "";
       })
       .catch((error) => {
-        if (error.name !== "AbortError") {
-          preview.innerHTML = `<p class="text-red-500">Erreur de chargement</p>`;
-        }
-    });
+        console.error(error);
+        preview.innerHTML = `<p class="text-red-500">Erreur réseau</p>`;
+      });
   });
 
   function attachDeleteEvents() {

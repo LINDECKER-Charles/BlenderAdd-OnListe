@@ -6,27 +6,17 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class AddonsManager
 {
-    public function cleanSession(array $addons, SessionInterface $session): array
-    {
-        $validated = array_filter($addons, function ($addon) {
-            return isset($addon[1]) && $addon[1] === true;
-        });
-
-        $session->set('valid_addons', array_values($validated));
-        return array_values($validated);
-    }
-    public function addAddOn(string $url, SessionInterface $session): array
+    public function addAddOn(string $url, array $data, SessionInterface $session): array
     {
         $addons = $session->get('valid_addons', []);
 
-        foreach ($addons as $index => $addon) {
-            if (isset($addon[0]) && $addon[0] === $url) {
-                $addons[$index][1] = true;
-                break;
-            }
-        }
+        // Évite les doublons en supprimant d'abord si déjà présent
+        $addons = array_filter($addons, fn($addon) => $addon[0] !== $url);
 
-        $session->set('valid_addons', $addons);
+        // Ajoute l'add-on à la fin
+        $addons[] = [$url, $data];
+
+        $session->set('valid_addons', array_values($addons)); // Reindexation propre
 
         return $addons;
     }
@@ -34,32 +24,24 @@ class AddonsManager
     {
         $addons = $session->get('valid_addons', []);
 
-        foreach ($addons as $index => $addon) {
-            if (isset($addon[0]) && $addon[0] === $url) {
-                $addons[$index][1] = false;
-                break;
-            }
-        }
+        // Supprime tous les add-ons correspondant à l'URL
+        $addons = array_filter($addons, fn($addon) => $addon[0] !== $url);
 
-        $session->set('valid_addons', $addons);
+        $session->set('valid_addons', array_values($addons)); // Reindexation propre
 
         return $addons;
     }
-    public function addStack(SessionInterface $session, $data, $url){
-        $addons = $session->get('valid_addons', []);
 
-        $alreadyExists = false;
-        foreach ($addons as $addon) {
-            if (is_array($addon) && $addon[0] === $url) {
-                $alreadyExists = true;
-                break;
-            }
-        }
+    public function isValidAddonUrl(string $url): bool
+    {
+        // Vérifie que l'URL est valide et commence bien par le domaine cible
+        $parsedUrl = parse_url($url);
 
-        if (!$alreadyExists) {
-            $addons[] = [$url, false, $data];
-            $session->set('valid_addons', $addons);
-        }
+        return isset($parsedUrl['scheme'], $parsedUrl['host'], $parsedUrl['path'])
+            && $parsedUrl['scheme'] === 'https'
+            && $parsedUrl['host'] === 'extensions.blender.org'
+            && str_starts_with($parsedUrl['path'], '/add-ons/');
     }
+
 }
 

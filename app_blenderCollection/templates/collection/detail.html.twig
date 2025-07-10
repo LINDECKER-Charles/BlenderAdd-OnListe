@@ -7,9 +7,11 @@
     <!-- 🏷️ Nom -->
     <div class="flex items-center gap-2">
         <h1 class="text-3xl font-bold">{{ liste.name }}</h1>
-        <button onclick="toggleModalName()" title="Modifier le nom" class="text-sm hover:scale-110 transition">
-            ✏️
-        </button>
+        {% if app.user and app.user == liste.usser %}
+            <button onclick="toggleModalName()" title="Modifier le nom" class="text-sm hover:scale-110 transition">
+                ✏️
+            </button>
+        {% endif %}
     </div>
 
     <!-- 📝 Description -->
@@ -20,9 +22,11 @@
                 {{ liste.description ?: 'Aucune description fournie.' }}
             </p>
         </div>
-        <button onclick="toggleModalDescription()" title="Modifier la description" class="text-sm hover:scale-110 transition">
-            ✏️
-        </button>
+        {% if app.user and app.user == liste.usser %}
+            <button onclick="toggleModalDescription()" title="Modifier la description" class="text-sm hover:scale-110 transition">
+                ✏️
+            </button>
+        {% endif %}
     </div>
 
     <!-- 👁️ Visibilité -->
@@ -33,9 +37,11 @@
                 {{ liste.isVisible ? 'Publique' : 'Privée' }}
             </span>
         </p>
-        <button onclick="toggleModalVisibility()" title="Modifier la visibilité" class="text-sm hover:scale-110 transition">
-            ✏️
-        </button>
+        {% if app.user and app.user == liste.usser %}
+            <button onclick="toggleModalVisibility()" title="Modifier la visibilité" class="text-sm hover:scale-110 transition">
+                ✏️
+            </button>
+        {% endif %}
     </div>
 
     <div class="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-lg shadow-sm mt-6">
@@ -77,8 +83,16 @@
 
     {% if liste.image %}
         <img src="{{ asset('uploads/' ~ liste.image) }}" alt="Image de la liste" class="mb-6 w-96 rounded-xl shadow-lg">
+        <!-- Bouton d'ouverture du modal -->
+        {% if app.user and app.user == liste.usser %}
+            <button onclick="document.getElementById('modalUpload').classList.remove('hidden')" 
+                    class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow">
+                Modifier l’image
+            </button>
+        {% endif %}
     {% endif %}
 
+    {# Téléchargement des add-on #}
     <form method="POST" action="{{ path('liste_download_addons', { id: liste.id }) }}" data-turbo="false">
         <input type="hidden" name="_token" value="{{ csrf_token('download_addons_' ~ liste.id) }}">
         <button type="submit"
@@ -86,7 +100,9 @@
             ⬇️ Télécharger tous les add-ons
         </button>
     </form>
-    <h2 class="text-2xl font-semibold mb-3">Ajouter un Add-on à la collection</h2>
+    
+    
+    {# Message d'erreur #}
     {% for label, messages in app.flashes %}
         {% for message in messages %}
             <div class="flash-dismissable transition-opacity duration-500 opacity-100 px-4 py-2 mb-4 rounded shadow text-white
@@ -99,22 +115,27 @@
         {% endfor %}
     {% endfor %}
 
-    <form method="POST" action="{{ path('add_addon_to_liste', { id: liste.id }) }}" class="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-        <div class="w-full sm:w-2/3">
-            <label for="addon_input" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">ID Blender de l’add-on</label>
-            <input type="text" name="idBlender" id="addon_input" required
-                class="w-full px-4 py-2 border rounded-md bg-white text-black-950 dark:bg-black-900 dark:text-white">
-        </div>
-        <div>
-            <input type="hidden" name="_token" value="{{ csrf_token('add_addon') }}">
-            <button type="submit"
-                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md shadow">
-                ➕ Ajouter
-            </button>
-        </div>
-    </form>
-    <h2 class="text-2xl font-semibold mb-3">Add-ons liés à cette liste</h2>
+    {# Ajout d'add-on #}
+    <h2 class="text-2xl font-semibold mb-3">Ajouter un Add-on à la collection</h2>
+    {% if app.user and app.user == liste.usser %}
+        <form method="POST" action="{{ path('add_addon_to_liste', { id: liste.id }) }}" class="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+            <div class="w-full sm:w-2/3">
+                <label for="addon_input" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">ID Blender de l’add-on</label>
+                <input type="text" name="idBlender" id="addon_input" required
+                    class="w-full px-4 py-2 border rounded-md bg-white text-black-950 dark:bg-black-900 dark:text-white">
+            </div>
+            <div>
+                <input type="hidden" name="_token" value="{{ csrf_token('add_addon') }}">
+                <button type="submit"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md shadow">
+                    ➕ Ajouter
+                </button>
+            </div>
+        </form>
+        <h2 class="text-2xl font-semibold mb-3">Add-ons liés à cette liste</h2>
+    {% endif %}
 
+    {# Liste des add-on #}
     {% if liste.addons|length > 0 %}
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow">
@@ -122,7 +143,9 @@
                     <tr>
                         <th class="px-4 py-2 text-left">ID</th>
                         <th class="px-4 py-2 text-left">ID Blender</th>
-                        <th class="px-4 py-2 text-left">Actions</th>
+                        {% if app.user and app.user == liste.usser %}
+                            <th class="px-4 py-2 text-left">Actions</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -133,7 +156,9 @@
                             <td class="px-4 py-2">
                                 <form method="POST" action="{{ path('remove_addon_from_liste', { id: liste.id, addonId: addon.id }) }}" onsubmit="return confirm('Supprimer cet add-on ?')">
                                     <input type="hidden" name="_token" value="{{ csrf_token('remove_addon_' ~ addon.id) }}">
-                                    <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-semibold">🗑️ Supprimer</button>
+                                    {% if app.user and app.user == liste.usser %}
+                                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-semibold">🗑️ Supprimer</button>
+                                    {% endif %}
                                 </form>
                             </td>
                         </tr>
@@ -145,6 +170,7 @@
         <p class="text-gray-500 italic">Aucun add-on associé à cette liste.</p>
     {% endif %}
 
+    {# Ajout de commentaire #}
     {% if app.user %}
         <h3 class="text-lg font-semibold mt-6 mb-2">Ajouter un commentaire</h3>
 
@@ -163,6 +189,7 @@
 
     <h2 class="text-xl font-bold">Commentaires</h2>
 
+    {# Affichage des commentaire #}
     {% for post in posts %}
         <div class="bg-gray-100 rounded-lg p-4 my-4 dark:text-black-950">
             <p class="font-semibold text-blue-700 dark:text-black-950">
@@ -174,6 +201,14 @@
                     ❤️ {{ post.liker|length }}
                 </button>
             </form>
+            {% if app.user and post.commenter.id == app.user.id %}
+                <form action="{{ path('post_delete', { id: post.id }) }}" method="post" class="inline ml-2">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_post_' ~ post.id) }}">
+                    <button type="submit" class="text-red-600 hover:underline text-sm">
+                        Supprimer
+                    </button>
+                </form>
+            {% endif %}
 
             <!-- Bouton Répondre -->
             {% if app.user %}
@@ -215,6 +250,14 @@
                                 ❤️ {{ reply.likes|length }}
                             </button>
                         </form>
+                        {% if app.user and reply.commenter == app.user %}
+                            <form action="{{ path('souspost_delete', { id: reply.id }) }}" method="post" class="inline ml-2">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_souspost_' ~ reply.id) }}">
+                                <button type="submit" class="text-red-600 hover:underline text-sm">
+                                    Supprimer
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
@@ -268,6 +311,23 @@
                     <button type="button" onclick="toggleModalVisibility()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Annuler</button>
                     <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Enregistrer</button>
                 </div>
+            </form>
+        </div>
+    </div>
+    <div id="modalUpload" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-6 w-96 relative">
+            <button onclick="document.getElementById('modalUpload').classList.add('hidden')" 
+                    class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            
+            <h2 class="text-lg font-semibold mb-4">Changer l’image de la liste</h2>
+
+            <form method="post" action="{{ path('liste_update_image', {'id': liste.id}) }}" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required 
+                    class="w-full p-2 border rounded-md mb-4">
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg">
+                    Mettre à jour
+                </button>
             </form>
         </div>
     </div>
