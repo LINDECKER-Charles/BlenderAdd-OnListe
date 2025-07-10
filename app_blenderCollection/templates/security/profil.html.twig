@@ -5,7 +5,7 @@
 {% set meta_description = "Consultez le profil de " ~ user.name ~ " : biographie, activités, publications et plus encore sur NomDuSite." %}
 
 {% block og_type %}profile{% endblock %}
-{# --- Directive SEO pour robots --- #}
+{# --- Directive SEO pour robots --- #} 
 {% block meta_robots %}index, follow{% endblock %}
 
 {# --- A ajouter une fois le site terminé --- #}
@@ -17,20 +17,30 @@
     <section class="min-h-screen bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
         <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6 select-none">
             <!-- Avatar -->
-            <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar') }}">
+            <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar', { id: user.id }) }}">
                 <input id="avatar-input" type="file" name="avatar" accept="image/*" class="hidden" onchange="document.getElementById('upload-avatar-form').submit()">
                 
-                <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" onclick="document.getElementById('avatar-input').click()">
-                {% if user.pathImg %}
-                    <img src="{{ user.pathImg }}" alt="Avatar" class="w-full h-full object-cover">
-                {% else %}
-                    <img src="/img/profil_template.png" alt="Default avatar" class="w-full h-full object-cover">
-                {% endif %}
-                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 text-black-990 ">
-                        {# Mettre icon update #}
-                        <span class=" text-sm font-semibold p-2 dark:bg-black-950 dark:text-white rounded-full bg-white">Change</span>
+                {% if user.id == app.user.id or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles %}
+                    <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" onclick="document.getElementById('avatar-input').click()">
+                        {% if user.pathImg %}
+                            <img src="{{ user.pathImg }}" alt="Avatar" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="/img/profil_template.png" alt="Default avatar" class="w-full h-full object-cover">
+                        {% endif %}
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 text-black-990 ">
+                            {# Mettre icon update #}
+                            <span class=" text-sm font-semibold p-2 dark:bg-black-950 dark:text-white rounded-full bg-white">Change</span>
+                        </div>
                     </div>
-                </div>
+                {% else %}
+                    <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" >
+                        {% if user.pathImg %}
+                            <img src="{{ user.pathImg }}" alt="Avatar" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="/img/profil_template.png" alt="Default avatar" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                {% endif %}
             </form>
 
 
@@ -41,22 +51,26 @@
                     {# Nom #}
                     <div class=" flex flex-row justify-center items-center gap-2">
                         <h1 class="text-2xl font-bold flex items-center gap-2">{{ user.name }}</h1>
-                        <button title="Modifier" role="button" onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
-                            <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
-                                <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
-                            </svg>
-                        </button>
+                        {% if user.id == app.user.id or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles %}
+                            <button title="Modifier" role="button" onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
+                                <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
+                                    <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
+                                </svg>
+                            </button>
+                        {% endif %}
                     </div>
                     {# Email #}
                     <div class=" flex flex-row justify-center items-center gap-2">
                         <p class="text-grey-400 flex items-center justify-center gap-2">{{ user.email }}</p>
-                        <button title="Modifier" role="button" onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
-                            <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
-                                <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
-                            </svg>
-                        </button>
+                        {% if user.id == app.user.id or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles %}
+                            <button title="Modifier" role="button" onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
+                                <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
+                                    <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
+                                </svg>
+                            </button>
+                        {% endif %}
                     </div>
                     {# Role + Verification #}
                     <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1 justify-center items-center text-center">
@@ -93,12 +107,14 @@
                         {% if user.description %}
                             <div class="max-w-2xl mx-auto mt-6 bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
                                 <div class=" flex flex-row items-center gap-2">
-                                    <button aria-roledescription="" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
-                                        <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
-                                            <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
-                                        </svg>
-                                    </button>
+                                    {% if user.id == app.user.id %}
+                                        <button aria-roledescription="" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
+                                            <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
+                                                <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
+                                            </svg>
+                                        </button>
+                                    {% endif %}
                                     <h2 class="text-xl font-semibold mb-2">Description</h2>
                                 </div>
                                 <div class="prose dark:prose-invert max-w-none">
@@ -108,12 +124,14 @@
                         {% else %}
                             <div class="max-w-2xl mx-auto mt-6 text-black-950 dark:text-white bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
                                 <div class=" flex flex-row items-center gap-2">
-                                    <button title="Modifier" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
-                                        <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
-                                            <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
-                                        </svg>
-                                    </button>
+                                    {% if user.id == app.user.id or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles %}
+                                        <button title="Modifier" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
+                                            <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
+                                                <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
+                                            </svg>
+                                        </button>
+                                    {% endif %}
                                     <h2 class="text-xl font-semibold mb-2">Description</h2>
                                 </div>
                                 <p class="text-sm italic">No description provided yet.</p>
@@ -140,7 +158,7 @@
                 <div id="editEmailModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
                     <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
                         <h2 class="text-xl font-semibold mb-4">Edit your email</h2>
-                        <form method="POST" action="{{ path('app_update_email') }}">
+                        <form method="POST" action="{{ path('app_update_email', { id: user.id }) }}">
                             <input type="text" name="name" value="{{ user.email }}" class="w-full px-4 py-2 border rounded-md bg-white text-black-950" required>
                             <div class="flex justify-end gap-3 mt-4">
                                 <button role="button" type="button" onclick="toggleModalEmail()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cacnel</button>
@@ -153,7 +171,7 @@
                 <div id="editNameModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
                     <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
                         <h2 class="text-xl font-semibold mb-4">Edit your name</h2>
-                        <form method="POST" action="{{ path('app_update_name') }}">
+                        <form method="POST" action="{{ path('app_update_name', { id: user.id }) }}">
                             <input type="text" name="name" value="{{ user.name }}" class="w-full px-4 py-2 border rounded-md bg-white text-black-950" required>
                             <div class="flex justify-end gap-3 mt-4">
                                 <button role="button" type="button" onclick="toggleModalName()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
@@ -166,7 +184,7 @@
                 <div id="editDescriptionModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
                     <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
                         <h2 class="text-xl font-semibold mb-4">Edit your description (Markdown supported)</h2>
-                        <form method="POST" action="{{ path('app_update_description') }}">
+                        <form method="POST" action="{{ path('app_update_description', { id: user.id }) }}">
                         <textarea 
                             name="description" 
                             rows="12"

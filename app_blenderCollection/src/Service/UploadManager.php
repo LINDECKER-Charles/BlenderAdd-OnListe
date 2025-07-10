@@ -18,12 +18,19 @@ class UploadManager
     }
 
     /**
-     * Upload un fichier local et retourne son nom généré
+     * Upload un fichier local vers un dossier défini et retourne le nom final.
      *
-     * @param UploadedFile $file
-     * @return string|null Nom du fichier sauvegardé (ou null en cas d'échec)
+     * Si un nom personnalisé est fourni, il sera utilisé tel quel (y compris l’extension).
+     * Sinon, un nom sécurisé sera généré à partir du nom original et d’un identifiant unique.
+     * Le dossier de destination peut également être redéfini temporairement.
+     *
+     * @param UploadedFile $file         Fichier à uploader (doit être une image autorisée).
+     * @param string|null $customName    Nom de fichier personnalisé avec extension (facultatif).
+     * @param string|null $customPath    Dossier de destination (facultatif, défaut : dossier défini dans le service).
+     *
+     * @return string|null               Nom du fichier sauvegardé, ou null en cas d’échec ou de type non autorisé.
      */
-    public function uploadLocalFile(UploadedFile $file): ?string
+    public function uploadLocalFile(UploadedFile $file, ?string $customName = null, ?string $customPath = null): ?string
     {
         $mimeType = $file->getMimeType();
 
@@ -31,12 +38,15 @@ class UploadManager
             return null;
         }
 
-        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $safeFilename = $this->slugger->slug($originalFilename);
-        $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+        $targetDir = $customPath ?? $this->uploadDir;
+
+        $newFilename = $customName ?? (
+            $this->slugger->slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
+            . '-' . uniqid() . '.' . $file->guessExtension()
+        );
 
         try {
-            $file->move($this->uploadDir, $newFilename);
+            $file->move($targetDir, $newFilename);
             return $newFilename;
         } catch (\Exception $e) {
             return null;

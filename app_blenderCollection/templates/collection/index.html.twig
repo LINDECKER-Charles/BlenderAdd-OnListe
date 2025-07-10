@@ -12,29 +12,40 @@
         <a href="{{ path('create_collection') }}" class="bg-white text-black-950 px-4 py-2 rounded-md font-semibold hover:bg-grey-200 transition">+ Create Collection</a>
     {% endif %}
     <div class="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {% for collection in collections %}
-            <a href="{{ path('liste_show', { id: collection.id }) }}"
-               class="block bg-white bg-opacity-80 p-4 rounded-lg shadow-lg hover:scale-[1.02] transition-transform duration-200 group">
-                {% if collection.image %}
+    {% for collection in collections %}
+        <div class="block bg-white bg-opacity-80 p-4 rounded-lg shadow-lg hover:scale-[1.02] transition-transform duration-200 group">
+            {% if collection.image %}
+                <a href="{{ path('liste_show', { id: collection.id }) }}">
                     <img src="{{ asset('uploads/' ~ collection.image) }}"
-                         alt="{{ collection.name }}"
-                         class="w-full h-48 object-cover rounded-md mb-4">
-                {% endif %}
-                <h2 class="text-2xl font-semibold text-black-900 group-hover:underline">{{ collection.name }}</h2>
-                {% if collection.description %}
-                    <p class="text-gray-700 mt-2 text-sm">
-                        {{ collection.description|length > 160 ? collection.description|slice(0, 160) ~ '…' : collection.description }}
-                    </p>
-                {% else %}
-                    <p class="text-gray-500 italic">Aucune description fournie.</p>
-                {% endif %}
+                        alt="{{ collection.name }}"
+                        class="w-full h-48 object-cover rounded-md mb-4">
+                </a>
+            {% endif %}
 
-                <p class="mt-4 text-sm text-gray-600">
-                    Créée le {{ collection.dateCreation|date('d/m/Y') }}
-                    par <span class="font-semibold">{{ collection.usser.name }}</span>
-                </p>
+            <a href="{{ path('liste_show', { id: collection.id }) }}">
+                <h2 class="text-2xl font-semibold text-black-900 group-hover:underline">
+                    {{ collection.name }}
+                </h2>
             </a>
-        {% else %}
+
+            {% if collection.description %}
+                <p class="text-gray-700 mt-2 text-sm">
+                    {{ collection.description|length > 160 ? collection.description|slice(0, 160) ~ '…' : collection.description }}
+                </p>
+            {% else %}
+                <p class="text-gray-500 italic">Aucune description fournie.</p>
+            {% endif %}
+
+            <p class="mt-4 text-sm text-gray-600">
+                Créée le {{ collection.dateCreation|date('d/m/Y') }}
+                par
+                <a href="{{ path('app_profil_visiteur', { id: collection.usser.id }) }}"
+                class="font-semibold text-blue-600 hover:underline">
+                    {{ collection.usser.name }}
+                </a>
+            </p>
+        </div>
+    {% else %}
             <div class="col-span-full text-center text-white text-lg">
                 Aucune collection publique n’a été trouvée.
             </div>
