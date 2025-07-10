@@ -167,5 +167,8 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('app_profil');
     }
 
+    #[Route('/should-verify', name: 'should_verify')]
+    public function shouldVerif(): Response
+    {return $this->render('registration/should_verify.html.twig', []);}
 
 }
