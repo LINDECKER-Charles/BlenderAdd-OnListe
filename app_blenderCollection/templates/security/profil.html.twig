@@ -12,6 +12,11 @@
 {# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
 {# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
+{% set isEditable =
+    user.id == app.user.id
+    or ('ADMIN' in app.user.roles and 'ADMIN' not in user.roles)
+    or ('MODO' in app.user.roles and 'ADMIN' not in user.roles and 'MODO' not in user.roles)
+%}
 
 {% block body %}
     <section class="min-h-screen bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
@@ -20,7 +25,7 @@
             <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar', { id: user.id }) }}">
                 <input id="avatar-input" type="file" name="avatar" accept="image/*" class="hidden" onchange="document.getElementById('upload-avatar-form').submit()">
                 
-                {% if user.id == app.user.id or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles %}
+                {% if isEditable %}
                     <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" onclick="document.getElementById('avatar-input').click()">
                         {% if user.pathImg %}
                             <img src="{{ user.pathImg }}" alt="Avatar" class="w-full h-full object-cover">
@@ -51,7 +56,7 @@
                     {# Nom #}
                     <div class=" flex flex-row justify-center items-center gap-2">
                         <h1 class="text-2xl font-bold flex items-center gap-2">{{ user.name }}</h1>
-                        {% if user.id == app.user.id or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles %}
+                        {% if isEditable %}
                             <button title="Modifier" role="button" onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
                                 <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
@@ -63,7 +68,7 @@
                     {# Email #}
                     <div class=" flex flex-row justify-center items-center gap-2">
                         <p class="text-grey-400 flex items-center justify-center gap-2">{{ user.email }}</p>
-                        {% if user.id == app.user.id or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles %}
+                        {% if isEditable %}
                             <button title="Modifier" role="button" onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
                                 <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
@@ -107,7 +112,7 @@
                         {% if user.description %}
                             <div class="max-w-2xl mx-auto mt-6 bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
                                 <div class=" flex flex-row items-center gap-2">
-                                    {% if user.id == app.user.id %}
+                                    {% if isEditable %}
                                         <button aria-roledescription="" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
                                             <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
@@ -124,7 +129,7 @@
                         {% else %}
                             <div class="max-w-2xl mx-auto mt-6 text-black-950 dark:text-white bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
                                 <div class=" flex flex-row items-center gap-2">
-                                    {% if user.id == app.user.id or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles %}
+                                    {% if isEditable %}
                                         <button title="Modifier" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
                                             <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>

@@ -152,7 +152,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', 'Error cannot updated name !');
         }
 
-        return $this->redirectToRoute('app_profil');
+        return $this->redirectToRoute('app_profil_visiteur', ['id' => $user->getId()]);
     }
     /**
      * Met à jour l’adresse e-mail de l’utilisateur et déclenche un e-mail de confirmation.
@@ -195,7 +195,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', 'Error cannot updated email !');
         }
 
-        return $this->redirectToRoute('app_profil');
+        return $this->redirectToRoute('app_profil_visiteur', ['id' => $user->getId()]);
     }
     /**
      * Met à jour la description d’un utilisateur.
@@ -229,7 +229,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', 'Error: Could not update description.');
         }
 
-        return $this->redirectToRoute('app_profil');
+        return $this->redirectToRoute('app_profil_visiteur', ['id' => $user->getId()]);
     }
 
     /**
@@ -285,7 +285,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', 'Image invalide ou absente.');
         }
 
-        return $this->redirectToRoute('app_profil');
+        return $this->redirectToRoute('app_profil_visiteur', ['id' => $user->getId()]);
     }
     /**
      * Affiche une page invitant l’utilisateur à vérifier son e-mail.
