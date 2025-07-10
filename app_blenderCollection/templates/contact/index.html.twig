@@ -23,23 +23,14 @@
     <div class="w-3/4 bg-[#CDD5D9] bg-opacity-90 flex flex-col justify-center rounded-lg p-6 text-black-900">
         <h2 class="text-lg mb-6">Contactez <span class="font-bold">Blender Collection</span></h2>
         <form method="post" action="{{ path('app_contact') }}" class="flex flex-col gap-4">
+        {# Message d'erreur #}    
         {% for type, messages in app.flashes %}
             {% for message in messages %}
-                <div class="
-                    font-bold
-                    {% if type == 'success' %} text-blue-500
-                    {% elseif type == 'error' %} text-red-600
-                    {% elseif type == 'warning' %} text-yellow-600
-                    {% elseif type == 'info' %} text-blue-500
-                    {% else %} text-gray-500
-                    {% endif %}
-                ">
+                <div class="font-bold {% if type == 'success' %} text-blue-500 {% elseif type == 'error' %} text-red-600 {% elseif type == 'warning' %} text-yellow-600 {% elseif type == 'info' %} text-blue-500 {% else %} text-gray-500 {% endif %}">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endfor %}
-
-
             <label for="name" class="font-bold text-xl">Nom <span class="text-red-600">*</span></label>
             <input type="text" id="name" name="name" class="block p-2 rounded px-6 bg-white" required />
 

@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     uploads_directory: '%kernel.project_dir%/public/uploads'
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -25,5 +26,8 @@ services:
     App\Service\AddonDownloader:
         arguments:
             $projectDir: '%kernel.project_dir%'
+    App\Service\UploadManager:
+        arguments:
+            $uploadDir: '%uploads_directory%'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

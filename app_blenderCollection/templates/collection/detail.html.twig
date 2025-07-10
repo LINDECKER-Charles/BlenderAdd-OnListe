@@ -91,7 +91,18 @@
             </button>
         {% endif %}
     {% endif %}
-
+    {% if app.user 
+        and ('BAN' not in app.user.roles) 
+        and ('LOCK' not in app.user.roles)
+        and (app.user == liste.usser or 'ADMIN' in app.user.roles or 'MODO' in app.user.roles) 
+    %}
+        <form method="post" action="{{ path('delete_collection', { id: liste.id }) }}" onsubmit="return confirm('Supprimer définitivement cette collection ?');" class="mt-6">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete_collection_' ~ liste.id) }}">
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow">
+                🗑️ Supprimer la collection
+            </button>
+        </form>
+    {% endif %}
     {# Téléchargement des add-on #}
     <form method="POST" action="{{ path('liste_download_addons', { id: liste.id }) }}" data-turbo="false">
         <input type="hidden" name="_token" value="{{ csrf_token('download_addons_' ~ liste.id) }}">

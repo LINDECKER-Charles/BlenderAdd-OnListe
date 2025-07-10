@@ -59,9 +59,6 @@ class SecurityController extends AbstractController
         ]);
     }
 
-
-
-
     #[Route('/updateName', name: 'app_update_name', methods: ['POST'])]
     public function updateName(Request $request, EntityManagerInterface $em, UserRepository $userRepository): Response
     {

@@ -26,14 +26,34 @@ class RegistrationController extends AbstractController
     {
     }
 
+    /**
+     * Gère l'inscription d'un nouvel utilisateur.
+     *
+     * Fonctionnalités incluses :
+     * - Redirection si l'utilisateur est déjà connecté
+     * - Création du formulaire d'inscription et liaison avec un nouvel utilisateur
+     * - Vérification de la correspondance entre les mots de passe
+     * - Validation du mot de passe selon les recommandations CNIL
+     * - Hachage et enregistrement du mot de passe
+     * - Attribution automatique du rôle "USER"
+     * - Connexion automatique de l'utilisateur après inscription
+     * - Envoi d'un email de confirmation avec lien sécurisé
+     *
+     * @param Request $request La requête HTTP en cours
+     * @param UserPasswordHasherInterface $userPasswordHasher Service de hachage de mot de passe
+     * @param EntityManagerInterface $entityManager Gestionnaire d'entités Doctrine
+     * @param Security $security Service de gestion de la session utilisateur
+     * @return Response
+     */
     #[Route('/register', name: 'app_register')]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, Security $security): Response
     {
+        //Verification utilisateur deja connecte
         if ($this->getUser()){
             return $this->redirectToRoute('app_home');
         }
 
-
+        //Creation nouvelle utilisateur et injection des données
         $user = new User();
         $form = $this->createForm(RegistrationForm::class, $user);
         $form->handleRequest($request);
@@ -45,14 +65,14 @@ class RegistrationController extends AbstractController
             $plainPassword = $form->get('plainPassword')->getData();
             $confirm  = $form->get('confirmPassword')->getData();
             
-            if($plainPassword !== $confirm){
+            if($plainPassword !== $confirm){ //Correspondance mdp et confirme mdp
                 $form->get('plainPassword')->addError(new \Symfony\Component\Form\FormError('Le mot de passe confirmé est différent.'));
                 return $this->render('registration/register.html.twig', [
                     'registrationForm' => $form,
                 ]);
             }
 
-            if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/', $plainPassword)) {
+            if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/', $plainPassword)) { //Check rejex CNIL
                 $form->get('plainPassword')->addError(
                     new FormError('Mot de passe trop faible. Il doit contenir au moins 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.')
                 );
@@ -66,6 +86,7 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            //Log l'utilisateur
             $security->login($user);
 
             // generate a signed url and email it to the user
@@ -87,6 +108,19 @@ class RegistrationController extends AbstractController
         ]);
     }
 
+    /**
+     * Vérifie l'adresse email d’un utilisateur via un lien sécurisé.
+     *
+     * Fonctionnalités incluses :
+     * - Vérifie que l'utilisateur est bien authentifié
+     * - Valide le lien signé envoyé par email
+     * - Active le compte en mettant à jour le champ `isVerified`
+     * - Affiche un message flash en cas d'erreur ou de succès
+     *
+     * @param Request $request La requête contenant les paramètres du lien
+     * @param TranslatorInterface $translator Service de traduction pour les messages d'erreur
+     * @return Response
+     */
     #[Route('/verify/email', name: 'app_verify_email')]
     public function verifyUserEmail(Request $request, TranslatorInterface $translator): Response
     {
@@ -103,7 +137,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_register');
         }
 
-        // @TODO Change the redirect on success and handle or remove the flash message in your templates
+        $this->container->get('session')->getFlashBag()->clear();
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->render('registration/verify_email.html.twig');

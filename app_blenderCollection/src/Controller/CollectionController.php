@@ -11,6 +11,7 @@ use App\Service\AddonsManager;
 use App\Service\AddonsScraper;
 use App\Service\AddonDownloader;
 use App\Repository\ListeRepository;
+use App\Service\UploadManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpClient\HttpClient;
@@ -27,74 +28,88 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class CollectionController extends AbstractController
 {
+    /* index.html.twig */
+    /**
+     * Affiche toutes les collections publiques.
+     *
+     * Fonctionnalités incluses :
+     * - Récupération des collections dont la visibilité est activée (`isVisible = true`)
+     * - Passage des collections à la vue Twig pour affichage
+     *
+     * @param ListeRepository $listeRepository Le repository permettant de récupérer les collections
+     * @return Response
+     */
     #[Route('/collection', name: 'app_collection')]
     public function index(ListeRepository $listeRepository): Response
     {
-        $collections = $listeRepository->findBy(['isVisible' => true]);
-
         return $this->render('collection/index.html.twig', [
             'controller_name' => 'CollectionController',
-            'collections' => $collections,
+            'collections' => $listeRepository->findBy(['isVisible' => true]),
         ]);
     }
     
-    #[Route('/collection/add', name: 'create_collection')]
-    public function addCollection(Request $request, SluggerInterface $slugger, EntityManagerInterface $em): Response
-    {
-        $user = $this->getUser();
 
+    /* add.html.twig */
+    /**
+     * Affiche le formulaire de création d'une collection et le traite lors de la soumission POST.
+     *
+     * Étapes :
+     * - Vérifie si l'utilisateur est connecté et vérifié
+     * - Récupère les champs du formulaire (nom, description, visibilité)
+     * - Upload l’image (locale ou récupérée depuis le 1er add-on)
+     * - Crée la collection et y associe les add-ons de la session
+     * - Enregistre la collection et nettoie la session
+     *
+     * @param Request $request Requête HTTP (POST pour la création)
+     * @param SluggerInterface $slugger Utilisé pour normaliser les noms de fichiers uploadés
+     * @param EntityManagerInterface $em Pour interagir avec la base de données
+     * @param UploadManager $uploadManager Service pour l’upload d’image
+     *
+     * @return Response Redirige vers la page de la collection ou affiche le formulaire
+     */
+    #[Route('/collection/add', name: 'create_collection')]
+    public function addCollection(Request $request, SluggerInterface $slugger, EntityManagerInterface $em, UploadManager $uploadManager): Response
+    {
+        //On verifie que l'utilisateur est loger et verifier
+        $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
+        } elseif (!$user->isVerified()) {
+            return $this->render('registration/should_verify.html.twig');
+        } elseif (in_array('ROLE_LOCK', $user->getRoles(), true)) {
+            $request->getSession()->getFlashBag()->clear();
+            $this->addFlash('error', 'Votre compte est verrouillé. Veuillez contacter un administrateur.');
+            return $this->redirectToRoute('app_home');
+        } elseif (in_array('ROLE_BAN', $user->getRoles(), true)) {
+            $request->getSession()->getFlashBag()->clear();
+            $this->addFlash('error', 'Votre compte a été banni.');
+            return $this->redirectToRoute('app_home');
         }
 
-        if (!$user->isVerified()) {
-            return $this->render('registration/should_verify.html.twig');
-        }
 
         if ($request->isMethod('POST')) {
             $fullName = $request->request->get('fullName');
             $description = $request->request->get('description');
             $isVisible = $request->request->getBoolean('isVisible');
 
-            /** @var UploadedFile|null $imageFile */
-            $imageFile = $request->files->get('image');
-            $imageFilename = null;
-
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $imageFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
-                $imageFile->move(
-                    $this->getParameter('uploads_directory'),
-                    $imageFilename
-                );
-            }
-
-            // 🔄 Récupérer les add-ons validés dans la session
-            $sessionAddons = $request->getSession()->get('valid_addons', []);
-
+            //Creation de la liste
             $liste = new Liste();
             $liste->setName($fullName);
             $liste->setDescription($description);
-            if (!$imageFile) {
-                // On tente de prendre l'image du premier add-on si elle existe
-                if (!empty($sessionAddons) && isset($sessionAddons[0][1]['image'])) {
-                    $addonImageUrl = $sessionAddons[0][1]['image'];
 
-                    // On télécharge l'image distante et on la copie localement
-                    $imageContents = @file_get_contents($addonImageUrl);
-                    if ($imageContents !== false) {
-                        $extension = pathinfo(parse_url($addonImageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                        $generatedName = 'addon_' . uniqid() . '.' . $extension;
-                        $path = $this->getParameter('uploads_directory') . '/' . $generatedName;
+            // Recuperer les add-ons valides dans la session
+            $sessionAddons = $request->getSession()->get('valid_addons', []);
 
-                        file_put_contents($path, $imageContents);
+            /** @var UploadedFile|null $imageFile */
+            $imageFile = $request->files->get('image');
+            $imageFilename = null;
+            if ($imageFile) {
+                $imageFilename = $uploadManager->uploadLocalFile($imageFile);
+            } elseif (!empty($sessionAddons) && isset($sessionAddons[0][1]['image'])) {
+                $imageFilename = $uploadManager->uploadFromUrl($sessionAddons[0][1]['image']);
+            }
 
-                        $liste->setImage($generatedName);
-                    }
-                }
-            } else {
+            if ($imageFilename) {
                 $liste->setImage($imageFilename);
             }
             
@@ -102,6 +117,9 @@ final class CollectionController extends AbstractController
             $liste->setIsVisible($isVisible);
             $liste->setDateCreation(new \DateTime());
             $liste->setDownload(0);
+
+
+
 
             foreach ($sessionAddons as [$url, $data]) {
                 if (isset($url)) {
@@ -134,10 +152,34 @@ final class CollectionController extends AbstractController
         return $this->render('collection/add.html.twig', []);
     }
 
-
     /* Rajouter un add-on dans la session */
+    /**
+     * API pour ajouter un add-on à la session.
+     *
+     * Vérifie que l'URL est fournie et conforme, puis scrape les données associées
+     * à l'add-on et l'ajoute à la session utilisateur.
+     *
+     * @param Request $request Requête contenant l'URL de l'add-on
+     * @param AddonsScraper $scraper Service pour récupérer les données d’un add-on
+     * @param AddonsManager $am Service pour gérer l’ajout en session
+     * @param SessionInterface $session Session utilisateur
+     *
+     * @return JsonResponse Réponse JSON contenant le succès ou une erreur
+     */
     #[Route('/api/add-addon', name: 'api_add_addon', methods: ['POST'])]
     public function addAddon(Request $request, AddonsScraper $scraper, AddonsManager $am, SessionInterface $session): JsonResponse {
+
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Utilisateur non connecté'], 401);
+        } elseif (!$user->isVerified()) {
+            return $this->json(['error' => 'Utilisateur non vérifié'], 403);
+        } elseif (in_array('LOCK', $user->getRoles(), true)) {
+            return $this->json(['error' => 'Accès refusé : votre compte est temporairement verrouillé.'], 403);
+        } elseif (in_array('BAN', $user->getRoles(), true)) {
+            return $this->json(['error' => 'Accès interdit : votre compte a été banni.'], 403);
+        }
+
         $url = $request->request->get('url');
 
         if (!$url) {
@@ -154,9 +196,31 @@ final class CollectionController extends AbstractController
             return $this->json(['error' => 'Scraping échoué'], 500);
         }
     }
-
+    /**
+     * API pour retirer un add-on de la session.
+     *
+     * Supprime l’add-on correspondant à l’URL reçue de la session utilisateur.
+     *
+     * @param Request $request Requête contenant l’URL de l’add-on à supprimer
+     * @param AddonsManager $am Service de gestion des add-ons
+     * @param SessionInterface $session Session utilisateur
+     *
+     * @return JsonResponse Réponse JSON confirmant la suppression
+     */
     #[Route('/api/remove-addon', name: 'api_remove_addon', methods: ['POST'])]
     public function removeAddon(Request $request, AddonsManager $am, SessionInterface $session): JsonResponse {
+        
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Utilisateur non connecté'], 401);
+        } elseif (!$user->isVerified()) {
+            return $this->json(['error' => 'Utilisateur non vérifié'], 403);
+        } elseif (in_array('LOCK', $user->getRoles(), true)) {
+            return $this->json(['error' => 'Accès refusé : votre compte est temporairement verrouillé.'], 403);
+        } elseif (in_array('BAN', $user->getRoles(), true)) {
+            return $this->json(['error' => 'Accès interdit : votre compte a été banni.'], 403);
+        }
+
         $url = $request->request->get('url');
 
         if (!$url) {
@@ -167,10 +231,29 @@ final class CollectionController extends AbstractController
 
         return $this->json(['success' => true]);
     }
-
+    /**
+    * API pour récupérer tous les add-ons actuellement stockés dans la session.
+    *
+    * Retourne un tableau JSON contenant les add-ons ou une clé 'empty' si la session est vide.
+    *
+    * @param SessionInterface $session Session utilisateur
+    *
+    * @return JsonResponse Liste des add-ons en session
+    */
     #[Route('/api/get-session-addons', name: 'api_get_session_addons')]
     public function getSessionAddons(SessionInterface $session): JsonResponse
     {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Utilisateur non connecté'], 401);
+        } elseif (!$user->isVerified()) {
+            return $this->json(['error' => 'Utilisateur non vérifié'], 403);
+        } elseif (in_array('LOCK', $user->getRoles(), true)) {
+            return $this->json(['error' => 'Accès refusé : votre compte est temporairement verrouillé.'], 403);
+        } elseif (in_array('BAN', $user->getRoles(), true)) {
+            return $this->json(['error' => 'Accès interdit : votre compte a été banni.'], 403);
+        }
+        
         $addons = $session->get('valid_addons', []);
         if (empty($addons)) {
             return $this->json(['empty' => true]);
@@ -180,8 +263,44 @@ final class CollectionController extends AbstractController
     }
 
 
+    /* detail.html.twig */
+/* PAS FINI ICI */
+     /* Supprimer une collection */
+    #[Route('/collection/delete/{id}', name: 'delete_collection', methods: ['POST'])]
+    public function deleteListe(Request $request, Liste $liste, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        } elseif (!$user->isVerified()) {
+            return $this->render('registration/should_verify.html.twig');
+        } elseif (in_array('LOCK', $user->getRoles(), true)) {
+            $request->getSession()->getFlashBag()->clear();
+            $this->addFlash('error', 'Votre compte est verrouillé. Veuillez contacter un administrateur.');
+            return $this->redirectToRoute('app_home');
+        } elseif (in_array('BAN', $user->getRoles(), true)) {
+            $request->getSession()->getFlashBag()->clear();
+            $this->addFlash('error', 'Votre compte a été banni.');
+            return $this->redirectToRoute('app_home');
+        }
 
-    /* Affichage de la liste */
+        $formToken = $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete_collection_' . $liste->getId(), $formToken)) {
+            try {
+                $em->remove($liste);
+                $em->flush();
+
+                $this->addFlash('success', 'Collection supprimée avec succès.');
+            } catch (\Throwable $e) {
+                $this->addFlash('error', 'Erreur : ' . $e->getMessage());
+            }
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
+        }
+
+        return $this->redirectToRoute('app_collection');
+    }
+        /* Affichage de la liste */
     #[Route('/liste/{id}', name: 'liste_show')]
     public function show(int $id, ListeRepository $listeRepository): Response
     {
@@ -197,7 +316,7 @@ final class CollectionController extends AbstractController
         ]);
     }
 
-    /* Edition d'une collection */
+        /* Edition d'une collection */
     #[Route('/liste/{id}/edit/name', name: 'update_liste_name', methods: ['POST'])]
     public function updateName(Liste $liste, Request $request, EntityManagerInterface $em): Response
     {
@@ -261,7 +380,7 @@ final class CollectionController extends AbstractController
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
 
-    /* Ajouter et retirer addon dans une collection */
+        /* Ajouter et retirer addon dans une collection */
     #[Route('/liste/{id}/remove-addon/{addonId}', name: 'remove_addon_from_liste', methods: ['POST'])]
     public function removeAddonFromListe(Liste $liste, int $addonId, EntityManagerInterface $em, Request $request): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
@@ -333,7 +452,7 @@ final class CollectionController extends AbstractController
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
 
-    /* Téléchargement de addon */
+        /* Téléchargement de addon */
     #[Route('/liste/{id}/download', name: 'liste_download_addons', methods: ['POST'])]
     public function downloadAddonsFromListe(Liste $liste, Request $request, BlenderAPI $blenderAPI, AddonDownloader $addonDownloader, EntityManagerInterface $em): BinaryFileResponse {
 
@@ -359,7 +478,7 @@ final class CollectionController extends AbstractController
         return $addonDownloader->downloadAndZip($urls, 'collection_' . $liste->getName() . '.zip');
     }
 
-    /* Ajouter un commentaire */
+        /* Ajouter un commentaire */
     #[Route('/liste/{id}/comment', name: 'liste_comment', methods: ['POST'])]
     public function addComment(Liste $liste, Request $request, EntityManagerInterface $em, Security $security): Response {
 
@@ -390,7 +509,7 @@ final class CollectionController extends AbstractController
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
-    /* Répondre à un commentaire */
+        /* Répondre à un commentaire */
     #[Route('/post/{id}/reply', name: 'post_reply', methods: ['POST'])]
     public function replyToPost(Post $post, Request $request, EntityManagerInterface $em): Response {
         if (!$this->getUser()) {
@@ -416,7 +535,7 @@ final class CollectionController extends AbstractController
 
         return $this->redirectToRoute('liste_show', ['id' => $post->getCommentaire()->getId()]);
     }
-    /* Supression Commentaire */
+        /* Supression Commentaire */
     #[Route('/post/{id}/delete', name: 'post_delete', methods: ['POST'])]
     public function deletePost(Post $post, Request $request, EntityManagerInterface $em): Response
     {
@@ -434,7 +553,7 @@ final class CollectionController extends AbstractController
         return $this->redirectToRoute('liste_show', ['id' => $post->getCommentaire()->getId()]);
     }
 
-    /* Supression d'une réponse */
+        /* Supression d'une réponse */
     #[Route('/souspost/{id}/delete', name: 'souspost_delete', methods: ['POST'])]
     public function deleteSousPost(SousPost $sousPost, Request $request, EntityManagerInterface $em): Response
     {
@@ -454,7 +573,7 @@ final class CollectionController extends AbstractController
 
 
 
-    /* Liker un commentaire */
+        /* Liker un commentaire */
     #[Route('/post/{id}/like', name: 'post_like', methods: ['POST'])]
     public function likePost(Post $post, EntityManagerInterface $em): Response
     {
@@ -473,7 +592,7 @@ final class CollectionController extends AbstractController
 
         return $this->redirect($this->generateUrl('liste_show', ['id' => $post->getCommentaire()->getId()]) . '#post-' . $post->getId());
     }
-    /* Liker un sous commentaire */
+        /* Liker un sous commentaire */
     #[Route('/souspost/{id}/like', name: 'souspost_like', methods: ['POST'])]
     public function likeSousPost(SousPost $sousPost, EntityManagerInterface $em): Response
     {
@@ -493,7 +612,7 @@ final class CollectionController extends AbstractController
         return $this->redirect($this->generateUrl('liste_show', ['id' => $sousPost->getPost()->getCommentaire()->getId()]) . '#post-' . $sousPost->getPost()->getId());
     }
 
-    /* Ajouter une collection en favoris */
+        /* Ajouter une collection en favoris */
     #[Route('/liste/{id}/toggle-favoris', name: 'toggle_favoris')]
     public function toggleFavoris(Liste $liste, EntityManagerInterface $em, Security $security): RedirectResponse
     {

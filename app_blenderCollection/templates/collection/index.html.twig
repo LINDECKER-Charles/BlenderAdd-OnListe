@@ -8,7 +8,9 @@
 {% block body %}
 <main class="min-h-screen w-full flex flex-col items-center bg-[url('/img/bg3.jpg')] bg-cover bg-center py-12 px-4 gap-12">
     <h1 class="text-4xl md:text-5xl font-bold text-white text-center">Collections publiques</h1>
-<a href="{{ path('create_collection') }}" class="bg-white text-black-950 px-4 py-2 rounded-md font-semibold hover:bg-grey-200 transition">+ Create Collection</a>
+    {% if app.user and 'BAN' not in app.user.roles and 'LOCK' not in app.user.roles %}
+        <a href="{{ path('create_collection') }}" class="bg-white text-black-950 px-4 py-2 rounded-md font-semibold hover:bg-grey-200 transition">+ Create Collection</a>
+    {% endif %}
     <div class="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for collection in collections %}
             <a href="{{ path('liste_show', { id: collection.id }) }}"
@@ -18,9 +20,7 @@
                          alt="{{ collection.name }}"
                          class="w-full h-48 object-cover rounded-md mb-4">
                 {% endif %}
-
                 <h2 class="text-2xl font-semibold text-black-900 group-hover:underline">{{ collection.name }}</h2>
-
                 {% if collection.description %}
                     <p class="text-gray-700 mt-2 text-sm">
                         {{ collection.description|length > 160 ? collection.description|slice(0, 160) ~ '…' : collection.description }}
