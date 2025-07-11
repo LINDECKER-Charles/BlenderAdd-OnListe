@@ -6,7 +6,8 @@
 {% block og_type %}website{% endblock %}
 {% block body %}
 
-<script type="module" src="{{ asset('js/addOnListeAdd.js') }}"></script>
+{# <script type="module" src="{{ asset('js/addOnListeAdd.js') }}" data-turbo-track="reload"></script> #}
+
 <section class="px-6 lg:px-24 py-12 text-white flex flex-col">
   <div class=" flex flex-row items-center gap-4 mb-8">
     <svg width="35" height="29" viewBox="0 0 35 29" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -69,4 +70,11 @@
     </div>
   </form>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+  <script type="module">
+    import initAddonScript from '{{ asset("js/addOnListeAdd.js") }}';
+    initAddonScript();
+  </script>
 {% endblock %}

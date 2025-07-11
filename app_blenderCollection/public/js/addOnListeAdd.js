@@ -1,5 +1,6 @@
-document.addEventListener("turbo:load", function () {
-  console.log("bahahaa");
+export default function initAddonScript() {
+
+  console.log("Script addOnListeAdd.js chargé ✅");
   const input = document.querySelector("#addon_url");
   const preview = document.querySelector("#addon-preview");
 
@@ -101,6 +102,4 @@ document.addEventListener("turbo:load", function () {
     `;
     attachDeleteEvents();
   }
-    
-
-});
+}

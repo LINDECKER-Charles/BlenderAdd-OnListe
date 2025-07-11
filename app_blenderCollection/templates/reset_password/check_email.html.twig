@@ -40,13 +40,11 @@
         </a>
     </div>
 </main>
+{% endblock %}
 
-<script>
-window.addEventListener('turbo:load', () => {
-    const element = document.getElementById('content');
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-});
-</script>
+{% block javascripts %}
+  <script type="module">
+    import initAddonScript from '{{ asset("js/centerPage.js") }}';
+    initAddonScript();
+  </script>
 {% endblock %}

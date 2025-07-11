@@ -64,13 +64,11 @@
             </div>
         </div>
     </main>
-    <script>
-        window.addEventListener('turbo:load', () => {
-            // Scroll vers une div précise si besoin
-            const element = document.getElementById('content');
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        });
-    </script>
+{% endblock %}
+
+{% block javascripts %}
+  <script type="module">
+    import initAddonScript from '{{ asset("js/centerPage.js") }}';
+    initAddonScript();
+  </script>
 {% endblock %}

@@ -41,7 +41,6 @@ class ContactController extends AbstractController
             $limiter = $contactLimiter->create($request->getClientIp());
             $limit = $limiter->consume();
             if (!$limit->isAccepted()) {
-                $this->container->get('session')->getFlashBag()->clear();
                 $this->addFlash('error', 'Trop de tentatives. Veuillez patienter quelques instants.');
                 return $this->redirectToRoute('app_contact');
             }
@@ -49,7 +48,6 @@ class ContactController extends AbstractController
             // Vérification du token CSRF
             $submittedToken = $request->request->get('_csrf_token');
             if (!$csrfTokenManager->isTokenValid(new CsrfToken('contact_form', $submittedToken))) {
-                $this->container->get('session')->getFlashBag()->clear();
                 $this->addFlash('error', 'Token CSRF invalide.');
                 return $this->redirectToRoute('app_contact');
             }
@@ -69,7 +67,6 @@ class ContactController extends AbstractController
             // Envoi
             $mailer->send($mail);
 
-            $this->container->get('session')->getFlashBag()->clear();
             $this->addFlash('success', 'Votre message a bien été envoyé !');
             return $this->redirectToRoute('app_contact');
         }
