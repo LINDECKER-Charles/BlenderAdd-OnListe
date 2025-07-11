@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -69,7 +70,7 @@ final class CollectionController extends AbstractController
      * @return Response Redirige vers la page de la collection ou affiche le formulaire
      */
     #[Route('/collection/add', name: 'create_collection')]
-    public function addCollection(UserAccesChecker $uac, Request $request, SluggerInterface $slugger, EntityManagerInterface $em, UploadManager $uploadManager): Response
+    public function addCollection(RateLimiterFactory $collectionLimiter, UserAccesChecker $uac, Request $request, SluggerInterface $slugger, EntityManagerInterface $em, UploadManager $uploadManager): Response
     {
         //On verifie que l'utilisateur est loger et verifier
         $user = $this->getUser();
@@ -79,6 +80,30 @@ final class CollectionController extends AbstractController
 
 
         if ($request->isMethod('POST')) {
+
+            /* Verification si absence d'add-on ou si spamm */
+            $limiter = $collectionLimiter->create($request->getClientIp());
+            $limit = $limiter->consume();
+            $sessionAddons = $request->getSession()->get('valid_addons', []);
+/*             if (!$limit->isAccepted()) {
+                $retryAfter = $limit->getRetryAfter();
+
+                $seconds = $retryAfter ? $retryAfter->getTimestamp() - time() : 60;
+
+                $minutes = ceil($seconds / 60);
+                $message = "Trop de tentatives. Réessayez dans environ $minutes minute" . ($minutes > 1 ? 's' : '') . ".";
+
+                $request->getSession()->getFlashBag()->clear();
+                $this->addFlash('error', $message);
+
+                return $uac->redirectingGlobal($user);
+            } */
+            if (empty($addons)) {
+                $request->getSession()->getFlashBag()->clear();
+                $this->addFlash('error', 'Trop de tentatives. Impossible de crée une connexion sans add-on.');
+                return $uac->redirectingGlobal($user);
+            }
+
             $fullName = $request->request->get('fullName');
             $description = $request->request->get('description');
             $isVisible = $request->request->getBoolean('isVisible');
@@ -89,7 +114,6 @@ final class CollectionController extends AbstractController
             $liste->setDescription($description);
 
             // Recuperer les add-ons valides dans la session
-            $sessionAddons = $request->getSession()->get('valid_addons', []);
 
             /** @var UploadedFile|null $imageFile */
             $imageFile = $request->files->get('image');
