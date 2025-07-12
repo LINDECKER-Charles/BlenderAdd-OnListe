@@ -36,7 +36,6 @@ class BlenderAPI
                 return $extension;
             }
         }
-
         return null;
     }
 

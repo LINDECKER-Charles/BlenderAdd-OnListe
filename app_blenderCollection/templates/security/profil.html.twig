@@ -19,7 +19,7 @@
 %}
 
 {% block body %}
-    <section class="min-h-screen bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
+    <section class=" bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
         <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6 select-none">
             <!-- Avatar -->
             <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar', { id: user.id }) }}">
@@ -47,9 +47,6 @@
                     </div>
                 {% endif %}
             </form>
-
-
-
             <div class="text-center flex flex-col gap-2">
                 <!-- Nom + Email + Role -->
                 <div class=" flex flex-col gap-2">
@@ -226,43 +223,155 @@
                     }, 4000);
                 });
             </script>
-            <!-- Trait -->
-            <div class="w-full h-px bg-white opacity-20 my-4"></div>
+    </section>
+    <section class=" bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
+        <!-- Trait -->
+        <div class="w-full h-px bg-white opacity-20 my-4"></div>
 
-            <!-- Mes Collections -->
-            <div class="w-full flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Mes Collections</h2>
-            <a href="#" class="text-sm text-grey-300 hover:underline">View all</a>
+        <!-- Commentaires rédigés -->
+        <div class="w-full flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Commentaires rédigés</h2>
+        </div>
+
+        {% set hasComments = user.posts|length > 0 or user.reponse|length > 0 %}
+
+        {% if hasComments %}
+            <div class="w-full flex flex-col gap-4">
+                {# --- Posts principaux (commentaires directs) --- #}
+                {% for comment in user.posts|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                    <div class="bg-white dark:bg-black-900 p-4 rounded-lg shadow text-black-950 dark:text-white">
+                        <div class="flex justify-between items-center text-sm text-grey-500 mb-1">
+                            <p>Sur : 
+                                <a href="{{ path('liste_show', { id: comment.commentaire.id }) }}" class="text-blue-500 hover:underline">
+                                    {{ comment.commentaire.name ?? 'Collection #' ~ comment.commentaire.id }}
+                                </a>
+                            </p>
+                            <p class="italic">{{ comment.dateCreation|date('d/m/Y H:i') }}</p>
+                        </div>
+                        <div class="text-sm leading-relaxed whitespace-pre-wrap">
+                            {{ comment.content }}
+                        </div>
+                        <span class="inline-block mt-2 px-2 py-1 rounded text-xs bg-blue-100 text-blue-600 font-semibold">Commentaire</span>
+                    </div>
+                {% endfor %}
+
+                {# --- Réponses (SousPost) --- #}
+                {% for reply in user.reponse|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                    <div class="bg-white dark:bg-black-900 p-4 rounded-lg shadow text-black-950 dark:text-white">
+                        <div class="flex justify-between items-center text-sm text-grey-500 mb-1">
+                            <p>En réponse à :
+                                <a href="{{ path('liste_show', { id: reply.post.commentaire.id }) }}" class="text-blue-500 hover:underline">
+                                    {{ reply.post.commentaire.name ?? 'Collection #' ~ reply.post.commentaire.id }}
+                                </a>
+                            </p>
+                            <p class="italic">{{ reply.dateCreation|date('d/m/Y H:i') }}</p>
+                        </div>
+                        <div class="text-sm leading-relaxed whitespace-pre-wrap">
+                            {{ reply.content }}
+                        </div>
+                        <span class="inline-block mt-2 px-2 py-1 rounded text-xs bg-green-100 text-green-600 font-semibold">Réponse</span>
+                    </div>
+                {% endfor %}
             </div>
+        {% else %}
+            <p class="text-sm italic text-grey-400">Aucun commentaire rédigé pour le moment.</p>
+        {% endif %}
 
-            <!-- Grid -->
+        <!-- Trait -->
+        <div class="w-full h-px bg-white opacity-20 my-4"></div>
+
+        <!-- Collections créées -->
+        <div class="w-full flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Collections créées</h2>
+        </div>
+
+        {% if user.listes is not empty %}
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
-            {% for i in 1..6 %}
-                <div class="bg-black-900 p-4 rounded-lg shadow-lg">
-                <img src="/img/exemple/ex{{ i }}.webp" alt="Addon {{ i }}" class="rounded-md mb-2 h-32 w-full object-cover">
-                <h3 class="text-lg font-bold">Synchronize Workspaces</h3>
-                <p class="text-xs text-grey-500">by HugeMenace · 15K vues</p>
-                <div class="flex items-center gap-1 mt-2 text-yellow-400">
-                    {% for star in 1..5 %}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                    </svg>
-                    {% endfor %}
-                </div>
-                </div>
-            {% endfor %}
+                {% for collection in user.listes|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                    <div class="bg-white dark:bg-black-900 p-4 rounded-lg shadow text-black-950 dark:text-white">
+                        <img src="{{ asset('uploads/' ~ collection.image) }}" alt="{{ collection.name }}" class="rounded-md mb-2 h-32 w-full object-cover">
+                        <h3 class="text-lg font-bold truncate">{{ collection.name }}</h3>
+                        <p class="text-sm text-grey-500 truncate">{{ collection.description|default('Aucune description') }}</p>
+                        <div class="text-xs text-grey-400 mt-2 flex justify-between">
+                            <span>{{ collection.dateCreation|date('d/m/Y') }}</span>
+                            <span>{{ collection.favorisCount }} favoris</span>
+                        </div>
+                        <a href="{{ path('liste_show', { id: collection.id }) }}" class="inline-block mt-2 text-sm text-blue-500 hover:underline">Voir plus →</a>
+                    </div>
+                {% endfor %}
             </div>
+        {% else %}
+            <p class="text-sm italic text-grey-400">Aucune collection créée pour le moment.</p>
+        {% endif %}
 
-            <!-- View More -->
-            <div class="mt-8">
-                <button role="button" class="px-6 py-2 border rounded-md
-                 dark:text-white dark:border-white text-black-950 border-black-950
-                 dark:hover:bg-white dark:hover:text-black-950
-                 hover:bg-black-950 hover:text-white
-                 transition-all duration-300">
-                    View more →
-                </button>
+
+        <!-- Trait -->
+        <div class="w-full h-px bg-white opacity-20 my-4"></div>
+
+        <!-- Collections en favoris -->
+        <div class="w-full flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Collections en favoris</h2>
+        </div>
+
+        {% if user.favoris is not empty %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+                {% for collection in user.favoris|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                    <div class="bg-white dark:bg-black-900 p-4 rounded-lg shadow text-black-950 dark:text-white">
+                        <img src="{{ asset('uploads/' ~ (collection.image ?? 'collection_template.webp')) }}" 
+                            alt="{{ collection.name }}" 
+                            class="rounded-md mb-2 h-32 w-full object-cover">
+                        
+                        <h3 class="text-lg font-bold truncate">{{ collection.name }}</h3>
+                        <p class="text-sm text-grey-500 truncate">
+                            {{ collection.description|default('Aucune description') }}
+                        </p>
+                        
+                        <div class="text-xs text-grey-400 mt-2 flex justify-between">
+                            <span>{{ collection.dateCreation|date('d/m/Y') }}</span>
+                            <span>{{ collection.favorisCount }} favoris</span>
+                        </div>
+                        
+                        <a href="{{ path('liste_show', { id: collection.id }) }}" 
+                        class="inline-block mt-2 text-sm text-blue-500 hover:underline">
+                        Voir plus →
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-sm italic text-grey-400">Aucune collection en favoris pour le moment.</p>
+        {% endif %}
+
+        <!-- Trait -->
+        <div class="w-full h-px bg-white opacity-20 my-4"></div>
+
+        <!-- Statistiques personnelles -->
+        <div class="w-full mb-4">
+            <h2 class="text-xl font-semibold mb-2">Mon activité</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-center text-black-950 dark:text-white">
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+                <p class="text-3xl font-bold">{{ user.listes|length }}</p>
+                <p class="text-sm text-grey-500">Collections créées</p>
+            </div>
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+                <p class="text-3xl font-bold">{{ user.posts|length }}</p>
+                <p class="text-sm text-grey-500">Commentaires postés</p>
+            </div>
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+                <p class="text-3xl font-bold">{{ user.reponse|length }}</p>
+                <p class="text-sm text-grey-500">Réponses envoyées</p>
+            </div>
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+                <p class="text-3xl font-bold">{{ user.sousPosts|length }}</p>
+                <p class="text-sm text-grey-500">Commentaires likés</p>
+            </div>
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+                <p class="text-3xl font-bold">{{ user.favoris|length }}</p>
+                <p class="text-sm text-grey-500">Collections en favoris</p>
             </div>
         </div>
+
     </section>
 {% endblock %}

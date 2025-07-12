@@ -43,5 +43,16 @@ class AddonsManager
             && str_starts_with($parsedUrl['path'], '/add-ons/');
     }
 
+    public function isValidAddonSize(string $url): bool
+    {
+        // Vérifie que l'URL est valide et commence bien par le domaine cible
+        $parsedUrl = parse_url($url);
+
+        return isset($parsedUrl['scheme'], $parsedUrl['host'], $parsedUrl['path'])
+            && $parsedUrl['scheme'] === 'https'
+            && $parsedUrl['host'] === 'extensions.blender.org'
+            && str_starts_with($parsedUrl['path'], '/add-ons/');
+    }
+
 }
 

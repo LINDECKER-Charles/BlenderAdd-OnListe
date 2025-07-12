@@ -85,7 +85,7 @@ final class CollectionController extends AbstractController
             $limiter = $collectionLimiter->create($request->getClientIp());
             $limit = $limiter->consume();
             $sessionAddons = $request->getSession()->get('valid_addons', []);
-/*             if (!$limit->isAccepted()) {
+            if (!$limit->isAccepted()) {
                 $retryAfter = $limit->getRetryAfter();
 
                 $seconds = $retryAfter ? $retryAfter->getTimestamp() - time() : 60;
@@ -97,12 +97,16 @@ final class CollectionController extends AbstractController
                 $this->addFlash('error', $message);
 
                 return $uac->redirectingGlobal($user);
-            } */
-            if (empty($addons)) {
+            }else if (empty($addons)) {
                 $request->getSession()->getFlashBag()->clear();
                 $this->addFlash('error', 'Trop de tentatives. Impossible de crée une connexion sans add-on.');
                 return $uac->redirectingGlobal($user);
+            }else if(count($sessionAddons) > 50){
+                $this->addFlash('error', 'Vous ne pouvez pas ajouter plus de 50 add-ons à une collection.');
+                return $uac->redirectingGlobal($user);
             }
+
+
 
             $fullName = $request->request->get('fullName');
             $description = $request->request->get('description');

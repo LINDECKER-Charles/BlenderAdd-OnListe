@@ -92,6 +92,4 @@ class AddonsScraper
             'image' => $this->getFirstImage($crawler),
         ];
     }
-
-
 }
