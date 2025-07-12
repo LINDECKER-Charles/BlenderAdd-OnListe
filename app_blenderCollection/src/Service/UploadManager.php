@@ -40,10 +40,11 @@ class UploadManager
 
         $targetDir = $customPath ?? $this->uploadDir;
 
-        $newFilename = $customName ?? (
-            $this->slugger->slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
-            . '-' . uniqid() . '.' . $file->guessExtension()
-        );
+        $baseName = $customName
+            ? $this->slugger->slug($customName, '_')
+            : $this->slugger->slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME), '_');
+
+        $newFilename = $baseName . '_' . uniqid() . '.' . $file->guessExtension();
 
         try {
             $file->move($targetDir, $newFilename);

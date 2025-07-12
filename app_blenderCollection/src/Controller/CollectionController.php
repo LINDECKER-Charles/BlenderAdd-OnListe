@@ -11,7 +11,9 @@ use App\Service\AddonsManager;
 use App\Service\AddonsScraper;
 use App\Service\UploadManager;
 use App\Service\AddonDownloader;
+use App\Message\DeleteZipMessage;
 use App\Service\UserAccesChecker;
+use App\Message\DownloadZipMessage;
 use App\Repository\ListeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -20,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -52,25 +55,9 @@ final class CollectionController extends AbstractController
     
 
     /* add.html.twig */
-    /**
-     * Affiche le formulaire de création d'une collection et le traite lors de la soumission POST.
-     *
-     * Étapes :
-     * - Vérifie si l'utilisateur est connecté et vérifié
-     * - Récupère les champs du formulaire (nom, description, visibilité)
-     * - Upload l’image (locale ou récupérée depuis le 1er add-on)
-     * - Crée la collection et y associe les add-ons de la session
-     * - Enregistre la collection et nettoie la session
-     *
-     * @param Request $request Requête HTTP (POST pour la création)
-     * @param SluggerInterface $slugger Utilisé pour normaliser les noms de fichiers uploadés
-     * @param EntityManagerInterface $em Pour interagir avec la base de données
-     * @param UploadManager $uploadManager Service pour l’upload d’image
-     *
-     * @return Response Redirige vers la page de la collection ou affiche le formulaire
-     */
+
     #[Route('/collection/add', name: 'create_collection')]
-    public function addCollection(RateLimiterFactory $collectionLimiter, UserAccesChecker $uac, Request $request, SluggerInterface $slugger, EntityManagerInterface $em, UploadManager $uploadManager): Response
+    public function addCollection(RateLimiterFactory $collectionLimiter, UserAccesChecker $uac, Request $request, EntityManagerInterface $em, UploadManager $uploadManager, AddonsScraper $scraper, MessageBusInterface $bus, AddonDownloader $addonDownloader): Response
     {
         //On verifie que l'utilisateur est loger et verifier
         $user = $this->getUser();
@@ -97,18 +84,24 @@ final class CollectionController extends AbstractController
                 $this->addFlash('error', $message);
 
                 return $uac->redirectingGlobal($user);
-            }else if (empty($addons)) {
+            }else if (empty($sessionAddons)) {
                 $request->getSession()->getFlashBag()->clear();
-                $this->addFlash('error', 'Trop de tentatives. Impossible de crée une connexion sans add-on.');
+                $this->addFlash('error', 'Impossible de crée une collection sans add-on.');
                 return $uac->redirectingGlobal($user);
             }else if(count($sessionAddons) > 50){
+                $request->getSession()->getFlashBag()->clear();
                 $this->addFlash('error', 'Vous ne pouvez pas ajouter plus de 50 add-ons à une collection.');
+                return $uac->redirectingGlobal($user);
+            } 
+            $fullName = $request->request->get('fullName');
+            $existing = $em->getRepository(Liste::class)->findOneBy(['name' => $fullName]);
+            if ($existing) {
+                $request->getSession()->getFlashBag()->clear();
+                $this->addFlash('error', 'Une collection porte déjà ce nom. Choisissez-en un autre.');
                 return $uac->redirectingGlobal($user);
             }
 
 
-
-            $fullName = $request->request->get('fullName');
             $description = $request->request->get('description');
             $isVisible = $request->request->getBoolean('isVisible');
 
@@ -124,8 +117,11 @@ final class CollectionController extends AbstractController
             $imageFilename = null;
             if ($imageFile) {
                 $imageFilename = $uploadManager->uploadLocalFile($imageFile);
-            } elseif (!empty($sessionAddons) && isset($sessionAddons[0][1]['image'])) {
-                $imageFilename = $uploadManager->uploadFromUrl($sessionAddons[0][1]['image']);
+            } elseif (!empty($sessionAddons)) {
+                $imageUrl = $scraper->getAddOnImage($sessionAddons[0][0]);
+                if ($imageUrl) {
+                    $imageFilename = $uploadManager->uploadFromUrl($imageUrl);
+                }
             }
 
             if ($imageFilename) {
@@ -137,10 +133,7 @@ final class CollectionController extends AbstractController
             $liste->setDateCreation(new \DateTime());
             $liste->setDownload(0);
 
-
-
-
-            foreach ($sessionAddons as [$url, $data]) {
+            foreach ($sessionAddons as [$url]) {
                 if (isset($url)) {
                     // On cherche un Addon existant ou on le crée
                     $addon = $em->getRepository(Addon::class)->findOneBy(['idBlender' => $url]);
@@ -156,13 +149,20 @@ final class CollectionController extends AbstractController
             }
 
             $em->persist($liste);
+            $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
+
+            // Envoie du message asynchrone
+            $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
+            $urls = $addonDownloader->resolveArchiveUrls($addonUrls);
+            $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
+            $bus->dispatch(new DownloadZipMessage($urls, $zipName));
+
             $em->flush();
 
-            // Nettoyage session
             $request->getSession()->remove('valid_addons');
-            
             $request->getSession()->getFlashBag()->clear();
             $this->addFlash('success', 'La collection a bien été créée avec ses add-ons !');
+
             return $this->redirectToRoute('liste_show', [
                 'id' => $liste->getId()
             ]);
@@ -201,8 +201,7 @@ final class CollectionController extends AbstractController
         }
 
         try {
-            $data = $scraper->getAddOn($url);
-            $am->addAddOn($url, $data, $session);
+            $am->addAddOn($url, $session);
             return $this->json(['success' => true]);
         } catch (\Throwable $e) {
             return $this->json(['error' => 'Scraping échoué'], 500);
@@ -296,31 +295,57 @@ final class CollectionController extends AbstractController
 
         /* Edition d'une collection */
     /**
-     * Met à jour le nom d’une liste (collection).
+     * Met à jour le nom d'une collection si l'utilisateur est autorisé.
      *
-     * Autorisé uniquement au propriétaire ou au staff.
-     * Si un nom est soumis, il est enregistré puis l'utilisateur est redirigé vers la liste.
+     * - Vérifie que l'utilisateur est soit propriétaire, soit membre du staff.
+     * - Refuse le changement si une autre collection possède déjà ce nom.
+     * - Supprime l'ancienne archive ZIP associée à l'ancien nom (asynchrone).
+     * - Met à jour le nom dans la base de données.
+     * - Recrée une nouvelle archive ZIP avec le nouveau nom (asynchrone).
+     * - Affiche un message flash selon le résultat.
      *
-     * @param UserAccesChecker        $uac   Vérification des droits d’accès
-     * @param Liste                   $liste Liste à modifier
-     * @param Request                 $request Requête contenant le nouveau nom
-     * @param EntityManagerInterface  $em    Gestionnaire d'entité Doctrine
+     * @param UserAccesChecker      $uac        Vérifie les permissions d'accès
+     * @param Liste                 $liste      Entité de la collection ciblée
+     * @param Request               $request    Requête HTTP contenant le nouveau nom
+     * @param EntityManagerInterface $em        Pour persister les changements
+     * @param MessageBusInterface   $bus        Bus Messenger pour lancer les tâches asynchrones
+     * @param AddonDownloader       $downloader Service de gestion des fichiers ZIP (non utilisé ici mais injectable si besoin)
      *
-     * @return Response Redirection vers la vue de la liste
-    */
+     * @return Response
+     */
     #[Route('/liste/{id}/edit/name', name: 'update_liste_name', methods: ['POST'])]
-    public function updateName(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em): Response
+    public function updateName(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em, MessageBusInterface $bus, AddonDownloader $downloader): Response
     {
-        /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
         if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
-        $name = $request->request->get('name');
+        $newName = $request->request->get('name');
 
-        if ($name) {
-            $liste->setName($name);
+        if ($newName) {
+            // Vérifie que le nom n'est pas déjà pris par une autre collection
+            $existing = $em->getRepository(Liste::class)->findOneBy(['name' => $newName]);
+            if ($existing && $existing->getId() !== $liste->getId()) {
+                $this->addFlash('error', 'Ce nom est déjà utilisé pour une autre collection.');
+                return $uac->redirectingGlobal();
+            }
+
+            // Supprime l’ancienne archive
+            $oldZipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
+            $bus->dispatch(new DeleteZipMessage($oldZipName));
+
+            // Met à jour le nom
+            $liste->setName($newName);
             $em->flush();
+
+            // Recrée une archive avec le nouveau nom
+            // Envoie du message asynchrone
+            $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
+            $urls = $downloader->resolveArchiveUrls($addonUrls);
+            $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
+            $bus->dispatch(new DownloadZipMessage($urls, $zipName));
+
+            $request->getSession()->getFlashBag()->clear();
             $this->addFlash('success', 'Nom mis à jour avec succès.');
         }
 
@@ -430,20 +455,24 @@ final class CollectionController extends AbstractController
     }
 
     /**
-     * Supprime une collection (liste) après vérification CSRF.
+     * Supprime une collection si l'utilisateur en a les droits, ainsi que son archive ZIP associée.
      *
-     * Autorisé uniquement au propriétaire ou au staff.
-     * Une fois supprimée, redirige vers la page principale des collections.
+     * - Vérifie les droits d'accès (propriétaire ou staff)
+     * - Valide le token CSRF
+     * - Supprime l'entité en base
+     * - Lance en asynchrone la suppression de l'archive ZIP liée
+     * - Ajoute un message flash selon le succès ou l'échec
      *
-     * @param UserAccesChecker       $uac   Vérification des droits d'accès
+     * @param UserAccesChecker       $uac   Vérifie les permissions
      * @param Request                $request Requête contenant le token CSRF
-     * @param Liste                  $liste  Collection à supprimer
-     * @param EntityManagerInterface $em     Gestionnaire Doctrine
+     * @param Liste                  $liste La collection à supprimer
+     * @param EntityManagerInterface $em    Pour supprimer en base
+     * @param MessageBusInterface    $bus   Pour exécuter la suppression du ZIP en tâche de fond
      *
-     * @return Response Redirection vers la page des collections
+     * @return Response
      */
     #[Route('/collection/delete/{id}', name: 'delete_collection', methods: ['POST'])]
-    public function deleteListe(UserAccesChecker $uac, Request $request, Liste $liste, EntityManagerInterface $em): Response
+    public function deleteListe(UserAccesChecker $uac, Request $request, Liste $liste, EntityManagerInterface $em, MessageBusInterface $bus): Response
     {
         /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
         if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
@@ -453,6 +482,8 @@ final class CollectionController extends AbstractController
         $formToken = $request->request->get('_token');
         if ($this->isCsrfTokenValid('delete_collection_' . $liste->getId(), $formToken)) {
             try {
+                $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
+                $bus->dispatch(new DeleteZipMessage($zipName));
                 $em->remove($liste);
                 $em->flush();
 
@@ -482,7 +513,7 @@ final class CollectionController extends AbstractController
      * @return Response Redirection vers la page de la liste
      */
     #[Route('/liste/{id}/remove-addon/{addonId}', name: 'remove_addon_from_liste', methods: ['POST'])]
-    public function removeAddonFromListe(UserAccesChecker $uac, Liste $liste, int $addonId, EntityManagerInterface $em, Request $request): Response {
+    public function removeAddonFromListe(UserAccesChecker $uac, Liste $liste, int $addonId, EntityManagerInterface $em, Request $request, MessageBusInterface $bus, AddonDownloader $downloader): Response {
         /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
         if ((!$uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
@@ -501,7 +532,14 @@ final class CollectionController extends AbstractController
 
         $liste->removeAddon($addon);
         $em->flush();
+        
+        // Recrée l’archive ZIP avec les add-ons restants
+        $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
+        $urls = $downloader->resolveArchiveUrls($addonUrls);
+        $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
+        $bus->dispatch(new DownloadZipMessage($urls, $zipName));
 
+        $request->getSession()->getFlashBag()->clear();
         $this->addFlash('success', 'Add-on retiré de la collection.');
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
@@ -520,7 +558,7 @@ final class CollectionController extends AbstractController
      * @return Response Redirection vers la page de la liste
      */
     #[Route('/liste/{id}/add-addon', name: 'add_addon_to_liste', methods: ['POST'])]
-    public function addAddonToListe(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em, AddonsScraper $scraper): Response {
+    public function addAddonToListe(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em, AddonsScraper $scraper, MessageBusInterface $bus, AddonDownloader $downloader): Response {
         /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
         if ((!$uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
@@ -557,6 +595,16 @@ final class CollectionController extends AbstractController
             if (!$liste->getAddons()->contains($addon)) {
                 $liste->addAddon($addon);
                 $em->flush();
+
+                // Nettoie les messages précédents
+                $request->getSession()->getFlashBag()->clear();
+
+                // Recrée l’archive ZIP
+                $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
+                $urls = $downloader->resolveArchiveUrls($addonUrls);
+                $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
+                $bus->dispatch(new DownloadZipMessage($urls, $zipName));
+
                 $request->getSession()->getFlashBag()->clear();
                 $this->addFlash('success', 'Add-on ajouté à la collection.');
             } else {
@@ -595,14 +643,9 @@ final class CollectionController extends AbstractController
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
-        $urls = [];
+        $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
+        $urls = $addonDownloader->resolveArchiveUrls($addonUrls);
 
-        foreach ($liste->getAddons() as $addon) {
-            $extension = $blenderAPI->findExtensionByWebsite($addon->getIdBlender());
-            if ($extension && isset($extension['archive_url'])) {
-                $urls[] = $extension['archive_url'];
-            }
-        }
         if(!$liste->getDownload()){
             $liste->setDownload(1);
         }else{
@@ -610,7 +653,7 @@ final class CollectionController extends AbstractController
         }
         $em->persist($liste);
         $em->flush();
-        return $addonDownloader->downloadAndZip($urls, 'collection_' . $liste->getName() . '.zip');
+        return $addonDownloader->downloadAndZip($urls, preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo('collection_' . $liste->getName(), PATHINFO_FILENAME)) . '.zip');
     }
 
     /**

@@ -14,8 +14,8 @@ export default function initAddonScript() {
       return;
     }
 
-    const confirmAdd = confirm(`Ajouter cet add-on à la collection ?\n\n${url}`);
-    if (!confirmAdd) return;
+    /* const confirmAdd = confirm(`Ajouter cet add-on à la collection ?\n\n${url}`);
+    if (!confirmAdd) return; */
 
     fetch("/api/add-addon", {
       method: "POST",

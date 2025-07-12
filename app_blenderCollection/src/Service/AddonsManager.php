@@ -6,20 +6,37 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class AddonsManager
 {
-    public function addAddOn(string $url, array $data, SessionInterface $session): array
+    /**
+     * Ajoute un add-on à la session s'il n'est pas déjà présent.
+     *
+     * @param string $url URL de l'add-on (doit venir de extensions.blender.org)
+     * @param SessionInterface $session La session utilisateur actuelle
+     * @return array Liste mise à jour des add-ons en session
+     */
+    public function addAddOn(string $url, SessionInterface $session): array
     {
         $addons = $session->get('valid_addons', []);
 
-        // Évite les doublons en supprimant d'abord si déjà présent
-        $addons = array_filter($addons, fn($addon) => $addon[0] !== $url);
-
-        // Ajoute l'add-on à la fin
-        $addons[] = [$url, $data];
-
-        $session->set('valid_addons', array_values($addons)); // Reindexation propre
+        // Vérifie si l'add-on est déjà présent
+        foreach ($addons as $addon) {
+            if ($addon[0] === $url) {
+                return $addons; // Ne rien faire si déjà présent
+            }
+        }
+        // Sinon, on l'ajoute
+        $addons[] = [$url];
+        $session->set('valid_addons', $addons);
 
         return $addons;
     }
+
+    /**
+     * Supprime un add-on de la session à partir de son URL.
+     *
+     * @param string $url URL de l'add-on à retirer
+     * @param SessionInterface $session La session utilisateur actuelle
+     * @return array Liste mise à jour des add-ons
+     */
     public function suprAddOn(string $url, SessionInterface $session): array
     {
         $addons = $session->get('valid_addons', []);
@@ -32,6 +49,15 @@ class AddonsManager
         return $addons;
     }
 
+    /**
+     * Vérifie que l'URL fournie correspond bien à un add-on Blender valide.
+     *
+     * Exemple d'URL valide :
+     * https://extensions.blender.org/add-ons/super-plugin/
+     *
+     * @param string $url L’URL à valider
+     * @return bool true si l’URL est valide et autorisée
+     */
     public function isValidAddonUrl(string $url): bool
     {
         // Vérifie que l'URL est valide et commence bien par le domaine cible
@@ -42,17 +68,5 @@ class AddonsManager
             && $parsedUrl['host'] === 'extensions.blender.org'
             && str_starts_with($parsedUrl['path'], '/add-ons/');
     }
-
-    public function isValidAddonSize(string $url): bool
-    {
-        // Vérifie que l'URL est valide et commence bien par le domaine cible
-        $parsedUrl = parse_url($url);
-
-        return isset($parsedUrl['scheme'], $parsedUrl['host'], $parsedUrl['path'])
-            && $parsedUrl['scheme'] === 'https'
-            && $parsedUrl['host'] === 'extensions.blender.org'
-            && str_starts_with($parsedUrl['path'], '/add-ons/');
-    }
-
 }
 

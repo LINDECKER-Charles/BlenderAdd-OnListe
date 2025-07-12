@@ -7,6 +7,12 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class AddonsScraper
 {
+    /**
+     * Récupère le titre principal de l'add-on à partir de la balise <h1>.
+     *
+     * @param Crawler $crawler Le DOM crawler de la page HTML de l'add-on
+     * @return string Le titre extrait, ou "No title" si absent
+     */
     private function getTitleAddOn(Crawler $crawler): string
     {
         $h1 = $crawler->filter('h1.d-flex')->first();
@@ -24,6 +30,12 @@ class AddonsScraper
         return trim($text);
     }
 
+    /**
+     * Extrait les tags associés à l'add-on (ex : catégories ou labels).
+     *
+     * @param Crawler $crawler Le DOM crawler de la page HTML de l'add-on
+     * @return string[] Tableau de tags extraits
+     */
     private function getTags(Crawler $crawler): array
     {
         $tags = [];
@@ -37,6 +49,12 @@ class AddonsScraper
         return $tags;
     }
 
+    /**
+     * Récupère la taille du fichier de l'add-on (ex : "2.1 MB").
+     *
+     * @param Crawler $crawler Le DOM crawler de la page HTML de l'add-on
+     * @return string|null La taille formatée ou null si absente
+     */
     private function getSize(Crawler $crawler): ?string
     {
         $dtNodes = $crawler->filter('dt');
@@ -59,8 +77,15 @@ class AddonsScraper
         return null;
     }
 
+    /**
+     * Récupère l'URL de la première image associée à l'add-on (généralement un aperçu).
+     *
+     * @param Crawler $crawler Le DOM crawler de la page HTML de l'add-on
+     * @return string|null L'URL complète de l'image ou null si absente
+     */
     private function getFirstImage(Crawler $crawler): ?string
     {
+
         $imgNode = $crawler->filter('a.galleria-item img')->first();
 
         if ($imgNode->count() > 0) {
@@ -70,13 +95,39 @@ class AddonsScraper
             if (str_starts_with($src, '/')) {
                 $src = 'https://extensions.blender.org' . $src;
             }
-
             return $src;
         }
-
         return null;
     }
 
+    /**
+     * Récupère uniquement l'URL de l'image principale d'un add-on depuis son URL.
+     *
+     * @param string $url URL de la page de l'add-on sur extensions.blender.org
+     * @return string|null L'URL absolue de l'image ou null si aucune trouvée
+     */
+    public function getAddOnImage(string $url): ?string
+    {
+        $client = HttpClient::create();
+        $response = $client->request('GET', $url);
+        $html = $response->getContent();
+
+        $crawler = new Crawler($html);
+
+        return $this->getFirstImage($crawler);
+    }
+    
+    /**
+     * Récupère les informations principales d’un add-on Blender depuis son URL.
+     *
+     * @param string $url URL complète de la page de l’add-on sur extensions.blender.org
+     * @return array{
+     *     title: string,
+     *     tags: string[],
+     *     size: string|null,
+     *     image: string|null
+     * }
+     */
     public function getAddOn(string $url): array
     {
         $client = HttpClient::create();
@@ -92,4 +143,5 @@ class AddonsScraper
             'image' => $this->getFirstImage($crawler),
         ];
     }
+
 }
