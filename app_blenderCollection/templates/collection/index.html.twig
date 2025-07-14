@@ -38,11 +38,15 @@
 
             <p class="mt-4 text-sm text-gray-600">
                 Créée le {{ collection.dateCreation|date('d/m/Y') }}
-                par
-                <a href="{{ path('app_profil_visiteur', { id: collection.usser.id }) }}"
-                class="font-semibold text-blue-600 hover:underline">
-                    {{ collection.usser.name }}
-                </a>
+                {% if collection.usser %}
+                    par
+                    <a href="{{ path('app_profil_visiteur', { id: collection.usser.id }) }}"
+                    class="font-semibold text-blue-600 hover:underline">
+                        {{ collection.usser.name }}
+                    </a>
+                {% else %}
+                    par <span class="italic text-gray-400">un utilisateur supprimé</span>
+                {% endif %}
             </p>
         </div>
     {% else %}

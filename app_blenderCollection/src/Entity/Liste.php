@@ -25,7 +25,8 @@ class Liste
     #[ORM\Column]
     private ?\DateTime $dateCreation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'listes')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'listes')]
+    #[ORM\JoinColumn(name: 'usser_id', referencedColumnName: 'id', onDelete: 'SET NULL', nullable: true)]
     private ?User $usser = null;
 
     /**

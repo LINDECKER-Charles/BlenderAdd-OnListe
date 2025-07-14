@@ -21,6 +21,19 @@
 {% block body %}
     <section class=" bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
         <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6 select-none">
+            {% if 'ADMIN' in app.user.roles %}
+                <p>JE SUIS ADMIN</p>
+            {% endif %}
+            {% if isEditable %}
+                <form method="POST" action="{{ path('delete_account', { id: user.id }) }}"
+                    onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_account_' ~ user.id) }}">
+                    <button type="submit" 
+                            class="mt-4 px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition duration-300">
+                        🗑️ Supprimer mon compte
+                    </button>
+                </form>
+            {% endif %}
             <!-- Avatar -->
             <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar', { id: user.id }) }}">
                 <input id="avatar-input" type="file" name="avatar" accept="image/*" class="hidden" onchange="document.getElementById('upload-avatar-form').submit()">

@@ -5,6 +5,7 @@ use App\Entity\Post;
 use App\Entity\Addon;
 use App\Entity\Liste;
 use App\Entity\SousPost;
+use App\Service\AdminLogger;
 use App\Service\AddonsScraper;
 use App\Service\UploadManager;
 use App\Service\AddonDownloader;
@@ -24,7 +25,8 @@ class CollectionEditor
         private readonly MessageBusInterface $bus,
         private readonly AddonDownloader $downloader,
         private readonly AddonsScraper $scraper,
-        private readonly Security $security
+        private readonly Security $security,
+        private AdminLogger $logger,
     ) {}
 
     /**
@@ -36,6 +38,7 @@ class CollectionEditor
      */
     public function updateName(Liste $liste, Request $request): void
     {
+
         $rawName = $request->request->get('name');
         $name = strip_tags($rawName);
 
@@ -43,6 +46,13 @@ class CollectionEditor
 
         $oldZip = 'collection_' . $this->slugify($liste->getName()) . '.zip';
         $this->bus->dispatch(new DeleteZipMessage($oldZip));
+
+        $user = $this->security->getUser();
+        $this->logger->log(
+        'Update Name Collection',
+        $user,
+        $liste->getName() . ' #' . $liste->getId(),
+        'Changement du nom de la liste de ' . $liste->getName() . ' en ' . $name);
 
         $liste->setName($name);
         $this->em->flush();
@@ -66,8 +76,18 @@ class CollectionEditor
         $rawDescription = $request->request->get('description');
         $description = strip_tags($rawDescription);
 
+        $user = $this->security->getUser();
+        $this->logger->log(
+            'Update Description Collection',
+            $user,
+            $liste->getName() . ' #' . $liste->getId(),
+            'Mise à jour de la description de la collection ' . $liste->getDescription() . ' en ' . $description
+        );
+
         $liste->setDescription($description);
         $this->em->flush();
+        
+
     }
 
     /**
@@ -78,7 +98,19 @@ class CollectionEditor
      */
     public function updateVisibility(Liste $liste, Request $request): void
     {
+
         $isVisible = filter_var($request->request->get('isVisible'), FILTER_VALIDATE_BOOLEAN);
+
+        $oldVisibility = $liste->isVisible() ? 'visible' : 'invisible';
+        $newVisibility = $isVisible ? 'visible' : 'invisible';
+        $user = $this->security->getUser();
+        $this->logger->log(
+            'Update Visibility Collection',
+            $user,
+            $liste->getName() . ' #' . $liste->getId(),
+            'Visibilité changée de ' . $oldVisibility . ' en ' . $newVisibility
+        );
+
         $liste->setIsVisible($isVisible);
         $this->em->flush();
     }
@@ -107,6 +139,14 @@ class CollectionEditor
             return false; // échec upload (MIME non autorisé)
         }
 
+        $user = $this->security->getUser();
+        $this->logger->log(
+            'Update Image Collection',
+            $user,
+            $liste->getName() . ' #' . $liste->getId(),
+            'Image mise à jour de  ' . $liste->getImage() . ' en ' . $filename
+        );
+
         $liste->setImage($filename);
         $this->em->flush();
 
@@ -122,6 +162,14 @@ class CollectionEditor
     {
         $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
         $this->bus->dispatch(new DeleteZipMessage($zipName));
+
+        $user = $this->security->getUser();
+        $this->logger->log(
+            'Delete Collection',
+            $user,
+            $liste->getName() . ' #' . $liste->getId(),
+            'Suppression de la collection' . $liste->getName()
+        );
 
         $this->em->remove($liste);
         $this->em->flush();
@@ -141,6 +189,14 @@ class CollectionEditor
         if (!$addon) {
             throw new \InvalidArgumentException('Add-on introuvable.');
         }
+
+        $user = $this->security->getUser();
+        $this->logger->log(
+            'Remove Addon Collection',
+            $user,
+            $liste->getName() . ' #' . $liste->getId(),
+            'Retrait de l’add-on ' . $addon->getIdBlender()
+        );
 
         $liste->removeAddon($addon);
         $this->em->flush();
@@ -201,6 +257,14 @@ class CollectionEditor
                 $zipName = 'collection_' . $this->slugify($liste->getName()) . '.zip';
                 $this->bus->dispatch(new DownloadZipMessage($urls, $zipName));
 
+                $user = $this->security->getUser();
+                $this->logger->log(
+                    'Add Addon Collection',
+                    $user,
+                    $liste->getName() . ' #' . $liste->getId(),
+                    'Ajout de l’add-on ' . $addon->getIdBlender()
+                );
+
                 return 'success';
             }
 
@@ -237,6 +301,13 @@ class CollectionEditor
         $comment->setCommentaire($liste);
         $comment->setCommenter($user);
 
+        $this->logger->log(
+            'Add Comment Collection',
+            $user,
+            $liste->getName() . ' #' . $liste->getId(),
+            'Ajout d’un commentaire'
+        );
+
         $this->em->persist($comment);
         $this->em->flush();
     }
@@ -269,6 +340,13 @@ class CollectionEditor
 
         $this->em->persist($reply);
         $this->em->flush();
+
+        $this->logger->log(
+        'Reply to Comment',
+        $user,
+        $post->getCommentaire()->getName() . ' #' . $post->getCommentaire()->getId(),
+        'Réponse ajoutée à un commentaire (Post #' . $post->getId() . ')'
+        );
     }
 
     /**
@@ -278,6 +356,14 @@ class CollectionEditor
      */
     public function deletePost(Post $post): void
     {
+        $user = $this->security->getUser();
+        $this->logger->log(
+            'Delete Comment',
+            $user,
+            $post->getCommentaire()->getName() . ' #' . $post->getCommentaire()->getId(),
+            'Suppression du commentaire (Post #' . $post->getId() . ')'
+        );
+
         $this->em->remove($post);
         $this->em->flush();
     }
@@ -289,6 +375,14 @@ class CollectionEditor
      */
     public function deleteSousPost(SousPost $sousPost): void
     {
+        $user = $this->security->getUser();
+        $this->logger->log(
+            'Delete Reply',
+            $user,
+            $sousPost->getPost()->getCommentaire()->getName() . ' #' . $sousPost->getPost()->getCommentaire()->getId(),
+            'Suppression de la réponse (SousPost #' . $sousPost->getId() . ')'
+        );
+
         $this->em->remove($sousPost);
         $this->em->flush();
     }
@@ -301,6 +395,8 @@ class CollectionEditor
     public function toggleLikeOnPost(Post $post): void
     {
         $user = $this->security->getUser();
+        $action = $post->getLiker()->contains($user) ? 'Retrait Like' : 'Ajout Like';
+
 
         if ($post->getLiker()->contains($user)) {
             $post->removeLiker($user);
@@ -309,6 +405,12 @@ class CollectionEditor
         }
 
         $this->em->flush();
+        $this->logger->log(
+            $action . ' on Post',
+            $user,
+            $post->getCommentaire()->getName() . ' #' . $post->getCommentaire()->getId(),
+            $action . ' sur le commentaire (Post #' . $post->getId() . ')'
+        );
     }
 
     /**
@@ -319,6 +421,8 @@ class CollectionEditor
     public function toggleLikeOnSousPost(SousPost $sousPost): void
     {
         $user = $this->security->getUser();
+        $action = $sousPost->getLikes()->contains($user) ? 'Retrait Like' : 'Ajout Like';
+
 
         if ($sousPost->getLikes()->contains($user)) {
             $sousPost->removeLike($user);
@@ -326,6 +430,12 @@ class CollectionEditor
             $sousPost->addLike($user);
         }
 
+        $this->logger->log(
+        $action . ' on Reply',
+        $user,
+        $sousPost->getPost()->getCommentaire()->getName() . ' #' . $sousPost->getPost()->getCommentaire()->getId(),
+        $action . ' sur la réponse (SousPost #' . $sousPost->getId() . ')'
+        );
         $this->em->flush();
     }
 
@@ -337,6 +447,7 @@ class CollectionEditor
     public function toggleFavoris(Liste $liste): void
     {
         $user = $this->security->getUser();
+        $action = $user->getFavoris()->contains($liste) ? 'Retrait Favoris' : 'Ajout Favoris';
 
         if (!$user) {
             return;
@@ -349,6 +460,12 @@ class CollectionEditor
         }
 
         $this->em->flush();
+        $this->logger->log(
+            $action . ' on Collection',
+            $user,
+            $liste->getName() . ' #' . $liste->getId(),
+            $action . ' de la collection aux favoris'
+        );
     }
 
 

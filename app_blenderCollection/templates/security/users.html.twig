@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% set title = "Administration - Utilisateurs" %}
+{% block body %}
+<section class="px-6 py-12 bg-slate-50 dark:bg-black-950 dark:text-white">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Liste des utilisateurs</h1>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm border border-white dark:border-black-700 rounded-md">
+                <thead class="bg-grey-100 dark:bg-black-800">
+                    <tr>
+                        <th class="px-4 py-2 text-left">ID</th>
+                        <th class="px-4 py-2 text-left">Nom</th>
+                        <th class="px-4 py-2 text-left">Email</th>
+                        <th class="px-4 py-2 text-left">Rôles</th>
+                        <th class="px-4 py-2 text-left">Vérifié</th>
+                        <th class="px-4 py-2 text-left">Avatar</th>
+                        <th class="px-4 py-2 text-left">Description</th>
+                        <th class="px-4 py-2 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr class="border-t border-white dark:border-black-700 hover:bg-grey-50 dark:hover:bg-black-800">
+                            <td class="px-4 py-2">{{ user.id }}</td>
+                            <td class="px-4 py-2">{{ user.name }}</td>
+                            <td class="px-4 py-2">{{ user.email }}</td>
+                            <td class="px-4 py-2">
+                                {% for role in user.roles %}
+                                    <span class="inline-block text-xs bg-blue-500 text-white px-2 py-1 rounded mr-1">{{ role }}</span>
+                                {% endfor %}
+                            </td>
+                            <td class="px-4 py-2">
+                                {% if user.isVerified %}
+                                    <span class="text-green-600 font-semibold">Oui</span>
+                                {% else %}
+                                    <span class="text-red-600 font-semibold">Non</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2">
+                                {% if user.pathImg %}
+                                    <img src="{{ user.pathImg }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                                {% else %}
+                                    <img src="/img/profil_template.png" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2 max-w-xs truncate">{{ user.description|default('—') }}</td>
+                            <td class="px-4 py-2">
+                                <form method="POST" action="{{ path('delete_account', { id: user.id }) }}" 
+                                    onsubmit="return confirm('⚠️ Supprimer {{ user.name }} ? Cette action est irréversible.')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_account_' ~ user.id) }}">
+                                    <button type="submit"
+                                            class="text-sm px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="px-4 py-4 text-center text-grey-400 italic">Aucun utilisateur trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

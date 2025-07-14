@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Collections{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8 text-white">
+    <h1 class="text-2xl font-bold mb-6">📁 Liste des Collections</h1>
+
+    {% for collection in collections %}
+        <div class="mb-4 p-4 rounded-lg bg-gray-800 shadow flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-semibold">{{ collection.name }}</h2>
+                <p class="text-sm text-gray-400">Créée par : 
+                    {{ collection.usser ? collection.usser.name : 'Inconnu' }}
+                </p>
+                <p class="text-sm text-gray-400">Description : {{ collection.description|default('Aucune') }}</p>
+                <p class="text-sm text-gray-400">Créée le : {{ collection.dateCreation|date('d/m/Y H:i') }}</p>
+            </div>
+
+            <form method="POST" action="{{ path('delete_collection', { id: collection.id }) }}" 
+                onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette collection ?')">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_collection_' ~ collection.id) }}">
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                    🗑️ Supprimer
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <p class="text-gray-400">Aucune collection enregistrée.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -6,14 +6,18 @@ use App\Entity\User;
 use App\Service\UploadManager;
 use App\Security\EmailVerifier;
 use App\Service\MarkdownService;
+use App\Repository\LogRepository;
 use App\Service\UserAccesChecker;
 use App\Repository\UserRepository;
+use App\Repository\ListeRepository;
 use Symfony\Component\Mime\Address;
+use App\Service\Profil\ProfilEditor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -105,8 +109,11 @@ class SecurityController extends AbstractController
      * @return Response             Page de profil en lecture seule.
      */
     #[Route('/profil/{id}', name: 'app_profil_visiteur')]
-    public function profilVisiteur(MarkdownService $md, User $user): Response
+    public function profilVisiteur(MarkdownService $md, ?User $user): Response
     {
+        if (!$user) {
+            return $this->redirectToRoute('app_home');
+        }
         return $this->render('security/profil.html.twig', [
             'user' => $user,
             'descriptionHtml' => $md->toHtml($user->getDescription() ?? ''),
@@ -303,6 +310,79 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
         return $this->render('registration/should_verify.html.twig', []);
+    }
+
+    /**
+     * Supprime le compte de l'utilisateur connecté et le déconnecte.
+     *
+     * Vérifie que l'utilisateur est bien connecté. Utilise le service ProfilEditor
+     * pour supprimer le compte, invalider la session et déconnecter l'utilisateur.
+     * Affiche un message flash et redirige vers la page d'accueil.
+     *
+     * @param UserAccesChecker $uac         Service de vérification d’accès utilisateur.
+     * @param ProfilEditor     $editor      Service de gestion du profil utilisateur.
+     *
+     * @return RedirectResponse             Redirection vers l’accueil après suppression.
+     */
+    #[Route('/delete-account/{id}', name: 'delete_account', methods: ['POST'])]
+    public function deleteAccount(Request $request, UserAccesChecker $uac, ProfilEditor $editor, User $user): RedirectResponse
+    {
+        if (!($uac->isConnected($user) || $uac->isStaff())) {
+            return $uac->redirectingGlobal();
+        }
+
+        if (!$this->isCsrfTokenValid('delete_account_' . $user->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+            return $uac->redirectingGlobal($user);
+        }
+
+        if ($uac->isStaff()) {
+            $editor->deleteUser($user);
+
+            $this->addFlash('success', 'Le compte a été supprimé avec succès.');
+
+            // 🔁 On récupère l'URL précédente
+            $referer = $request->headers->get('referer');
+            return $referer
+                ? new RedirectResponse($referer)
+                : $this->redirectToRoute('admin_users');
+        }
+
+        $editor->deleteUserAndLogout($user);
+        $this->addFlash('success', 'Votre compte a été supprimé avec succès.');
+
+        return $this->redirectToRoute('app_login');
+    }
+
+    #[Route('/users/admin', name: 'admin_users')]
+    public function listUsers(UserAccesChecker $uac, UserRepository $userRepo): Response
+    {
+        if (!($uac->isStaff())) {
+            return $uac->redirectingGlobal();
+        }
+
+        return $this->render('security/users.html.twig', [
+            'users' => $userRepo->findAll(),
+        ]);
+    }
+
+    #[Route('/collections/admin', name: 'admin_collections')]
+    public function adminCollections(UserAccesChecker $uac, ListeRepository $listeRepository): Response
+    {
+        if (!($uac->isStaff())) {
+            return $uac->redirectingGlobal();
+        }
+        return $this->render('security/collections.html.twig', [
+            'collections' => $listeRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/logs/admin', name: 'admin_logs')]
+    public function showLogs(LogRepository $repo): Response
+    {
+        return $this->render('security/logs.html.twig', [
+            'logs' => $repo->findBy([], ['date' => 'DESC']),
+        ]);
     }
 
 }

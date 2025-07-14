@@ -61,7 +61,7 @@ class UserAccesChecker
     public function hasRole(?User $user = null, string $role): bool
     {
         $user = $user ?? $this->user;
-        if($this->isConnected($user)){
+        if(!($this->isConnected($user))){
             return false;
         }
         return in_array($role, $user->getRoles(), true);
