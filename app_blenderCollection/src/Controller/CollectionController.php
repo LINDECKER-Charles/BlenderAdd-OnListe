@@ -17,16 +17,18 @@ use App\Message\DownloadZipMessage;
 use App\Repository\ListeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpClient\HttpClient;
+use App\Service\Collection\CollectionEditor;
+use App\Service\Collection\CollectionCreator;
+use App\Service\Collection\CollectionRenamer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Service\Collection\CollectionDownloader;
+use App\Service\Collection\CollectionRateLimiter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,132 +47,68 @@ final class CollectionController extends AbstractController
      * @return Response
      */
     #[Route('/collection', name: 'app_collection')]
-    public function index(ListeRepository $listeRepository): Response
+    public function index(
+        ListeRepository $listeRepository
+        ): Response
     {
         return $this->render('collection/index.html.twig', [
-            'controller_name' => 'CollectionController',
             'collections' => $listeRepository->findBy(['isVisible' => true]),
         ]);
     }
     
 
     /* add.html.twig */
-
+    /**
+     * Gère la création d’une nouvelle collection d’add-ons par l’utilisateur connecté.
+     *
+     * Cette méthode :
+     * - Vérifie si l'utilisateur est connecté et vérifié (via UserAccesChecker)
+     * - Applique une limitation de fréquence (rate limiter) par adresse IP
+     * - Si le formulaire est soumis, délègue la création métier au service CollectionCreator
+     * - En cas de succès, redirige vers la page de la collection avec un message flash
+     * - En cas d’échec (limite atteinte ou erreur métier), affiche un message d’erreur et redirige
+     *
+     * @param CollectionRateLimiter $rateLimiter Service de limitation des tentatives
+     * @param UserAccesChecker $uac Vérification des droits d’accès utilisateur
+     * @param Request $request Requête HTTP courante
+     * @param CollectionCreator $creator Service métier de création de collection
+     * @return Response
+     */
     #[Route('/collection/add', name: 'create_collection')]
-    public function addCollection(RateLimiterFactory $collectionLimiter, UserAccesChecker $uac, Request $request, EntityManagerInterface $em, UploadManager $uploadManager, AddonsScraper $scraper, MessageBusInterface $bus, AddonDownloader $addonDownloader): Response
-    {
-        //On verifie que l'utilisateur est loger et verifier
+    public function addCollection(
+        CollectionRateLimiter $rateLimiter, 
+        UserAccesChecker $uac, 
+        Request $request, 
+        CollectionCreator $creator
+        ): Response {
         $user = $this->getUser();
         if (!$uac->isVerified($user)) {
             return $uac->redirectingGlobal($user);
         }
 
-
         if ($request->isMethod('POST')) {
+            $limit = $rateLimiter->consume($request);
 
-            /* Verification si absence d'add-on ou si spamm */
-            $limiter = $collectionLimiter->create($request->getClientIp());
-            $limit = $limiter->consume();
-            $sessionAddons = $request->getSession()->get('valid_addons', []);
             if (!$limit->isAccepted()) {
-                $retryAfter = $limit->getRetryAfter();
-
-                $seconds = $retryAfter ? $retryAfter->getTimestamp() - time() : 60;
-
-                $minutes = ceil($seconds / 60);
-                $message = "Trop de tentatives. Réessayez dans environ $minutes minute" . ($minutes > 1 ? 's' : '') . ".";
-
-                $request->getSession()->getFlashBag()->clear();
-                $this->addFlash('error', $message);
-
-                return $uac->redirectingGlobal($user);
-            }else if (empty($sessionAddons)) {
-                $request->getSession()->getFlashBag()->clear();
-                $this->addFlash('error', 'Impossible de crée une collection sans add-on.');
-                return $uac->redirectingGlobal($user);
-            }else if(count($sessionAddons) > 50){
-                $request->getSession()->getFlashBag()->clear();
-                $this->addFlash('error', 'Vous ne pouvez pas ajouter plus de 50 add-ons à une collection.');
-                return $uac->redirectingGlobal($user);
-            } 
-            $fullName = $request->request->get('fullName');
-            $existing = $em->getRepository(Liste::class)->findOneBy(['name' => $fullName]);
-            if ($existing) {
-                $request->getSession()->getFlashBag()->clear();
-                $this->addFlash('error', 'Une collection porte déjà ce nom. Choisissez-en un autre.');
+                $this->addFlash('error', $rateLimiter->getErrorMessage($limit));
                 return $uac->redirectingGlobal($user);
             }
 
-
-            $description = $request->request->get('description');
-            $isVisible = $request->request->getBoolean('isVisible');
-
-            //Creation de la liste
-            $liste = new Liste();
-            $liste->setName($fullName);
-            $liste->setDescription($description);
-
-            // Recuperer les add-ons valides dans la session
-
-            /** @var UploadedFile|null $imageFile */
-            $imageFile = $request->files->get('image');
-            $imageFilename = null;
-            if ($imageFile) {
-                $imageFilename = $uploadManager->uploadLocalFile($imageFile);
-            } elseif (!empty($sessionAddons)) {
-                $imageUrl = $scraper->getAddOnImage($sessionAddons[0][0]);
-                if ($imageUrl) {
-                    $imageFilename = $uploadManager->uploadFromUrl($imageUrl);
-                }
+            try {
+                $liste = $creator->handle($request, $user);
+                $this->addFlash('success', 'La collection a bien été créée avec ses add-ons !');
+                return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
+            } catch (\InvalidArgumentException $e) {
+                $this->addFlash('error', $e->getMessage());
+                return $uac->redirectingGlobal($user);
             }
-
-            if ($imageFilename) {
-                $liste->setImage($imageFilename);
-            }
-            
-            $liste->setUsser($user);
-            $liste->setIsVisible($isVisible);
-            $liste->setDateCreation(new \DateTime());
-            $liste->setDownload(0);
-
-            foreach ($sessionAddons as [$url]) {
-                if (isset($url)) {
-                    // On cherche un Addon existant ou on le crée
-                    $addon = $em->getRepository(Addon::class)->findOneBy(['idBlender' => $url]);
-
-                    if (!$addon) {
-                        $addon = new Addon();
-                        $addon->setIdBlender($url);
-                        $em->persist($addon);
-                    }
-
-                    $liste->addAddon($addon);
-                }
-            }
-
-            $em->persist($liste);
-            $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
-
-            // Envoie du message asynchrone
-            $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
-            $urls = $addonDownloader->resolveArchiveUrls($addonUrls);
-            $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
-            $bus->dispatch(new DownloadZipMessage($urls, $zipName));
-
-            $em->flush();
-
-            $request->getSession()->remove('valid_addons');
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('success', 'La collection a bien été créée avec ses add-ons !');
-
-            return $this->redirectToRoute('liste_show', [
-                'id' => $liste->getId()
-            ]);
         }
 
-        return $this->render('collection/add.html.twig', []);
+        return $this->render('collection/add.html.twig');
     }
 
+    /* API */
+    
     /* Rajouter un add-on dans la session */
     /**
      * API pour ajouter un add-on à la session.
@@ -186,7 +124,12 @@ final class CollectionController extends AbstractController
      * @return JsonResponse Réponse JSON contenant le succès ou une erreur
      */
     #[Route('/api/add-addon', name: 'api_add_addon', methods: ['POST'])]
-    public function addAddon(UserAccesChecker $uac, Request $request, AddonsScraper $scraper, AddonsManager $am, SessionInterface $session): JsonResponse {
+    public function addAddon(
+        UserAccesChecker $uac, 
+        Request $request, 
+        AddonsManager $am, 
+        SessionInterface $session
+        ): JsonResponse {
 
         if (!$uac->isConnected()) {
             return $uac->redirectingGlobalJson();
@@ -219,7 +162,12 @@ final class CollectionController extends AbstractController
      * @return JsonResponse Réponse JSON confirmant la suppression
      */
     #[Route('/api/remove-addon', name: 'api_remove_addon', methods: ['POST'])]
-    public function removeAddon(UserAccesChecker $uac, Request $request, AddonsManager $am, SessionInterface $session): JsonResponse {
+    public function removeAddon(
+        UserAccesChecker $uac, 
+        Request $request, 
+        AddonsManager $am, 
+        SessionInterface $session
+        ): JsonResponse {
         
         if (!$uac->isConnected()) {
             return $uac->redirectingGlobalJson();
@@ -245,7 +193,10 @@ final class CollectionController extends AbstractController
     * @return JsonResponse Liste des add-ons en session
     */
     #[Route('/api/get-session-addons', name: 'api_get_session_addons')]
-    public function getSessionAddons(UserAccesChecker $uac, SessionInterface $session): JsonResponse
+    public function getSessionAddons(
+        UserAccesChecker $uac, 
+        SessionInterface $session
+        ): JsonResponse
     {
         if (!$uac->isConnected()) {
             return $uac->redirectingGlobalJson();
@@ -275,7 +226,11 @@ final class CollectionController extends AbstractController
      * @return Response Vue détaillée de la liste
      */
     #[Route('/liste/{id}', name: 'liste_show')]
-    public function show(UserAccesChecker $uac, int $id, ListeRepository $listeRepository): Response
+    public function show(
+        UserAccesChecker $uac, 
+        int $id, 
+        ListeRepository $listeRepository
+        ): Response
     {
         /* On verifie que l'utilisateur est connecté */
         if (!$uac->isConnected()) {
@@ -289,7 +244,6 @@ final class CollectionController extends AbstractController
 
         return $this->render('collection/detail.html.twig', [
             'liste' => $liste,
-            'posts' => $liste->getPosts(),
         ]);
     }
 
@@ -297,270 +251,259 @@ final class CollectionController extends AbstractController
     /**
      * Met à jour le nom d'une collection si l'utilisateur est autorisé.
      *
-     * - Vérifie que l'utilisateur est soit propriétaire, soit membre du staff.
-     * - Refuse le changement si une autre collection possède déjà ce nom.
-     * - Supprime l'ancienne archive ZIP associée à l'ancien nom (asynchrone).
-     * - Met à jour le nom dans la base de données.
-     * - Recrée une nouvelle archive ZIP avec le nouveau nom (asynchrone).
-     * - Affiche un message flash selon le résultat.
+     * Cette méthode délègue la logique métier complète à un service dédié (`CollectionRenamer`) qui :
+     * - Sanitize le nom reçu pour prévenir les attaques XSS ou les contenus malveillants.
+     * - Vérifie que le nom est unique (hors collection actuelle).
+     * - Supprime l’ancienne archive ZIP (via Messenger).
+     * - Met à jour le nom de la collection en base de données.
+     * - Recrée une archive ZIP avec le nouveau nom (via Messenger).
+     * - Ajoute un message flash selon le succès ou l’échec de l’opération.
      *
-     * @param UserAccesChecker      $uac        Vérifie les permissions d'accès
-     * @param Liste                 $liste      Entité de la collection ciblée
-     * @param Request               $request    Requête HTTP contenant le nouveau nom
-     * @param EntityManagerInterface $em        Pour persister les changements
-     * @param MessageBusInterface   $bus        Bus Messenger pour lancer les tâches asynchrones
-     * @param AddonDownloader       $downloader Service de gestion des fichiers ZIP (non utilisé ici mais injectable si besoin)
+     * @param UserAccesChecker $uac        Vérifie si l'utilisateur est propriétaire ou staff
+     * @param Liste            $liste      La collection à renommer
+     * @param Request          $request    La requête contenant le nouveau nom
+     * @param CollectionEditor $renamer   Service métier chargé du renommage sécurisé
      *
-     * @return Response
+     * @return Response Redirige vers la vue de la collection avec message flash
      */
     #[Route('/liste/{id}/edit/name', name: 'update_liste_name', methods: ['POST'])]
-    public function updateName(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em, MessageBusInterface $bus, AddonDownloader $downloader): Response
-    {
+    public function updateName(
+        UserAccesChecker $uac, 
+        Liste $liste, 
+        Request $request, 
+        CollectionEditor $editor
+        ): Response {
         if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
-        $newName = $request->request->get('name');
-
-        if ($newName) {
-            // Vérifie que le nom n'est pas déjà pris par une autre collection
-            $existing = $em->getRepository(Liste::class)->findOneBy(['name' => $newName]);
-            if ($existing && $existing->getId() !== $liste->getId()) {
-                $this->addFlash('error', 'Ce nom est déjà utilisé pour une autre collection.');
-                return $uac->redirectingGlobal();
-            }
-
-            // Supprime l’ancienne archive
-            $oldZipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
-            $bus->dispatch(new DeleteZipMessage($oldZipName));
-
-            // Met à jour le nom
-            $liste->setName($newName);
-            $em->flush();
-
-            // Recrée une archive avec le nouveau nom
-            // Envoie du message asynchrone
-            $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
-            $urls = $downloader->resolveArchiveUrls($addonUrls);
-            $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
-            $bus->dispatch(new DownloadZipMessage($urls, $zipName));
-
+        try {
+            $editor->updateName($liste, $request);
             $request->getSession()->getFlashBag()->clear();
             $this->addFlash('success', 'Nom mis à jour avec succès.');
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
         }
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
+
     /**
-     * Met à jour la description d’une liste.
+     * Met à jour la description d’une collection.
      *
-     * Accessible uniquement au propriétaire ou aux membres du staff.
-     * Enregistre la nouvelle description sans validation spécifique.
+     * - Accessible uniquement au propriétaire de la collection ou à un membre du staff.
+     * - Délègue la logique métier à CollectionEditor pour :
+     *     → Nettoyer la nouvelle description (strip_tags).
+     *     → Mettre à jour l’entité Liste et persister les changements.
+     * - Affiche un message flash de succès si tout se passe bien.
      *
-     * @param UserAccesChecker        $uac    Vérification des droits d’accès
-     * @param Liste                   $liste  Liste à modifier
-     * @param Request                 $request Requête contenant la description
-     * @param EntityManagerInterface  $em     Gestionnaire d’entité Doctrine
+     * @param UserAccesChecker  $uac     Vérifie les permissions d'accès
+     * @param Liste             $liste   Collection ciblée
+     * @param Request           $request Requête contenant la nouvelle description
+     * @param CollectionEditor  $editor  Service métier gérant les modifications de collection
      *
-     * @return Response Redirection vers la vue de la liste
+     * @return Response Redirection vers la page de la collection
      */
     #[Route('/liste/{id}/edit/description', name: 'update_liste_description', methods: ['POST'])]
-    public function updateDescription(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em): Response
+    public function updateDescription(
+        UserAccesChecker $uac, 
+        Liste $liste, 
+        Request $request, 
+        CollectionEditor $editor
+        ): Response
     {
-        /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
         if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
-
-        $description = $request->request->get('description');
-
-        $liste->setDescription($description);
-        $em->flush();
+        $editor->updateDescription($liste, $request);
         $this->addFlash('success', 'Description mise à jour avec succès.');
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
+
     /**
-     * Met à jour la visibilité publique d’une liste.
+     * Met à jour la visibilité d’une collection.
      *
-     * Seul le propriétaire ou un membre du staff peut changer cet état.
-     * La valeur booléenne est extraite et validée à partir de la requête.
+     * - Accessible uniquement au propriétaire ou aux membres du staff.
+     * - La valeur est convertie en booléen avec `FILTER_VALIDATE_BOOLEAN`.
+     * - La modification est persistée.
+     * - Un message flash confirme la réussite de l’opération.
      *
-     * @param UserAccesChecker        $uac    Vérification des droits d’accès
-     * @param Liste                   $liste  Liste à modifier
-     * @param Request                 $request Requête contenant le champ `isVisible`
-     * @param EntityManagerInterface  $em     Gestionnaire d’entité Doctrine
+     * @param UserAccesChecker  $uac     Vérifie les permissions d'accès
+     * @param Liste             $liste   Collection à modifier
+     * @param Request           $request Requête contenant le champ `isVisible`
+     * @param CollectionEditor  $editor  Service de modification des collections
      *
-     * @return Response Redirection vers la vue de la liste
+     * @return Response Redirection vers la page de la collection
      */
     #[Route('/liste/{id}/edit/visibility', name: 'update_liste_visibility', methods: ['POST'])]
-    public function updateVisibility(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em): Response
+    public function updateVisibility(
+        UserAccesChecker $uac, 
+        Liste $liste, 
+        Request $request, 
+        CollectionEditor $editor
+        ): Response
     {
-        /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
         if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
-
-        $isVisible = filter_var($request->request->get('isVisible'), FILTER_VALIDATE_BOOLEAN);
-
-        $liste->setIsVisible($isVisible);
-        $em->flush();
+        $editor->updateVisibility($liste, $request);
         $this->addFlash('success', 'Visibilité mise à jour avec succès.');
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
-        /**
-     * Met à jour l'image d’une liste via un fichier envoyé par formulaire.
+
+    /**
+     * Met à jour l’image d’une collection.
      *
-     * Seuls le propriétaire ou un membre du staff peuvent effectuer cette opération.
-     * Utilise le service UploadManager pour gérer l’enregistrement local du fichier.
-     * Gère les erreurs si le fichier est invalide ou non traité.
+     * - Accessible uniquement au propriétaire ou aux membres du staff.
+     * - L’image est récupérée depuis la requête.
+     * - Le fichier est enregistré localement via le service `UploadManager`.
+     * - Si le traitement échoue, un message flash d’erreur est affiché.
      *
-     * @param UploadManager           $uploadManager Service de gestion d’upload de fichiers
-     * @param UserAccesChecker        $uac            Vérification des droits d’accès
-     * @param Request                 $request        Requête contenant le fichier image
-     * @param Liste                   $liste          Liste cible
-     * @param EntityManagerInterface  $em             Gestionnaire d’entité Doctrine
-     * @param SluggerInterface        $slugger        (Non utilisé ici, présent pour compatibilité)
+     * @param UploadManager      $uploadManager Service de gestion des fichiers locaux
+     * @param UserAccesChecker   $uac           Vérifie les permissions d'accès
+     * @param Request            $request       Requête HTTP contenant le fichier image
+     * @param Liste              $liste         Collection à modifier
+     * @param CollectionEditor   $editor        Service de modification des collections
      *
-     * @return Response Redirection vers la vue de la liste
+     * @return Response Redirection vers la page de la collection
      */
     #[Route('/liste/{id}/update-image', name: 'liste_update_image', methods: ['POST'])]
-    public function updateImage(UploadManager $uploadManager, UserAccesChecker $uac, Request $request, Liste $liste, EntityManagerInterface $em, SluggerInterface $slugger): Response {
-        /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
+    public function updateImage(
+        UploadManager $uploadManager, 
+        UserAccesChecker $uac, 
+        Request $request, 
+        Liste $liste, 
+        CollectionEditor $editor
+        ): Response {
         if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
+        $result = $editor->updateImage($liste, $request, $uploadManager);
 
-        $image = $request->files->get('image');
-
-    if ($image && $image->isValid()) {
-        // Utilisation du service UploadManager
-        $filename = $uploadManager->uploadLocalFile($image);
-
-        if ($filename !== null) {
-            $liste->setImage($filename);
-            $em->flush();
+        if ($result === true) {
+            $this->addFlash('success', 'Image mise à jour avec succès.');
+        } elseif ($result === null) {
+            $this->addFlash('error', 'Image invalide ou manquante.');
         } else {
             $this->addFlash('error', 'Le fichier n’a pas pu être traité. Format non autorisé.');
         }
-    } else {
-        $this->addFlash('error', 'Image invalide ou manquante.');
-    }
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
 
     /**
-     * Supprime une collection si l'utilisateur en a les droits, ainsi que son archive ZIP associée.
+     * Supprime une collection si l'utilisateur en a les droits.
      *
-     * - Vérifie les droits d'accès (propriétaire ou staff)
-     * - Valide le token CSRF
-     * - Supprime l'entité en base
-     * - Lance en asynchrone la suppression de l'archive ZIP liée
-     * - Ajoute un message flash selon le succès ou l'échec
+     * - Vérifie les permissions (propriétaire ou staff)
+     * - Vérifie le token CSRF
+     * - Supprime la collection ainsi que l’archive ZIP associée (asynchrone)
+     * - Affiche un message flash selon le résultat
      *
-     * @param UserAccesChecker       $uac   Vérifie les permissions
-     * @param Request                $request Requête contenant le token CSRF
-     * @param Liste                  $liste La collection à supprimer
-     * @param EntityManagerInterface $em    Pour supprimer en base
-     * @param MessageBusInterface    $bus   Pour exécuter la suppression du ZIP en tâche de fond
+     * @param UserAccesChecker       $uac      Vérifie les permissions d'accès
+     * @param Request                $request  Contient le token CSRF
+     * @param Liste                  $liste    Collection à supprimer
+     * @param CollectionEditor       $editor   Service de gestion des collections
      *
-     * @return Response
+     * @return Response Redirection vers la liste des collections
      */
     #[Route('/collection/delete/{id}', name: 'delete_collection', methods: ['POST'])]
-    public function deleteListe(UserAccesChecker $uac, Request $request, Liste $liste, EntityManagerInterface $em, MessageBusInterface $bus): Response
-    {
-        /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
+    public function deleteListe(
+        UserAccesChecker $uac, 
+        Request $request, 
+        Liste $liste, 
+        CollectionEditor $editor
+        ): Response {
         if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
         $formToken = $request->request->get('_token');
-        if ($this->isCsrfTokenValid('delete_collection_' . $liste->getId(), $formToken)) {
-            try {
-                $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
-                $bus->dispatch(new DeleteZipMessage($zipName));
-                $em->remove($liste);
-                $em->flush();
-
-                $this->addFlash('success', 'Collection supprimée avec succès.');
-            } catch (\Throwable $e) {
-                $this->addFlash('error', 'Erreur : ' . $e->getMessage());
-            }
-        } else {
+        if (!$this->isCsrfTokenValid('delete_collection_' . $liste->getId(), $formToken)) {
             $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_collection');
+        }
+
+        try {
+            $editor->delete($liste);
+            $this->addFlash('success', 'Collection supprimée avec succès.');
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur : ' . $e->getMessage());
         }
 
         return $this->redirectToRoute('app_collection');
     }
 
+
+
     /**
      * Retire un add-on d'une collection.
      *
-     * Vérifie les droits d'accès et la validité du token CSRF.
-     * L'add-on est ensuite retiré de la collection et la base de données mise à jour.
+     * - Vérifie les permissions et le token CSRF
+     * - Supprime l’add-on de la collection
+     * - Recrée l’archive ZIP avec les add-ons restants (asynchrone)
+     * - Affiche un message flash selon le résultat
      *
-     * @param UserAccesChecker       $uac     Contrôle d'accès
-     * @param Liste                  $liste   Collection ciblée
-     * @param int                    $addonId ID de l'add-on à retirer
-     * @param EntityManagerInterface $em      Gestionnaire Doctrine
-     * @param Request                $request Requête contenant le token CSRF
+     * @param UserAccesChecker   $uac      Vérifie les droits d'accès
+     * @param Liste              $liste    Collection concernée
+     * @param int                $addonId  ID de l'add-on à retirer
+     * @param Request            $request  Requête HTTP contenant le token CSRF
+     * @param CollectionEditor   $editor   Service métier pour les modifications
      *
-     * @return Response Redirection vers la page de la liste
+     * @return Response Redirection vers la page de la collection
      */
     #[Route('/liste/{id}/remove-addon/{addonId}', name: 'remove_addon_from_liste', methods: ['POST'])]
-    public function removeAddonFromListe(UserAccesChecker $uac, Liste $liste, int $addonId, EntityManagerInterface $em, Request $request, MessageBusInterface $bus, AddonDownloader $downloader): Response {
-        /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
-        if ((!$uac->isOwnerOfListe($liste) || $uac->isStaff())) {
+    public function removeAddonFromListe(
+        UserAccesChecker $uac, 
+        Liste $liste, 
+        int $addonId, 
+        Request $request, 
+        CollectionEditor $editor
+        ): Response {
+        if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
-        // CSRF protection
-        $submittedToken = $request->request->get('_token');
-        if (!$this->isCsrfTokenValid('remove_addon_' . $addonId, $submittedToken)) {
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('remove_addon_' . $addonId, $token)) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
-        $addon = $em->getRepository(Addon::class)->find($addonId);
-        if (!$addon) {
-            throw $this->createNotFoundException('Add-on introuvable.');
+        try {
+            $editor->removeAddon($liste, $addonId);
+            $this->addFlash('success', 'Add-on retiré de la collection.');
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur : ' . $e->getMessage());
         }
 
-        $liste->removeAddon($addon);
-        $em->flush();
-        
-        // Recrée l’archive ZIP avec les add-ons restants
-        $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
-        $urls = $downloader->resolveArchiveUrls($addonUrls);
-        $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
-        $bus->dispatch(new DownloadZipMessage($urls, $zipName));
-
-        $request->getSession()->getFlashBag()->clear();
-        $this->addFlash('success', 'Add-on retiré de la collection.');
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
+
     /**
      * Ajoute un add-on à une collection à partir d'une URL.
      *
-     * Vérifie les droits d'accès, la validité du token CSRF, et tente de scraper les données de l'add-on.
-     * Si l'add-on n'existe pas, il est créé et associé à la collection.
+     * Vérifie les droits d'accès, le token CSRF et délègue le traitement au service dédié.
+     * Affiche un message flash selon le résultat.
      *
-     * @param UserAccesChecker       $uac     Contrôle d'accès
-     * @param Liste                  $liste   Collection cible
-     * @param Request                $request Requête contenant l'URL et le token CSRF
-     * @param EntityManagerInterface $em      Gestionnaire Doctrine
-     * @param AddonsScraper          $scraper Service de scraping d'add-ons
+     * @param UserAccesChecker $uac       Vérifie les droits d'accès
+     * @param Liste            $liste     Collection ciblée
+     * @param Request          $request   Contient l'URL et le token CSRF
+     * @param CollectionEditor $editor    Service métier pour les opérations de collection
      *
-     * @return Response Redirection vers la page de la liste
+     * @return Response
      */
     #[Route('/liste/{id}/add-addon', name: 'add_addon_to_liste', methods: ['POST'])]
-    public function addAddonToListe(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em, AddonsScraper $scraper, MessageBusInterface $bus, AddonDownloader $downloader): Response {
-        /* On verifie qu'il est bien proprietaire de la liste ou membre du staff */
-        if ((!$uac->isOwnerOfListe($liste) || $uac->isStaff())) {
+    public function addAddonToListe(
+        UserAccesChecker $uac,
+        Liste $liste,
+        Request $request,
+        CollectionEditor $editor
+    ): Response {
+        if (!($uac->isOwnerOfListe($liste) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
@@ -569,204 +512,160 @@ final class CollectionController extends AbstractController
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
-        $url = trim($request->request->get('idBlender'));
+        $status = $editor->addAddonFromUrl($liste, $request);
 
-        if (empty($url)) {
-            $this->addFlash('error', 'Veuillez entrer une URL valide.');
-            return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
-        }
-
-        try {
-            $data = $scraper->getAddOn($url);
-
-            if (empty($data['title']) || empty($data['tags']) || empty($data['size']) || empty($data['image'])) {
-                $this->addFlash('error', 'L\'URL ne semble pas correspondre à un add-on valide.');
-                return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
-            }
-
-            $addon = $em->getRepository(Addon::class)->findOneBy(['idBlender' => $url]);
-
-            if (!$addon) {
-                $addon = new Addon();
-                $addon->setIdBlender($url);
-                $em->persist($addon);
-            }
-
-            if (!$liste->getAddons()->contains($addon)) {
-                $liste->addAddon($addon);
-                $em->flush();
-
-                // Nettoie les messages précédents
-                $request->getSession()->getFlashBag()->clear();
-
-                // Recrée l’archive ZIP
-                $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
-                $urls = $downloader->resolveArchiveUrls($addonUrls);
-                $zipName = 'collection_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $liste->getName()) . '.zip';
-                $bus->dispatch(new DownloadZipMessage($urls, $zipName));
-
-                $request->getSession()->getFlashBag()->clear();
-                $this->addFlash('success', 'Add-on ajouté à la collection.');
-            } else {
-                $request->getSession()->getFlashBag()->clear();
-                $this->addFlash('warning', 'Cet add-on est déjà présent dans la collection.');
-            }
-
-        } catch (\Throwable $e) {
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('error', 'Impossible de valider l’URL : ' . $e->getMessage());
-        }
+        match ($status) {
+            'success' => $this->addFlash('success', 'Add-on ajouté à la collection.'),
+            'already_present' => $this->addFlash('warning', 'Cet add-on est déjà présent dans la collection.'),
+            'invalid_url' => $this->addFlash('error', 'Veuillez entrer une URL valide.'),
+            'invalid_data' => $this->addFlash('error', 'L\'URL ne correspond pas à un add-on valide.'),
+            default => $this->addFlash('error', 'Erreur : ' . $status),
+        };
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
 
+
+
     /**
-     * Télécharge tous les add-ons d'une collection sous forme d'archive ZIP.
+     * Permet de télécharger tous les add-ons d’une collection sous forme d’archive ZIP.
      *
-     * Vérifie le token CSRF, récupère les URLs des archives à partir de l'API Blender,
-     * puis utilise le service d’archivage pour générer le fichier ZIP.
-     * Incrémente le compteur de téléchargements de la collection.
+     * - Vérifie la validité du token CSRF pour sécuriser la requête.
+     * - Récupère les URLs des add-ons liés à la collection.
+     * - Incrémente le compteur de téléchargements de la collection.
+     * - Génère une archive ZIP via le service AddonDownloader.
+     * - Retourne une réponse HTTP permettant le téléchargement direct du fichier.
      *
-     * @param UserAccesChecker       $uac            Contrôle d'accès
-     * @param Liste                  $liste          Collection ciblée
-     * @param Request                $request        Requête contenant le token CSRF
-     * @param BlenderAPI             $blenderAPI     API Blender pour retrouver les URLs
-     * @param AddonDownloader        $addonDownloader Service de téléchargement et archivage
-     * @param EntityManagerInterface $em             Gestionnaire Doctrine
+     * @param UserAccesChecker       $uac              Vérifie les droits d’accès
+     * @param Liste                  $liste            Collection contenant les add-ons
+     * @param Request                $request          Requête HTTP contenant le token CSRF
+     * @param BlenderAPI             $blenderAPI       (Non utilisé ici, injecté pour compatibilité)
+     * @param AddonDownloader        $addonDownloader  Service de création de l’archive ZIP
+     * @param EntityManagerInterface $em               Gestionnaire Doctrine
      *
-     * @return BinaryFileResponse Archive ZIP des add-ons
+     * @return BinaryFileResponse Fichier ZIP prêt au téléchargement
      */
     #[Route('/liste/{id}/download', name: 'liste_download_addons', methods: ['POST'])]
-    public function downloadAddonsFromListe(UserAccesChecker $uac, Liste $liste, Request $request, BlenderAPI $blenderAPI, AddonDownloader $addonDownloader, EntityManagerInterface $em): BinaryFileResponse {
-
+    public function downloadAddonsFromListe(
+        UserAccesChecker $uac,
+        Liste $liste,
+        Request $request,
+        CollectionDownloader $downloader
+    ): BinaryFileResponse {
         if (!$this->isCsrfTokenValid('download_addons_' . $liste->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
-        $addonUrls = array_map(fn($a) => $a->getIdBlender(), $liste->getAddons()->toArray());
-        $urls = $addonDownloader->resolveArchiveUrls($addonUrls);
+        if (!($uac->isConnected())) {
+            throw $this->createAccessDeniedException('Vous n’avez pas les droits pour télécharger cette collection.');
 
-        if(!$liste->getDownload()){
-            $liste->setDownload(1);
-        }else{
-            $liste->setDownload($liste->getDownload() + 1);
         }
-        $em->persist($liste);
-        $em->flush();
-        return $addonDownloader->downloadAndZip($urls, preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo('collection_' . $liste->getName(), PATHINFO_FILENAME)) . '.zip');
+
+        return $downloader->download($liste);
     }
+
+
 
     /**
      * Ajoute un commentaire à une collection.
      *
-     * Vérifie que l'utilisateur est connecté et vérifié, puis associe le commentaire à l'utilisateur et à la collection.
-     * Gère la protection CSRF.
+     * - Vérifie que l’utilisateur est connecté et vérifié.
+     * - Valide le token CSRF.
+     * - Crée un commentaire associé à l’utilisateur et à la collection.
      *
-     * @param UserAccesChecker       $uac       Contrôle d'accès
-     * @param Liste                  $liste     Collection commentée
-     * @param Request                $request   Requête contenant le contenu et le token CSRF
-     * @param EntityManagerInterface $em        Gestionnaire Doctrine
-     * @param Security               $security  Service de sécurité pour récupérer l'utilisateur connecté
+     * @param UserAccesChecker $uac       Vérifie les droits d’accès
+     * @param Liste            $liste     Collection ciblée
+     * @param Request          $request   Requête HTTP contenant le commentaire
+     * @param CollectionEditor $editor    Service de gestion des modifications de collection
      *
-     * @return Response Redirection vers la page de la liste
+     * @return Response Redirection vers la page de la collection
      */
     #[Route('/liste/{id}/comment', name: 'liste_comment', methods: ['POST'])]
-    public function addComment(UserAccesChecker $uac, Liste $liste, Request $request, EntityManagerInterface $em, Security $security): Response {
-
-        /* On verifie qu'il est bien connecté et vérifié */
+    public function addComment(
+        UserAccesChecker $uac,
+        Liste $liste,
+        Request $request,
+        CollectionEditor $editor
+    ): Response {
         if (!($uac->isAllowed() && $uac->isVerified())) {
             return $uac->redirectingGlobal();
         }
-
-        $content = trim($request->request->get('content'));
 
         if (!$this->isCsrfTokenValid('add_comment_' . $liste->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
-        if ($content) {
-            $post = new Post();
-            $post->setContent($content);
-            $post->setDateCreation(new \DateTime());
-            $post->setCommentaire($liste);
-
-            $user = $security->getUser();
-            if ($user) {
-                $post->setCommenter($user);
-            }
-
-            $em->persist($post);
-            $em->flush();
-        }
+        $editor->addComment($liste, $request);
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
+
     /**
      * Répond à un commentaire existant (Post).
      *
-     * Vérifie que l'utilisateur est connecté et vérifié, puis enregistre une réponse (SousPost).
+     * Vérifie que l'utilisateur est connecté et vérifié, puis délègue la création de la réponse au service.
      * Protégé contre les attaques CSRF.
      *
-     * @param UserAccesChecker       $uac     Contrôle d'accès
-     * @param Post                   $post    Commentaire parent
-     * @param Request                $request Requête contenant le contenu et le token CSRF
-     * @param EntityManagerInterface $em      Gestionnaire Doctrine
+     * @param UserAccesChecker  $uac     Contrôle d'accès
+     * @param Post              $post    Commentaire parent
+     * @param Request           $request Requête contenant le contenu et le token CSRF
+     * @param CollectionEditor  $editor  Service de gestion de la collection
      *
      * @return Response Redirection vers la page de la collection associée
      */
     #[Route('/post/{id}/reply', name: 'post_reply', methods: ['POST'])]
-    public function replyToPost(UserAccesChecker $uac, Post $post, Request $request, EntityManagerInterface $em): Response {
-        /* On verifie qu'il est bien connecté et vérifié */
+    public function replyToPost(
+        UserAccesChecker $uac,
+        Post $post,
+        Request $request,
+        CollectionEditor $editor
+    ): Response {
         if (!($uac->isAllowed() && $uac->isVerified())) {
             return $uac->redirectingGlobal();
         }
-
-        $content = trim($request->request->get('content'));
 
         if (!$this->isCsrfTokenValid('reply_' . $post->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
-        if ($content) {
-            $reply = new SousPost();
-            $reply->setContent($content);
-            $reply->setDateCreation(new \DateTime());
-            $reply->setPost($post);
-            $reply->setCommenter($this->getUser());
+        $editor->replyToPost($post, $request);
 
-            $em->persist($reply);
-            $em->flush();
-        }
-
-        return $this->redirectToRoute('liste_show', ['id' => $post->getCommentaire()->getId()]);
+        return $this->redirectToRoute('liste_show', [
+            'id' => $post->getCommentaire()->getId()
+        ]);
     }
+
     /**
      * Supprime un commentaire (Post) si l'utilisateur est autorisé.
      *
      * Vérifie la propriété du commentaire ou les droits de staff.
      * Protégé par un token CSRF.
      *
-     * @param UserAccesChecker       $uac     Contrôle d'accès
-     * @param Post                   $post    Commentaire à supprimer
-     * @param Request                $request Requête contenant le token CSRF
-     * @param EntityManagerInterface $em      Gestionnaire Doctrine
+     * @param UserAccesChecker  $uac     Contrôle d'accès
+     * @param Post              $post    Commentaire à supprimer
+     * @param Request           $request Requête contenant le token CSRF
+     * @param CollectionEditor  $editor  Service de gestion de la collection
      *
      * @return Response Redirection vers la page de la liste associée
      */
     #[Route('/post/{id}/delete', name: 'post_delete', methods: ['POST'])]
-    public function deletePost(UserAccesChecker $uac, Post $post, Request $request, EntityManagerInterface $em): Response
-    {
-        /* On verifie qu'il est bien proprietaire du Post ou membre du staff */
+    public function deletePost(
+        UserAccesChecker $uac,
+        Post $post,
+        Request $request,
+        CollectionEditor $editor
+    ): Response {
         if (!($uac->isOwnerOfPost($post) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
         if ($this->isCsrfTokenValid('delete_post_' . $post->getId(), $request->request->get('_token'))) {
-            $em->remove($post);
-            $em->flush();
+            $editor->deletePost($post);
         }
 
-        return $this->redirectToRoute('liste_show', ['id' => $post->getCommentaire()->getId()]);
+        return $this->redirectToRoute('liste_show', [
+            'id' => $post->getCommentaire()->getId()
+        ]);
     }
 
     /**
@@ -775,27 +674,31 @@ final class CollectionController extends AbstractController
      * Vérifie la propriété de la réponse ou les droits de staff.
      * Protégé par un token CSRF.
      *
-     * @param UserAccesChecker       $uac       Contrôle d'accès
-     * @param SousPost               $sousPost  Réponse à supprimer
-     * @param Request                $request   Requête contenant le token CSRF
-     * @param EntityManagerInterface $em        Gestionnaire Doctrine
+     * @param UserAccesChecker  $uac       Contrôle d'accès
+     * @param SousPost          $sousPost  Réponse à supprimer
+     * @param Request           $request   Requête contenant le token CSRF
+     * @param CollectionEditor  $editor    Service de gestion de la collection
      *
      * @return Response Redirection vers la page de la collection associée
      */
     #[Route('/souspost/{id}/delete', name: 'souspost_delete', methods: ['POST'])]
-    public function deleteSousPost(UserAccesChecker $uac, SousPost $sousPost, Request $request, EntityManagerInterface $em): Response
-    {
-        /* On verifie qu'il est bien proprietaire du SousPost ou membre du staff */
+    public function deleteSousPost(
+        UserAccesChecker $uac,
+        SousPost $sousPost,
+        Request $request,
+        CollectionEditor $editor
+    ): Response {
         if (!($uac->isOwnerOfSousPost($sousPost) || $uac->isStaff())) {
             return $uac->redirectingGlobal();
         }
 
         if ($this->isCsrfTokenValid('delete_souspost_' . $sousPost->getId(), $request->request->get('_token'))) {
-            $em->remove($sousPost);
-            $em->flush();
+            $editor->deleteSousPost($sousPost);
         }
 
-        return $this->redirectToRoute('liste_show', ['id' => $sousPost->getPost()->getCommentaire()->getId()]);
+        return $this->redirectToRoute('liste_show', [
+            'id' => $sousPost->getPost()->getCommentaire()->getId()
+        ]);
     }
 
     /**
@@ -804,58 +707,55 @@ final class CollectionController extends AbstractController
      * Vérifie que l'utilisateur est connecté et vérifié. Si le like existe déjà, il est retiré.
      * Sinon, l'utilisateur est ajouté à la liste des personnes ayant aimé le commentaire.
      *
-     * @param UserAccesChecker       $uac     Contrôle d'accès
-     * @param Post                   $post    Commentaire ciblé
-     * @param EntityManagerInterface $em      Gestionnaire Doctrine
+     * @param UserAccesChecker  $uac     Contrôle d'accès
+     * @param Post              $post    Commentaire ciblé
+     * @param CollectionEditor  $editor  Service de gestion de collection
      *
      * @return Response Redirection vers la page de la collection avec ancre sur le commentaire
      */
     #[Route('/post/{id}/like', name: 'post_like', methods: ['POST'])]
-    public function likePost(UserAccesChecker $uac, Post $post, EntityManagerInterface $em): Response
-    {
-        $user = $this->getUser();
+    public function likePost(
+        UserAccesChecker $uac,
+        Post $post,
+        CollectionEditor $editor
+    ): Response {
         if (!($uac->isAllowed() && $uac->isVerified())) {
             return $uac->redirectingGlobal();
         }
 
-        if ($post->getLiker()->contains($user)) {
-            $post->removeLiker($user);
-        } else {
-            $post->addLiker($user);
-        }
+        $editor->toggleLikeOnPost($post);
 
-        $em->flush();
-
-        return $this->redirect($this->generateUrl('liste_show', ['id' => $post->getCommentaire()->getId()]) . '#post-' . $post->getId());
+        return $this->redirectToRoute('liste_show', [
+            'id' => $post->getCommentaire()->getId()
+        ]);
     }
+
     /**
      * Like ou retire un like d’une réponse (SousPost).
      *
      * Vérifie que l'utilisateur est connecté et vérifié. Bascule l'état du like sur le sous-commentaire.
      *
-     * @param UserAccesChecker       $uac       Contrôle d'accès
-     * @param SousPost               $sousPost  Réponse ciblée
-     * @param EntityManagerInterface $em        Gestionnaire Doctrine
+     * @param UserAccesChecker  $uac       Contrôle d'accès
+     * @param SousPost          $sousPost  Réponse ciblée
+     * @param CollectionEditor  $editor    Service de gestion de collection
      *
      * @return Response Redirection vers la page de la collection avec ancre sur le commentaire parent
      */
     #[Route('/souspost/{id}/like', name: 'souspost_like', methods: ['POST'])]
-    public function likeSousPost(UserAccesChecker $uac, SousPost $sousPost, EntityManagerInterface $em): Response
-    {
-        $user = $this->getUser();
+    public function likeSousPost(
+        UserAccesChecker $uac,
+        SousPost $sousPost,
+        CollectionEditor $editor
+    ): Response {
         if (!($uac->isAllowed() && $uac->isVerified())) {
             return $uac->redirectingGlobal();
         }
 
-        if ($sousPost->getLikes()->contains($user)) {
-            $sousPost->removeLike($user);
-        } else {
-            $sousPost->addLike($user);
-        }
+        $editor->toggleLikeOnSousPost($sousPost);
 
-        $em->flush();
-
-        return $this->redirect($this->generateUrl('liste_show', ['id' => $sousPost->getPost()->getCommentaire()->getId()]) . '#post-' . $sousPost->getPost()->getId());
+        return $this->redirectToRoute('liste_show', [
+            'id' => $sousPost->getPost()->getCommentaire()->getId()
+        ]);
     }
 
     /**
@@ -864,34 +764,26 @@ final class CollectionController extends AbstractController
      * Vérifie que l'utilisateur est connecté et vérifié. Bascule l'état de favori de la liste.
      * Redirige vers la page de la collection concernée.
      *
-     * @param UserAccesChecker       $uac      Contrôle d'accès
-     * @param Liste                  $liste    Collection ciblée
-     * @param EntityManagerInterface $em       Gestionnaire Doctrine
-     * @param Security               $security Service de sécurité pour récupérer l'utilisateur
+     * @param UserAccesChecker  $uac      Contrôle d'accès
+     * @param Liste             $liste    Collection ciblée
+     * @param CollectionEditor  $editor   Service métier pour gérer les collections
      *
      * @return RedirectResponse Redirection vers la page de la liste
      */
     #[Route('/liste/{id}/toggle-favoris', name: 'toggle_favoris')]
-    public function toggleFavoris(UserAccesChecker $uac, Liste $liste, EntityManagerInterface $em, Security $security): RedirectResponse
-    {
+    public function toggleFavoris(
+        UserAccesChecker $uac,
+        Liste $liste,
+        CollectionEditor $editor
+    ): RedirectResponse {
         if (!($uac->isAllowed() && $uac->isVerified())) {
             return $uac->redirectingGlobal();
         }
-        $user = $security->getUser();
 
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
-        }
-
-        if ($user->getFavoris()->contains($liste)) {
-            $user->removeFavori($liste);
-        } else {
-            $user->addFavori($liste);
-        }
-
-        $em->flush();
+        $editor->toggleFavoris($liste);
 
         return $this->redirectToRoute('liste_show', ['id' => $liste->getId()]);
     }
+
 
 }

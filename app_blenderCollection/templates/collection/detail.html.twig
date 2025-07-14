@@ -211,7 +211,7 @@
     <h2 class="text-xl font-bold">Commentaires</h2>
 
     {# Affichage des commentaire #}
-    {% for post in posts %}
+    {% for post in liste.posts %}
         <div class="bg-gray-100 rounded-lg p-4 my-4 dark:text-black-950">
             <p class="font-semibold text-blue-700 dark:text-black-950">
                 {{ post.commenter.name ?? 'Anonyme' }} — {{ post.dateCreation|date('d/m/Y H:i') }}
