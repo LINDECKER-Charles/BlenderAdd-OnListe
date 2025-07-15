@@ -18,12 +18,47 @@
     or ('MODO' in app.user.roles and 'ADMIN' not in user.roles and 'MODO' not in user.roles)
 %}
 
+{% set isAdmin = 'ADMIN' in app.user.roles %}
+{% set isModo = 'MODO' in app.user.roles %}
+{% set isSelf = user.id == app.user.id %}
+
 {% block body %}
     <section class=" bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
         <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6 select-none">
-            {% if 'ADMIN' in app.user.roles %}
-                <p>JE SUIS ADMIN</p>
-            {% endif %}
+            {# Boutons admin — Ban & Donner rôle Modo #}
+{% if isAdmin and not isSelf %}
+    <form method="POST" action="{{ path('admin_set_ban', {id: user.id}) }}" onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir bannir cet utilisateur ? Cette action est irréversible.')">
+        <input type="hidden" name="_token" value="{{ csrf_token('set_ban_' ~ user.id) }}">
+        <button type="submit" class="mt-4 px-4 py-2 rounded bg-red-700 text-white hover:bg-red-800 transition">
+            🚫 Bannir l'utilisateur
+        </button>
+    </form>
+
+    <form method="POST" action="{{ path('admin_give_modo', {id: user.id}) }}" onsubmit="return confirm('Confirmez-vous l\'attribution du rôle modérateur à cet utilisateur ?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('give_modo_' ~ user.id) }}">
+        <button type="submit" class="mt-2 px-4 py-2 rounded bg-yellow-600 text-black hover:bg-yellow-700 transition">
+            ⚔️ Donner rôle Modérateur
+        </button>
+    </form>
+{% endif %}
+{% if isAdmin and not isSelf %}
+    <form method="POST" action="{{ path('admin_reset_roles', {id: user.id}) }}" onsubmit="return confirm('⚠️ Voulez-vous vraiment réinitialiser tous les rôles de cet utilisateur ? Cette action est irréversible.')">
+        <input type="hidden" name="_token" value="{{ csrf_token('reset_roles_' ~ user.id) }}">
+        <button type="submit" class="mt-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition">
+            🔄 Réinitialiser les rôles
+        </button>
+    </form>
+{% endif %}
+
+{# Bouton Modo — Verrouiller utilisateur #}
+{% if (isAdmin or isModo) and not isSelf %}
+    <form method="POST" action="{{ path('admin_set_lock', {id: user.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir verrouiller cet utilisateur ?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('set_lock_' ~ user.id) }}">
+        <button type="submit" class="mt-4 px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-800 transition">
+            🔒 Verrouiller l'utilisateur
+        </button>
+    </form>
+{% endif %}
             {% if isEditable %}
                 <form method="POST" action="{{ path('delete_account', { id: user.id }) }}"
                     onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')">

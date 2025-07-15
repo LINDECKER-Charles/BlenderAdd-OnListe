@@ -354,35 +354,6 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('app_login');
     }
 
-    #[Route('/users/admin', name: 'admin_users')]
-    public function listUsers(UserAccesChecker $uac, UserRepository $userRepo): Response
-    {
-        if (!($uac->isStaff())) {
-            return $uac->redirectingGlobal();
-        }
 
-        return $this->render('security/users.html.twig', [
-            'users' => $userRepo->findAll(),
-        ]);
-    }
-
-    #[Route('/collections/admin', name: 'admin_collections')]
-    public function adminCollections(UserAccesChecker $uac, ListeRepository $listeRepository): Response
-    {
-        if (!($uac->isStaff())) {
-            return $uac->redirectingGlobal();
-        }
-        return $this->render('security/collections.html.twig', [
-            'collections' => $listeRepository->findAll(),
-        ]);
-    }
-
-    #[Route('/logs/admin', name: 'admin_logs')]
-    public function showLogs(LogRepository $repo): Response
-    {
-        return $this->render('security/logs.html.twig', [
-            'logs' => $repo->findBy([], ['date' => 'DESC']),
-        ]);
-    }
 
 }
