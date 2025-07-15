@@ -1,4 +1,4 @@
-<header>
+<header class=" w-full">
     <nav id="navbar" class="h-auto text-grey-950 dark:text-white bg-white dark:bg-black-950 px-8 py-8 gap-8 flex flex-col items-center justify-evenly lg:flex-row transition-colors duration-300">
         <div class=" flex flex-col md:flex-row items-center justify-around gap-8">
             {# Logo #}
@@ -19,7 +19,7 @@
         </div>
         <div class=" flex flex-row gap-4 items-center">
             {# Creation Collection #}
-            <div class="flex flex-row justify-between items-center bg-white dark:bg-grey-950 px-4 rounded-md border-2 border-grey-300 dark:border-white min-h-14 transition-colors duration-300">
+            <div class="flex flex-row justify-between items-center bg-white dark:bg-grey-950 px-4 rounded-md border-2 h-16 border-grey-300 dark:border-white min-h-14 transition-colors duration-300">
                 <input type="text" name="search" id="search" placeholder="Search..." class="bg-white dark:bg-grey-950 text-grey-950 dark:text-white placeholder:text-grey-500 dark:placeholder:text-white focus:outline-none w-full transition-colors duration-300"/>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="text-grey-500 dark:text-white ml-2 transition-colors duration-300" xmlns="http://www.w3.org/2000/svg">
                     <path d="M0.5 7.33443C0.5 11.1029 3.56592 14.1689 7.33443 14.1689C8.96457 14.1689 10.463 13.5949 11.639 12.6388L14.5002 15.5L15.5 14.5002L12.6388 11.6389C13.5949 10.463 14.1689 8.9646 14.1689 7.33446C14.1689 3.56592 11.1029 0.5 7.33443 0.5C3.56592 0.5 0.5 3.56592 0.5 7.33443ZM12.7549 7.33443C12.7549 10.3232 10.3232 12.7549 7.33443 12.7549C4.34562 12.7549 1.91401 10.3233 1.91401 7.33443C1.91401 4.3456 4.34562 1.91401 7.33443 1.91401C10.3232 1.91401 12.7549 4.34563 12.7549 7.33443Z"/>
@@ -27,7 +27,7 @@
             </div>
             {# CA Creation Collection #}
             <a href="{{ path('create_collection') }}">
-                <div class="flex flex-row justify-center items-center gap-4 bg-white dark:bg-grey-800 rounded-md p-4 min-h-14 transition-colors duration-300 border border-blue-600 dark:border-grey-700">
+                <div class="flex flex-row justify-center items-center gap-4 bg-white dark:bg-grey-800 rounded-md p-4 max-h-14 transition-colors duration-300 border border-blue-600 dark:border-grey-700">
                     <div class="flex items-center">
                         <svg width="20" height="20" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1.5 9.375V14.625C1.5 15.1083 1.94772 15.5 2.5 15.5H14.5C15.0523 15.5 15.5 15.1083 15.5 14.625V9.375" stroke="#71D6FF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>

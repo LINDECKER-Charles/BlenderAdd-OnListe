@@ -38,7 +38,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
         {# Font awesome #}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+        {# GSAP #}
+        <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
         <script>
           tailwind.config = {
             darkMode: 'class',
@@ -62,8 +63,16 @@
                   blue: {
                     500: "#0585DC",
                     600: "#71D6FF"
+                  },
+                  purple: {
+                    500: "#9F6EFF", // Accent discret inspiré de Blender Studio
+                    600: "#B59CFF"  // Variante plus claire pour hover ou backgrounds doux
+                  },
+                  white: {
+                    DEFAULT: "#F3F6F7", // Blanc principal lisible et doux
+                    soft: "#F5F8FA",    // Pour fonds secondaires
+                    muted: "#ECECEC"    // Pour éléments subtils
                   }
-
                 }
               }
             }
@@ -73,7 +82,7 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body id="top" class="transition-colors duration-300 ease-in-out 
+    <body id="top" class="transition-colors duration-300 ease-in-out flex flex-col justify-center items-center
      bg-slate-50 text-black-950 dark:bg-black-950 dark:text-white">
 
       {% include "partials/header.html.twig" %}    
