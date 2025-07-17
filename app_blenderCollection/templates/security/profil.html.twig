@@ -239,7 +239,7 @@
                                             title: "Modifier la description",
                                             action: "{{ path('app_update_description', { id: user.id }) }}",
                                             fieldName: "description",
-                                            value: "{{ user.description|e('js') }}"
+                                            value: "{{ user.description }}"
                                         })'
                                         role="button"
                                         title="Modifier la description"
