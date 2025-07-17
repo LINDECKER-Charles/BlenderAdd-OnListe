@@ -2,7 +2,7 @@
     <nav id="navbar" class="h-auto text-grey-950 dark:text-white bg-white dark:bg-black-950 px-8 py-8 gap-8 flex flex-col items-center justify-evenly lg:flex-row transition-colors duration-300">
         <div class=" flex flex-col md:flex-row items-center justify-around gap-8">
             {# Logo #}
-            <a href="{{ path('app_home') }}">
+            <a href="{{ path('app_home') }}" class="transition-transform duration-300 hover:scale-105 hover:text-blue-500 active:text-blue-600 inline-block">
                 <div class=" flex flex-row gap-2 items-center">
                     <svg width="35" height="29" viewBox="0 0 35 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10.9138 18.5669C10.9223 19.0162 11.0638 19.8904 11.2752 20.5729C11.7338 22.0438 12.5039 23.3953 13.5318 24.5329C14.6342 25.7619 15.9799 26.7416 17.481 27.4079C19.1143 28.1374 20.881 28.5095 22.6658 28.4998C24.4507 28.5032 26.2162 28.1253 27.8473 27.3906C29.3468 26.7187 30.691 25.7358 31.793 24.5052C32.819 23.3633 33.5884 22.0093 34.0479 20.5366C34.4885 19.1101 34.6091 17.6019 34.4008 16.1222C34.2022 14.7044 33.7122 13.3446 32.9622 12.131C32.2673 11.002 31.3783 10.0084 30.3374 9.19732H30.3408L19.7189 0.926542L19.6916 0.905809C18.9945 0.363294 17.8235 0.365021 17.0566 0.909265C16.281 1.45869 16.1924 2.36749 16.8827 2.93938L16.8793 2.94283L21.3108 6.59531L7.80666 6.60913H7.78962C6.67322 6.61086 5.59944 7.35207 5.38638 8.29197C5.16992 9.24742 5.92669 10.0387 7.0874 10.0439V10.0474L13.9307 10.0353L1.71676 19.5379L1.67075 19.5725C0.518556 20.4675 0.146992 21.9533 0.871371 22.895C1.60768 23.8521 3.17405 23.8539 4.33817 22.9002L11.0025 17.3713C11.0025 17.3713 10.907 18.1177 10.9138 18.5652V18.5669ZM28.0416 21.067C26.6678 22.4838 24.7452 23.2889 22.6658 23.2941C20.5813 23.2975 18.6604 22.4993 17.285 21.0843C16.6151 20.3932 16.1208 19.6001 15.8174 18.7553C15.5255 17.9326 15.41 17.0563 15.4788 16.1848C15.5476 15.3133 15.799 14.4667 16.2163 13.7016C16.6311 12.9451 17.1854 12.2764 17.8491 11.7319C19.213 10.621 20.9128 10.02 22.6624 10.0301C24.4106 10.0148 26.1105 10.611 27.4757 11.7181C28.1392 12.26 28.6936 12.9264 29.1085 13.6808C29.5215 14.4359 29.773 15.2707 29.8465 16.1308C29.9225 17.0121 29.8073 17.8997 29.5091 18.7311C29.1907 19.6074 28.6902 20.404 28.0416 21.067ZM18.2241 16.2448C18.2594 15.6889 18.407 15.1463 18.6577 14.6506C18.9084 14.1549 19.2568 13.7166 19.6814 13.3629C20.5613 12.6215 21.6716 12.2195 22.8158 12.2278C23.9593 12.2206 25.0686 12.6226 25.9485 13.3629C26.3728 13.7165 26.7209 14.1546 26.9716 14.6499C27.2222 15.1453 27.37 15.6875 27.4058 16.2431C27.4689 17.4232 27.0019 18.522 26.1786 19.3358C25.2734 20.2113 24.0669 20.6942 22.8158 20.6817C21.4812 20.6817 20.2864 20.1634 19.4496 19.3341C19.0382 18.9387 18.7158 18.4581 18.5043 17.925C18.2928 17.3919 18.1973 16.8188 18.2241 16.2448Z" fill="currentColor"/>
@@ -12,9 +12,9 @@
             </a>
             {# Lien Navigation #}
             <div class=" flex flex-row gap-6 items-center">
-                <a href="{{ path('app_collection')}}" >Collection</a>
-                <a href="https://extensions.blender.org/add-ons/" target="_blank">Add-ons</a>
-                <a href="{{ path('app_contact') }}">Contact</a>
+                <a href="{{ path('app_collection')}}" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Collection</a>
+                <a href="https://extensions.blender.org/add-ons/" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600" target="_blank">Add-ons</a>
+                <a href="{{ path('app_contact') }}" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Contact</a>
             </div>
         </div>
         <div class=" flex flex-row gap-4 items-center">
@@ -26,7 +26,7 @@
                 </svg>
             </div>
             {# CA Creation Collection #}
-            <a href="{{ path('create_collection') }}">
+            <a id="createCollectionBtn" href="{{ path('create_collection') }}" class="">
                 <div class="flex flex-row justify-center items-center gap-4 bg-white dark:bg-grey-800 rounded-md p-4 max-h-14 transition-colors duration-300 border border-blue-600 dark:border-grey-700">
                     <div class="flex items-center">
                         <svg width="20" height="20" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -43,12 +43,23 @@
             <div class=" flex flex-row items-center gap-4">
                 {% if app.user %}
                     {# L'utilisateur est connecté #}
-                    <div class=" flex flex-col gap-2 items-center">
-                        <p>
-                            <a href="{{ path('app_profil') }}" class="underline">Profil</a>
+                    <div class=" flex flex-row gap-2 items-center justify-center">
+                        <p class=" justify-center items-center">
+                            <a id="btnLogout" href="{{ path('app_profil') }}" class="group flex flex-col items-center justify-center transition duration-300 rounded-full">
+                                <svg width="35" class="text-black-950 dark:text-white group-hover:text-blue-500 transition duration-300" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M49.6876 54H10.3145C8.19535 54 6.63046 51.9089 7.42974 49.9859C11.1383 41.0939 19.8508 36 29.9996 36C40.1514 36 48.8639 41.0939 52.5724 49.9859C53.3717 51.9089 51.8068 54 49.6876 54ZM17.75 18C17.75 11.382 23.247 5.99995 29.9996 5.99995C36.7552 5.99995 42.2491 11.382 42.2491 18C42.2491 24.618 36.7552 30 29.9996 30C23.247 30 17.75 24.618 17.75 18ZM59.867 52.9079C57.6407 42.8309 50.6768 35.3939 41.5111 32.0189C46.368 28.1879 49.2007 21.9928 48.1595 15.2098C46.9529 7.34079 40.2708 1.04393 32.2045 0.125931C21.0696 -1.14307 11.6252 7.34695 11.6252 18C11.6252 23.67 14.3079 28.7219 18.4911 32.0189C9.3223 35.3939 2.36149 42.8309 0.132072 52.9079C-0.676399 56.5709 2.337 60 6.16192 60H53.8372C57.6652 60 60.6786 56.5709 59.867 52.9079Z" fill="currentColor"/>
+                                </svg>
+                                <p class="text-black-950 dark:text-white dark:hover:text-blue-500 hover:text-blue-500 text-sm font-semibold transition duration-100">Profil</p>
+                            </a>
                         </p>
-                        <p>
-                            <a href="{{ path('app_logout') }}" class="underline">Déconnexion</a>
+                        <p class=" justify-center items-center">
+                            <a id="btnProfil" href="{{ path('app_logout') }}" class="group flex flex-col items-center justify-center transition duration-300 rounded-full">
+                                <svg width="55" class="text-black-950 dark:text-white group-hover:text-blue-500 transition duration-300" viewBox="0 0 61 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M25.2043 0.0185547H18.5173C14.2348 0.0185547 10.6416 2.92902 9.58319 6.87754H0.561279V11.6791H9.58319C10.6426 15.6266 14.2358 18.5371 18.5173 18.5371H25.2043V14.0151H30.2463V4.54164H25.2043V0.0185547Z" fill="currentColor"/>
+                                    <path d="M51.5384 6.87754C50.4799 2.92902 46.8877 0.0185547 42.6052 0.0185547H35.9182V18.537H42.6052C46.8877 18.537 50.4791 15.6265 51.5384 11.6789H60.5612V6.87742L51.5384 6.87754Z" fill="currentColor"/>
+                                </svg>
+                                <p class="text-black-950 dark:text-white hover:text-blue-500 dark:hover:text-blue-500 text-sm font-semibold transition duration-100">Diconnected</p>
+                            </a>
                         </p>
                     </div>
                 {% else %}
@@ -64,7 +75,8 @@
                 {% endif %}
             </div>
             {# Thème #}
-            <div id="theme-toggle" class="transition-all duration-300 ease-in-out cursor-pointer relative w-fit">
+            <div id="theme-toggle" class="transition-all duration-300 ease-in-out cursor-pointer relative w-fit
+            hover:scale-105 hover:brightness-110 active:scale-95">
                 <!-- Moon / Dark -->
                 <div class="absolute inset-0 flex flex-row items-center gap-4 transition-all duration-300 ease-in-out opacity-0 scale-90 translate-y-2 dark:opacity-100 dark:scale-100 dark:translate-y-0">
                     <svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -93,4 +105,8 @@
             </div>
         </div>
     </nav>
+<script type="module">
+    import initAddonScript from '{{ asset("js/asset/navButton.js") }}';
+    initAddonScript();
+</script>
 </header>

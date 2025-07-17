@@ -2,7 +2,7 @@
 
     <div class="flex flex-col lg:flex-row gap-6 items-center justify-evenly">
         <div class=" flex flex-col md:flex-row gap-4 items-center">
-            <a href="{{ path('app_home') }}">
+            <a href="{{ path('app_home') }}" class="transition-transform duration-300 hover:scale-105 hover:text-blue-500 active:text-blue-600 inline-block">
                 <div class=" flex flex-row gap-2 items-center">
                     <svg width="35" height="29" viewBox="0 0 35 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10.9138 18.5669C10.9223 19.0162 11.0638 19.8904 11.2752 20.5729C11.7338 22.0438 12.5039 23.3953 13.5318 24.5329C14.6342 25.7619 15.9799 26.7416 17.481 27.4079C19.1143 28.1374 20.881 28.5095 22.6658 28.4998C24.4507 28.5032 26.2162 28.1253 27.8473 27.3906C29.3468 26.7187 30.691 25.7358 31.793 24.5052C32.819 23.3633 33.5884 22.0093 34.0479 20.5366C34.4885 19.1101 34.6091 17.6019 34.4008 16.1222C34.2022 14.7044 33.7122 13.3446 32.9622 12.131C32.2673 11.002 31.3783 10.0084 30.3374 9.19732H30.3408L19.7189 0.926542L19.6916 0.905809C18.9945 0.363294 17.8235 0.365021 17.0566 0.909265C16.281 1.45869 16.1924 2.36749 16.8827 2.93938L16.8793 2.94283L21.3108 6.59531L7.80666 6.60913H7.78962C6.67322 6.61086 5.59944 7.35207 5.38638 8.29197C5.16992 9.24742 5.92669 10.0387 7.0874 10.0439V10.0474L13.9307 10.0353L1.71676 19.5379L1.67075 19.5725C0.518556 20.4675 0.146992 21.9533 0.871371 22.895C1.60768 23.8521 3.17405 23.8539 4.33817 22.9002L11.0025 17.3713C11.0025 17.3713 10.907 18.1177 10.9138 18.5652V18.5669ZM28.0416 21.067C26.6678 22.4838 24.7452 23.2889 22.6658 23.2941C20.5813 23.2975 18.6604 22.4993 17.285 21.0843C16.6151 20.3932 16.1208 19.6001 15.8174 18.7553C15.5255 17.9326 15.41 17.0563 15.4788 16.1848C15.5476 15.3133 15.799 14.4667 16.2163 13.7016C16.6311 12.9451 17.1854 12.2764 17.8491 11.7319C19.213 10.621 20.9128 10.02 22.6624 10.0301C24.4106 10.0148 26.1105 10.611 27.4757 11.7181C28.1392 12.26 28.6936 12.9264 29.1085 13.6808C29.5215 14.4359 29.773 15.2707 29.8465 16.1308C29.9225 17.0121 29.8073 17.8997 29.5091 18.7311C29.1907 19.6074 28.6902 20.404 28.0416 21.067ZM18.2241 16.2448C18.2594 15.6889 18.407 15.1463 18.6577 14.6506C18.9084 14.1549 19.2568 13.7166 19.6814 13.3629C20.5613 12.6215 21.6716 12.2195 22.8158 12.2278C23.9593 12.2206 25.0686 12.6226 25.9485 13.3629C26.3728 13.7165 26.7209 14.1546 26.9716 14.6499C27.2222 15.1453 27.37 15.6875 27.4058 16.2431C27.4689 17.4232 27.0019 18.522 26.1786 19.3358C25.2734 20.2113 24.0669 20.6942 22.8158 20.6817C21.4812 20.6817 20.2864 20.1634 19.4496 19.3341C19.0382 18.9387 18.7158 18.4581 18.5043 17.925C18.2928 17.3919 18.1973 16.8188 18.2241 16.2448Z" fill="currentColor"/>
@@ -11,22 +11,22 @@
                 </div>
             </a>
             <div class=" flex flex-row gap-6 items-center">
-                <a href="{{ path('app_home') }}">Home</a>
-                <a href="{{ path('app_collection')}}">Collection</a>
-                <a href="https://extensions.blender.org/add-ons/">Add-ons</a>
-                <a href="{{ path('app_contact') }}">Contact</a>
+                <a href="{{ path('app_home') }}" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Home</a>
+                <a href="{{ path('app_collection')}}" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Collection</a>
+                <a href="https://extensions.blender.org/add-ons/" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Add-ons</a>
+                <a href="{{ path('app_contact') }}" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Contact</a>
             </div>
         </div>
         <div class=" flex flex-row gap-4">
-            <a href="{{ path('app_legal_notice') }}">Legal Notice</a>
-            <a href="{{ path('app_privacy_policy') }}">Privacy Policy</a>
-            <a href="{{ path('app_terms_service') }}">Terms of Service</a>
+            <a href="{{ path('app_legal_notice') }}" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Legal Notice</a>
+            <a href="{{ path('app_privacy_policy') }}" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Privacy Policy</a>
+            <a href="{{ path('app_terms_service') }}" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">Terms of Service</a>
         </div>
     </div>
 
     <div class="flex flex-col md:flex-row gap-6 items-center">
         <div class=" flex flex-row gap-4 items-center">
-            <a target="_blank" href="https://www.linkedin.com/in/charles-lindecker/">
+            <a target="_blank" href="https://www.linkedin.com/in/charles-lindecker/" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-500 active:scale-95 active:after:bg-blue-600">
                 <div class=" flex flex-col items-center text-xs">
                     <svg width="31" height="30" viewBox="0 0 31 30" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M28.0994 0.00269046H3.06869C2.74607 -0.0124207 2.42361 0.0362316 2.11981 0.14589C1.81601 0.255549 1.53683 0.424039 1.29823 0.641707C1.05964 0.859393 0.866311 1.122 0.729345 1.41447C0.592379 1.70697 0.514437 2.02359 0.5 2.34623V27.4315C0.5189 28.1066 0.795605 28.7491 1.27329 29.2266C1.75097 29.7043 2.39341 29.9811 3.06869 30H28.0994C28.7558 29.9708 29.3747 29.6854 29.8234 29.2053C30.2721 28.7251 30.5147 28.0884 30.4993 27.4315V2.34623C30.5047 2.03219 30.4459 1.72039 30.3264 1.4299C30.207 1.13944 30.0294 0.876417 29.8046 0.656968C29.58 0.437538 29.3128 0.266329 29.0196 0.153821C28.7264 0.0413124 28.4132 -0.0101146 28.0994 0.00269046ZM9.87478 25.013H5.50613V11.6454H9.87478V25.013ZM7.79358 9.62056C7.48873 9.63119 7.18497 9.57866 6.9014 9.46628C6.61782 9.3539 6.36053 9.1841 6.14574 8.96754C5.93092 8.75098 5.76321 8.49234 5.65315 8.20788C5.54307 7.92341 5.49303 7.61926 5.50613 7.31452C5.49265 7.00649 5.54371 6.69905 5.65604 6.41192C5.76837 6.12477 5.93947 5.86429 6.15838 5.64716C6.3773 5.43002 6.63917 5.26104 6.92722 5.15106C7.21529 5.04107 7.52316 4.99251 7.83108 5.00848C8.13593 4.99787 8.43969 5.05038 8.72326 5.16276C9.00685 5.27514 9.26413 5.44494 9.47892 5.6615C9.69374 5.87807 9.86145 6.1367 9.97151 6.42117C10.0816 6.70563 10.1316 7.00979 10.1185 7.31452C10.132 7.62256 10.081 7.92999 9.96863 8.21712C9.8563 8.50427 9.68519 8.76476 9.46629 8.98188C9.24737 9.19903 8.98549 9.368 8.69744 9.47798C8.40937 9.58798 8.10151 9.63653 7.79358 9.62056ZM25.5119 25.013H21.1245V17.7011C21.1245 15.9575 20.5058 14.7576 18.9496 14.7576C18.4662 14.7618 17.9958 14.9153 17.6032 15.1973C17.2104 15.4793 16.9145 15.8758 16.7559 16.3325C16.634 16.6748 16.583 17.0384 16.6059 17.4012V25.013H12.2935V11.6454H16.6059V13.5203C16.9893 12.8159 17.5599 12.2313 18.2547 11.8309C18.9496 11.4306 19.7416 11.2301 20.5433 11.2517C23.3745 11.2517 25.5119 13.1265 25.5119 17.1199V25.013Z" fill="currentColor"/>
@@ -34,7 +34,7 @@
                     <p>Linkedin</p>
                 </div>
             </a>
-            <a target="_blank" href="https://github.com/LINDECKER-Charles">
+            <a target="_blank" href="https://github.com/LINDECKER-Charles" class="relative after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-purple-500 after:transition-all after:duration-300 hover:after:w-full hover:text-purple-500 active:scale-95 active:after:bg-purple-700">
                 <div class=" flex flex-col items-center text-xs">
                     <svg width="31" height="30" viewBox="0 0 31 30" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M15.5 0C23.7845 0 30.5 6.88489 30.5 15.3794C30.5 22.1729 26.207 27.9359 20.2505 29.9714C19.49 30.1229 19.22 29.6426 19.22 29.2331C19.22 28.7261 19.238 27.0702 19.238 25.0122C19.238 23.5782 18.758 22.6423 18.2195 22.1653C21.56 21.7843 25.07 20.4836 25.07 14.5766C25.07 12.8966 24.488 11.5257 23.525 10.4487C23.681 10.0602 24.1955 8.49592 23.378 6.37792C23.378 6.37792 22.121 5.96583 19.2575 7.95482C18.059 7.61433 16.775 7.443 15.5 7.437C14.225 7.443 12.9425 7.61433 11.7455 7.95482C8.879 5.96583 7.619 6.37792 7.619 6.37792C6.8045 8.49592 7.319 10.0602 7.4735 10.4487C6.515 11.5257 5.9285 12.8966 5.9285 14.5766C5.9285 20.4686 9.431 21.7892 12.7625 22.1777C12.3335 22.5617 11.945 23.2391 11.81 24.2336C10.955 24.6266 8.783 25.3068 7.445 22.9563C7.445 22.9563 6.6515 21.4786 5.1455 21.3706C5.1455 21.3706 3.683 21.3512 5.0435 22.3052C5.0435 22.3052 6.026 22.7777 6.7085 24.5551C6.7085 24.5551 7.589 27.3001 11.762 26.3701C11.7695 27.6556 11.783 28.8671 11.783 29.2331C11.783 29.6396 11.507 30.1154 10.7585 29.9729C4.7975 27.9404 0.5 22.1744 0.5 15.3794C0.5 6.88489 7.217 0 15.5 0Z" fill="currentColor"/>
@@ -43,7 +43,7 @@
                 </div>
             </a>
         </div>
-        <div>
+        <di class=" text-xs">
             <p><span class="text-xs text-grey-600 dark:text-grey-300">© 2025 LINDECKER Charles</span> — Open-source under the MIT License.</p>
             <p>Inspired by Blender’s open development philosophy.</p>
         </div>

@@ -87,10 +87,29 @@
 
       {% include "partials/header.html.twig" %}    
       {% block body %}{% endblock %}
+      {# Toast Container (position fixed) #}
+      <div id="toast-container" class="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-3">
+          {% for label, messages in app.flashes %}
+              {% for message in messages %}
+                  <div class="flash-dismissable px-4 py-2 rounded-xl shadow-lg text-sm max-w-xs w-fit transition-opacity duration-500 opacity-100
+                      {% if label == 'success' %} bg-blue-500 text-white
+                      {% elseif label == 'error' %} bg-red-600 text-white
+                      {% elseif label == 'warning' %} bg-yellow-600 text-black
+                      {% else %} bg-grey-900 text-white {% endif %}">
+                      {{ message }}
+                  </div>
+              {% endfor %}
+          {% endfor %}
+      </div>
       {% include "partials/footer.html.twig" %}  
     </body>
+
     <script type="module">
       import initAddonScript from '{{ asset("js/toggleTheme.js") }}';
+      initAddonScript();
+    </script>
+    <script type="module">
+      import initAddonScript from '{{ asset("js/flashFade.js") }}';
       initAddonScript();
     </script>
 </html>

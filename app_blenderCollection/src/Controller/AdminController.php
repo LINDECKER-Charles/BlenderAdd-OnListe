@@ -202,7 +202,7 @@ class AdminController extends AbstractController
      * @param UserRepository $userRepo Repository pour accéder aux utilisateurs.
      * @return Response Page affichant la liste des utilisateurs.
      */
-    #[Route('/users/admin', name: 'admin_users')]
+    #[Route('/users', name: 'admin_users')]
     public function listUsers(UserRepository $userRepo): Response
     {
         if (!($this->uac->isStaff())) {
@@ -224,7 +224,7 @@ class AdminController extends AbstractController
      * @param ListeRepository $listeRepository Repository pour accéder aux collections.
      * @return Response Page affichant la liste des collections.
      */
-    #[Route('/collections/admin', name: 'admin_collections')]
+    #[Route('/collections', name: 'admin_collections')]
     public function adminCollections(ListeRepository $listeRepository): Response
     {
         if (!($this->uac->isStaff())) {
@@ -243,7 +243,7 @@ class AdminController extends AbstractController
      * @param LogRepository $repo Repository pour accéder aux logs.
      * @return Response Page affichant la liste des logs.
      */
-    #[Route('/logs/admin', name: 'admin_logs')]
+    #[Route('/logs', name: 'admin_logs')]
     public function showLogs(LogRepository $repo): Response
     {
         return $this->render('security/logs.html.twig', [

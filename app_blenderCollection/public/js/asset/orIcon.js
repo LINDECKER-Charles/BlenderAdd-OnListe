@@ -1,4 +1,4 @@
-export default function initAddonScript() {
+export default function initAddonScript(val) {
     console.log("Script orIcon.js chargé ✅");
     
   const cards = document.querySelectorAll(".tilt-card");
@@ -15,8 +15,8 @@ export default function initAddonScript() {
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
 
-      const rotateX = ((y - centerY) / centerY) * -20; // inversion verticale
-      const rotateY = ((x - centerX) / centerX) * 20;
+      const rotateX = ((y - centerY) / centerY) * -val; // inversion verticale
+      const rotateY = ((x - centerX) / centerX) * val;
 
       gsap.to(card, {
         rotateX: rotateX,

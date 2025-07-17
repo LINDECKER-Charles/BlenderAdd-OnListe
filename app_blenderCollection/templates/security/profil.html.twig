@@ -23,403 +23,500 @@
 {% set isSelf = user.id == app.user.id %}
 
 {% block body %}
-    <section class=" bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
-        <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6 select-none">
-            {# Boutons admin — Ban & Donner rôle Modo #}
-{% if isAdmin and not isSelf %}
-    <form method="POST" action="{{ path('admin_set_ban', {id: user.id}) }}" onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir bannir cet utilisateur ? Cette action est irréversible.')">
-        <input type="hidden" name="_token" value="{{ csrf_token('set_ban_' ~ user.id) }}">
-        <button type="submit" class="mt-4 px-4 py-2 rounded bg-red-700 text-white hover:bg-red-800 transition">
-            🚫 Bannir l'utilisateur
-        </button>
-    </form>
-
-    <form method="POST" action="{{ path('admin_give_modo', {id: user.id}) }}" onsubmit="return confirm('Confirmez-vous l\'attribution du rôle modérateur à cet utilisateur ?')">
-        <input type="hidden" name="_token" value="{{ csrf_token('give_modo_' ~ user.id) }}">
-        <button type="submit" class="mt-2 px-4 py-2 rounded bg-yellow-600 text-black hover:bg-yellow-700 transition">
-            ⚔️ Donner rôle Modérateur
-        </button>
-    </form>
-{% endif %}
-{% if isAdmin and not isSelf %}
-    <form method="POST" action="{{ path('admin_reset_roles', {id: user.id}) }}" onsubmit="return confirm('⚠️ Voulez-vous vraiment réinitialiser tous les rôles de cet utilisateur ? Cette action est irréversible.')">
-        <input type="hidden" name="_token" value="{{ csrf_token('reset_roles_' ~ user.id) }}">
-        <button type="submit" class="mt-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition">
-            🔄 Réinitialiser les rôles
-        </button>
-    </form>
-{% endif %}
-
-{# Bouton Modo — Verrouiller utilisateur #}
-{% if (isAdmin or isModo) and not isSelf %}
-    <form method="POST" action="{{ path('admin_set_lock', {id: user.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir verrouiller cet utilisateur ?')">
-        <input type="hidden" name="_token" value="{{ csrf_token('set_lock_' ~ user.id) }}">
-        <button type="submit" class="mt-4 px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-800 transition">
-            🔒 Verrouiller l'utilisateur
-        </button>
-    </form>
-{% endif %}
-            {% if isEditable %}
-                <form method="POST" action="{{ path('delete_account', { id: user.id }) }}"
-                    onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete_account_' ~ user.id) }}">
-                    <button type="submit" 
-                            class="mt-4 px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition duration-300">
-                        🗑️ Supprimer mon compte
+<section class=" bg-white-muted dark:bg-black-950 dark:text-white px-6 pt-12 pb-2 w-3/4">
+    <div class="max-w-5xl mx-auto flex flex-col items-center justify-center gap-6 select-none">
+        {# Boutons admin — Ban & Donner rôle Modo #}
+        {% if isSelf or isAdmin or isModo %}
+            <div class="fixed top-1/2 -translate-y-1/2 right-6 z-50">
+                {# --- BOUTON TOGGLE (visible uniquement quand la sidebar est cachée) --- #}
+                <button id="toggleSidebarBtn" class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500 hover:bg-purple-600 text-white shadow-xl transition-opacity duration-0" aria-label="Ouvrir la barre admin">
+                    <svg width="23"  viewBox="0 0 46 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3.4585 3.19116H43.4585M3.4585 18.1912H43.4585M3.4585 33.1912H43.4585" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                {# --- SIDEBAR (même conteneur que le bouton) --- #}
+                <div id="adminSidebar" class="hidden flex-col items-center justify-center gap-4 bg-grey-950/90 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl min-w-[180px]">
+                    {# Bouton de fermeture #}
+                    <button id="closeSidebarBtn" class=" py-1 self-end -mt-2 -mr-2 mb-2 text-white hover:text-purple-500 transition-colors" aria-label="Fermer la barre admin">
+                        <svg width="30"  viewBox="0 0 55 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M33.8113 21.0279L21.3113 33.5278M21.3113 21.0278L33.8113 33.5278" stroke="currentColor" stroke-width="3.75" stroke-linecap="round"/>
+                            <path d="M15.0613 5.62238C18.7385 3.49526 23.0078 2.27783 27.5613 2.27783C41.3683 2.27783 52.5613 13.4707 52.5613 27.2778C52.5613 41.0848 41.3683 52.2778 27.5613 52.2778C13.7542 52.2778 2.56128 41.0848 2.56128 27.2778C2.56128 22.7243 3.7787 18.455 5.90583 14.7778" stroke="currentColor" stroke-width="3.75" stroke-linecap="round"/>
+                        </svg>
                     </button>
-                </form>
-            {% endif %}
+                    <div class="flex flex-col gap-4">
+                        {% if (isAdmin or isModo) and not isSelf %}
+                            <form method="POST" action="{{ path('admin_set_lock', {id: user.id}) }}"
+                                data-confirm="Verrouiller cet utilisateur bloquera son accès. Es-tu certain de cette décision ?">
+                                <input type="hidden" name="_token" value="{{ csrf_token('set_lock_' ~ user.id) }}">
+                                <button class="flex items-center gap-3 px-4 py-2 w-full rounded-lg bg-grey-900 hover:bg-grey-800 text-white transition-transform hover:scale-[1.02]">
+                                    <svg width="15" viewBox="0 0 46 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8.4585 22.6912V15.1912C8.4585 6.90689 15.1742 0.191162 23.4585 0.191162C31.7426 0.191162 38.4585 6.90689 38.4585 15.1912V22.6912H45.9585V60.1912H0.958496V22.6912H8.4585ZM15.9585 15.1912C15.9585 11.049 19.3164 7.69116 23.4585 7.69116C27.6006 7.69116 30.9585 11.049 30.9585 15.1912V22.6912H15.9585V15.1912ZM19.7085 48.9412V33.9412H27.2085V48.9412H19.7085Z" fill="white"/>
+                                    </svg>
+                                    <span class="text-sm font-medium">Verrouiller</span>
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ path('admin_set_ban', {id: user.id}) }}"
+                                data-confirm="⚠️ Es-tu sûr de vouloir bannir cet utilisateur ? Cette action est irréversible.">
+                                <input type="hidden" name="_token" value="{{ csrf_token('set_ban_' ~ user.id) }}">
+                                <button class="flex items-center gap-3 px-4 py-2 w-full rounded-lg bg-black-900 hover:bg-black-950 text-white transition-transform hover:scale-[1.02]">
+                                    <svg width="25"  viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M30.0004 0C13.4585 0 0.000732422 13.4585 0.000732422 30.0015C0.00237212 46.5428 13.4601 60 30.0004 60C46.5419 60 59.9993 46.5426 59.9993 30.0011C59.9993 13.4585 46.5419 0 30.0004 0ZM30.0004 5.46568C35.782 5.46568 41.1017 7.47741 45.2997 10.8361L10.8363 45.2992C7.47832 41.1015 5.46695 35.7821 5.46641 30.0013C5.46641 16.4723 16.4723 5.46568 30.0004 5.46568ZM30.0004 54.5343C24.219 54.5343 18.8989 52.5226 14.7007 49.1639L49.1645 14.701C52.5224 18.8992 54.5338 24.2193 54.5338 30.0011C54.5336 43.5288 43.5281 54.5343 30.0004 54.5343Z" fill="white"/>
+                                    </svg>
+                                    <span class="text-sm font-medium">Bannir</span>
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ path('admin_reset_roles', {id: user.id}) }}"
+                                data-confirm="⚠️ Tous les rôles de cet utilisateur seront supprimés. Veux-tu vraiment continuer ?">
+                                <input type="hidden" name="_token" value="{{ csrf_token('reset_roles_' ~ user.id) }}">
+                                <button class="flex items-center gap-3 px-4 py-2 w-full rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-transform hover:scale-[1.02]">
+                                    <svg width="25"  viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_100_23)">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M30 0V6.66666C42.8633 6.66666 53.3333 17.1333 53.3333 30C53.3333 42.8667 42.8633 53.3333 30 53.3333C17.1367 53.3333 6.66666 42.8667 6.66666 30C6.66666 23.8433 9.11666 18.0467 13.3333 13.7267V21.6667H20V3.33334H1.66666V10H7.63666C2.77 15.44 0 22.53 0 30C0 46.54 13.4567 60 30 60C46.5433 60 60 46.54 60 30C60 13.46 46.5433 0 30 0Z" fill="white"/>
+                                        </g>
+                                        <defs>
+                                        <clipPath id="clip0_100_23">
+                                        <rect width="60" height="60" fill="white"/>
+                                        </clipPath>
+                                        </defs>
+                                    </svg>
+                                    <span class="text-sm font-medium">Reset rôles</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                        {% if isAdmin and not isSelf %}
+                            <form method="POST" action="{{ path('admin_give_modo', {id: user.id}) }}"
+                                data-confirm="Confirme-tu vouloir accorder le rôle de modérateur à cet utilisateur ?">
+                                <input type="hidden" name="_token" value="{{ csrf_token('give_modo_' ~ user.id) }}">
+                                <button class="flex items-center gap-3 px-4 py-2 w-full rounded-lg bg-purple-500 hover:bg-purple-600 text-white transition-transform hover:scale-[1.02]">
+                                    <svg width="20" viewBox="0 0 38 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M35.1496 43.4674C34.0703 40.8253 32.5774 38.3612 30.7563 36.2972C32.7794 33.7479 33.9833 30.5201 33.9918 27.0032C33.9833 24.471 33.3549 22.088 32.2457 20.0009V5.43012C32.2457 4.49566 32.001 3.5877 31.4604 2.87238C30.9276 2.14781 30.1415 1.66687 29.2778 1.42301C28.2036 1.11691 26.7456 0.758789 25.0081 0.48C23.262 0.200391 21.2371 0 19.0017 0C14.5315 0 10.8824 0.803086 8.71693 1.42301C7.8617 1.66687 7.07561 2.1477 6.54369 2.87238C6.00229 3.58781 5.7576 4.49578 5.7576 5.43012V19.9837C4.63986 22.0794 4.0115 24.4624 4.0115 27.0032C4.0115 30.5218 5.21619 33.7505 7.24108 36.3006C5.4208 38.3639 3.92865 40.8271 2.85029 43.4674C1.63283 46.4531 0.940489 49.6657 0.938731 52.7973C0.93709 53.458 1.13572 54.0949 1.45717 54.6432C2.02494 55.6066 2.9185 56.345 4.01748 56.9862C5.67228 57.941 7.84811 58.6743 10.4026 59.1935C12.9551 59.7093 15.8828 60 18.9999 60C23.7531 59.9974 28.0552 59.3307 31.2806 58.1993C32.8937 57.6289 34.2442 56.9494 35.2733 56.0977C35.7856 55.6704 36.2221 55.1947 36.5436 54.6431C36.8642 54.0949 37.0627 53.458 37.0611 52.7972C37.0604 49.6658 36.3671 46.4532 35.1496 43.4674ZM8.37498 10.8688C8.38354 10.8688 8.39291 10.8782 8.40147 10.8782C8.72455 10.983 9.12615 11.0965 9.58904 11.2012C10.5056 11.4101 11.649 11.5935 12.8187 11.7417C15.159 12.0393 17.6733 12.2047 18.9999 12.2047C20.746 12.2047 24.5179 11.9251 27.2938 11.4196C28.2199 11.2618 29.0315 11.07 29.5993 10.8782C29.6077 10.8782 29.6164 10.8688 29.6248 10.8688V13.5928C29.4244 13.6542 29.2062 13.7062 28.9879 13.7505C27.94 13.9859 26.7439 14.1776 25.5127 14.3354C23.0513 14.6493 20.5106 14.8154 18.9998 14.824C17.0269 14.8154 13.2466 14.5358 10.2438 14.0038C9.57111 13.881 8.94275 13.7507 8.37486 13.5928V10.8688H8.37498ZM18.9999 55.6057C17.8306 55.6057 16.8829 54.6585 16.8829 53.4887C16.8829 52.3189 17.8306 51.3717 18.9999 51.3717C20.1693 51.3717 21.1169 52.3189 21.1169 53.4887C21.1169 54.6585 20.1693 55.6057 18.9999 55.6057ZM18.9999 48.6213C17.8306 48.6213 16.8829 47.6741 16.8829 46.5043C16.8829 45.3346 17.8306 44.3873 18.9999 44.3873C20.1693 44.3873 21.1169 45.3345 21.1169 46.5043C21.1169 47.6741 20.1693 48.6213 18.9999 48.6213ZM19.0017 39.3742C15.5794 39.3742 12.4973 37.9946 10.2542 35.7506C8.01861 33.5075 6.63065 30.4254 6.63065 27.0032C6.63065 25.1871 7.02369 23.4675 7.7219 21.9132C8.44658 22.1579 9.3017 22.3412 10.2447 22.5159C13.2483 23.048 17.0203 23.3276 19.0017 23.3276C20.5124 23.3276 23.0522 23.1614 25.5146 22.8476C26.7458 22.6898 27.9419 22.498 28.9897 22.2627C29.4517 22.1664 29.8798 22.0529 30.2728 21.9131C30.9796 23.4674 31.364 25.1871 31.3727 27.003C31.3641 30.4253 29.9847 33.5074 27.7501 35.7505C25.506 37.9947 22.4239 39.3742 19.0017 39.3742Z" fill="white"/>
+                                    </svg>
+                                    <span class="text-sm font-medium">Donner Modo</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                        {% if isSelf or isAdmin or isModo %}
+                            <form method="POST" action="{{ path('delete_account', { id: user.id }) }}"
+                                data-confirm="⚠️ Es-tu sûr de vouloir supprimer ton compte ? Cette action est irréversible.">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_account_' ~ user.id) }}">
+                                <button type="submit"
+                                    class="mt-4 flex items-center gap-3 px-4 py-2 w-full rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-transform hover:scale-[1.02] duration-200">
+                                    <svg width="25"  viewBox="0 0 46 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M18 25L28 35M28 25L18 35M3 10H43M33 10L32.3235 7.97017C31.6677 6.00312 31.3398 5.0196 30.7318 4.29245C30.1948 3.65032 29.5052 3.1533 28.7262 2.84695C27.844 2.5 26.8075 2.5 24.734 2.5H21.266C19.1925 2.5 18.156 2.5 17.2738 2.84695C16.4948 3.1533 15.8052 3.65032 15.2682 4.29245C14.6601 5.0196 14.3323 6.00312 13.6766 7.97017L13 10M38 10V35.5C38 39.7005 38 41.8005 37.1825 43.405C36.4635 44.8162 35.3162 45.9635 33.905 46.6825C32.3005 47.5 30.2005 47.5 26 47.5H20C15.7996 47.5 13.6994 47.5 12.0951 46.6825C10.6839 45.9635 9.5365 44.8162 8.81745 43.405C8 41.8005 8 39.7005 8 35.5V10" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span class="text-sm">Supprimer Compte</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {# Modal #}
+        <div id="customConfirmModal"
+            class="fixed inset-0 z-[100] bg-black-990/70 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="bg-grey-950 border border-white/10 rounded-xl p-6 w-full max-w-sm text-white shadow-2xl relative">
+            
+            <p id="confirmMessage" class="text-white text-sm mb-6">
+            Es-tu sûr de vouloir effectuer cette action ?
+            </p>
+
+            <div class="flex justify-end gap-3">
+            <button id="cancelConfirm"
+                    class="px-4 py-2 rounded bg-grey-800 hover:bg-grey-900 text-white text-sm">
+                Annuler
+            </button>
+            <button id="confirmAction"
+                    class="px-4 py-2 rounded bg-purple-500 hover:bg-purple-600 text-white text-sm">
+                Confirmer
+            </button>
+            </div>
+        </div>
+        </div>
+
             <!-- Avatar -->
             <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar', { id: user.id }) }}">
                 <input id="avatar-input" type="file" name="avatar" accept="image/*" class="hidden" onchange="document.getElementById('upload-avatar-form').submit()">
-                
                 {% if isEditable %}
-                    <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" onclick="document.getElementById('avatar-input').click()">
+                    <div class="group relative w-96 h-96 md:w-56 md:h-56 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" onclick="document.getElementById('avatar-input').click()">
                         {% if user.pathImg %}
-                            <img src="{{ user.pathImg }}" alt="Avatar" class="w-full h-full object-cover">
+                            <img src="{{ user.pathImg }}" alt="Avatar" class="transition duration-150 group-hover:blur-sm w-full h-full object-cover">
                         {% else %}
-                            <img src="/img/profil_template.png" alt="Default avatar" class="w-full h-full object-cover">
+                            <img src="/img/profil_template.png" alt="Default avatar" class="transition duration-150 group-hover:blur-sm w-full h-full object-cover">
                         {% endif %}
                         <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 text-black-990 ">
-                            {# Mettre icon update #}
-                            <span class=" text-sm font-semibold p-2 dark:bg-black-950 dark:text-white rounded-full bg-white">Change</span>
+                            <span class="{#  text-sm font-semibold p-2 dark:bg-black-950 dark:text-white rounded-full bg-white #}">
+                                <svg width="65" viewBox="0 0 51 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10.4585 2.69116H35.4585C36.7846 2.69116 38.0563 3.21795 38.994 4.15563C39.9317 5.09331 40.4585 6.36508 40.4585 7.69116V25.1912" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M40.4585 37.6912H15.4585C14.1324 37.6912 12.8606 37.1644 11.923 36.2267C10.9853 35.289 10.4585 34.0172 10.4585 32.6912V15.1912" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M32.9585 17.6912L40.4585 25.1912L47.9585 17.6912" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M17.9585 22.6912L10.4585 15.1912L2.9585 22.6912" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
                         </div>
                     </div>
                 {% else %}
                     <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" >
                         {% if user.pathImg %}
-                            <img src="{{ user.pathImg }}" alt="Avatar" class="w-full h-full object-cover">
+                            <img src="{{ user.pathImg }}" alt="Avatar" class="transition duration-150 group-hover:blur-sm w-full h-full object-cover">
                         {% else %}
-                            <img src="/img/profil_template.png" alt="Default avatar" class="w-full h-full object-cover">
+                            <img src="/img/profil_template.png" alt="Default avatar" class="transition duration-150 group-hover:blur-sm w-full h-full object-cover">
                         {% endif %}
                     </div>
                 {% endif %}
-            </form>
+            </form>         
+            
             <div class="text-center flex flex-col gap-2">
                 <!-- Nom + Email + Role -->
-                <div class=" flex flex-col gap-2">
+                <div class=" flex flex-col gap-4 justify-center items-center">
                     {# Nom #}
-                    <div class=" flex flex-row justify-center items-center gap-2">
-                        <h1 class="text-2xl font-bold flex items-center gap-2">{{ user.name }}</h1>
-                        {% if isEditable %}
-                            <button title="Modifier" role="button" onclick="toggleModalName()" class="hover:scale-110 transition-transform ease-in-out">
-                                <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
-                                    <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
-                                </svg>
-                            </button>
-                        {% endif %}
+                    <div class="flex items-center gap-4 px-4 py-2 bg-grey-900 dark:bg-grey-950 rounded-xl shadow-sm max-w-fit">
+                        <h1
+                            {% if isEditable %}
+                            class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition"
+                            onclick="openModal({
+                                title: 'Modifier le nom',
+                                action: '{{ path("app_update_name", { id: user.id }) }}',
+                                fieldName: 'name',
+                                value: '{{ user.name|e('js') }}'
+                            })" 
+                            {% endif %}>
+                                {{ user.name }}
+                        </h1>
                     </div>
                     {# Email #}
-                    <div class=" flex flex-row justify-center items-center gap-2">
-                        <p class="text-grey-400 flex items-center justify-center gap-2">{{ user.email }}</p>
-                        {% if isEditable %}
-                            <button title="Modifier" role="button" onclick="toggleModalEmail()" class="hover:scale-110 transition-transform ease-in-out">
-                                <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
-                                    <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
-                                </svg>
-                            </button>
-                        {% endif %}
+                    <div class="flex items-center gap-4 px-4 py-2 bg-grey-900 dark:bg-grey-950 rounded-xl shadow-sm max-w-fit">
+                        <p 
+                            {% if isEditable %}
+                                class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition"
+                                onclick='openModal({
+                                    title: "Modifier ladresse mail",
+                                    action: "{{ path('app_update_email', { id: user.id }) }}",
+                                    fieldName: "email",
+                                    value: "{{ user.email|e('js') }}"
+                                })'
+                            {% endif %}>
+                            {{ user.email }}
+                        </p>
                     </div>
                     {# Role + Verification #}
                     <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1 justify-center items-center text-center">
-                        <div>
+                        <div class="bg-white dark:bg-black-950 flex flex-wrap items-center gap-2 px-4 py-2  rounded-xl shadow-sm max-w-fit">
                             {% if user.roles %}
                                 {% for role in user.roles %}
                                     {% if role == 'ROLE_USER' %}
-                                        <p title="You are member" class="role m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">Membre</p>
-                                    {% else %}
-                                        <p title="{{ role }}" class="role m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">{{ role }}</p>
+                                        {% set role = 'Membre' %}
                                     {% endif %}
-
+                                    <span class="px-2 py-1 rounded border border-grey-500 text-xs text-grey-400">{{ role|lower|capitalize }}</span>
                                 {% endfor %}
-                            {% else %}
-                                <p title="{{ role }}" class="role m-1 p-1 rounded-md text-xs border-[1px] border-grey-500">Membre</p>
                             {% endif %}
                         </div>
                         <div>
                             {% if user.isVerified %}
-                                <span class="inline-flex items-center gap-1 px-3 py-1 font-bold rounded-full text-sm bg-blue-600 text-white dark:text-black-990">
+                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-600/10 text-blue-600 border border-blue-600">
                                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414L9 13.414l4.707-4.707z" clip-rule="evenodd"/>
                                     </svg>
                                     Vérifié
                                 </span>
                             {% else %}
-                                <div class=" inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-yellow-500 dark:text-white text-white">
-                                    <p>Non vérifié</p>
-                                </div>
+                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/10 text-yellow-400 border border-yellow-400">
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V5z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Non vérifié
+                                </span>
                             {% endif %}
                         </div>
-                    </div>
-                    <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1 justify-center items-center text-center">
-                        {% if user.description %}
-                            <div class="max-w-2xl mx-auto mt-6 bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
-                                <div class=" flex flex-row items-center gap-2">
-                                    {% if isEditable %}
-                                        <button aria-roledescription="" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
-                                            <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
-                                                <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
-                                            </svg>
-                                        </button>
-                                    {% endif %}
-                                    <h2 class="text-xl font-semibold mb-2">Description</h2>
-                                </div>
-                                <div class="prose dark:prose-invert max-w-none">
-                                    {{ descriptionHtml|raw }}
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="max-w-2xl mx-auto mt-6 text-black-950 dark:text-white bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
-                                <div class=" flex flex-row items-center gap-2">
-                                    {% if isEditable %}
-                                        <button title="Modifier" role="button" onclick="toggleModalDescription()" class="hover:scale-110 transition-transform ease-in-out">
-                                            <svg width="20" height="20" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M27.7233 14.2767L0.375 41.625V56.625H15.375L42.7234 29.2767L27.7233 14.2767Z" fill="currentColor"/>
-                                                <path d="M33.0264 8.97334L48.0263 23.9733L53.5182 18.4816C55.5072 16.4925 56.6247 13.7946 56.6247 10.9816C56.6247 5.12374 51.8761 0.375 46.0182 0.375C43.205 0.375 40.5072 1.49248 38.5182 3.4816L33.0264 8.97334Z" fill="currentColor"/>
-                                            </svg>
-                                        </button>
-                                    {% endif %}
-                                    <h2 class="text-xl font-semibold mb-2">Description</h2>
-                                </div>
-                                <p class="text-sm italic">No description provided yet.</p>
-                            </div>
-                        {% endif %}
 
                     </div>
+                    <div class="flex flex-row font-thin text-grey-500 mb-2 gap-1 justify-center items-center text-center">
+                        <div class="max-w-2xl mx-auto mt-6 text-black-950 dark:text-white bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
+                            <div class="flex flex-row items-center gap-2">
+                                <h2 
+                                    {% if isEditable %}
+                                        onclick='openModal({
+                                            title: "Modifier la description",
+                                            action: "{{ path('app_update_description', { id: user.id }) }}",
+                                            fieldName: "description",
+                                            value: "{{ user.description|e('js') }}"
+                                        })'
+                                        role="button"
+                                        title="Modifier la description"
+                                        class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition"
+                                    {% else %}
+                                        class="text-xl font-semibold mb-2"
+                                    {% endif %}
+                                >
+                                    Description
+                                </h2>
+                            </div>
+
+                            <div class="prose dark:prose-invert max-w-none">
+                                {% if user.description %}
+                                    {{ descriptionHtml|raw }}
+                                {% elseif isEditable %}
+                                    <p class="italic text-sm text-grey-500">Clique ici pour ajouter une description à ton profil.</p>
+                                {% else %}
+                                    <p class="italic text-sm text-grey-500">Pas de description renseignée.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                {% for label, messages in app.flashes %}
-                    {% for message in messages %}
-                        <div class="flash-dismissable transition-opacity duration-500 opacity-100 px-4 py-1 rounded shadow text-white
-                                    {% if label == 'success' %} dark:text-blue-500 text-blue-500
-                                    {% elseif label == 'error' %} dark:text-red-600 text-red-600
-                                    {% elseif label == 'warning' %} dark:text-yellow-600 text-yellow-600 
-                                    {% else %} dark:text-white {% endif %}">
-                            {{ message }}
+            </div>
+
+        <!-- Modal d'Édition Générique -->
+        <div id="genericEditModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+            <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
+                <h2 id="genericModalTitle" class="text-xl font-semibold mb-4">Titre</h2>
+                <form method="POST" action="">
+                    <!-- Champ inséré dynamiquement ici -->
+                    <div id="genericModalField"></div>
+
+                    <div class="flex justify-end gap-3 mt-4">
+                        <button type="button" onclick="document.getElementById('genericEditModal').classList.add('hidden')"
+                                class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">
+                            Annuler
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">
+                            Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+</section>
+
+
+<section class=" bg-white-muted dark:bg-black-950 dark:text-white px-6 pb-12 w-3/4">
+
+    <!-- Séparateur -->
+    <div class="w-full h-px bg-grey-500 opacity-30 my-6"></div>
+
+    <!-- Section des commentaires -->
+    <div class="w-full flex items-center gap-3 mb-4">
+        <svg width="25" class="dark:text-white text-black-950" viewBox="0 0 60 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M60 0.75H0V45.75H18.75L30 57L41.25 45.75H60V0.75ZM11.25 19.5H18.75V27H11.25V19.5ZM33.75 19.5H26.25V27H33.75V19.5ZM48.75 19.5H41.25V27H48.75V19.5Z" fill="currentColor"/>
+        </svg>
+        <h2 class="text-xl sm:text-2xl font-semibold dark:text-white text-black-950">Commentaires rédigés</h2>
+    </div>
+
+    {% set hasComments = user.posts|length > 0 or user.reponse|length > 0 %}
+
+    {% if hasComments %}
+        <!-- Section Commentaires -->
+        <div class="w-full flex flex-col gap-6">
+            {# Commentaires directs #}
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-2">Commentaires</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for comment in user.posts|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                        <div class="bg-grey-900 dark:bg-black-900 rounded-xl shadow-md hover:shadow-lg transition-shadow p-4 flex flex-col justify-between h-full text-white">
+                            <div class="flex flex-col gap-2 mb-2">
+                                <div class="flex justify-between items-center text-xs text-grey-500">
+                                    <p>
+                                        Sur :
+                                        <a href="{{ path('liste_show', { id: comment.commentaire.id }) }}"
+                                        class="text-blue-500 hover:underline hover:text-blue-400 transition-colors">
+                                            {{ comment.commentaire.name ?? 'Collection #' ~ comment.commentaire.id }}
+                                        </a>
+                                    </p>
+                                    <span class="italic">{{ comment.dateCreation|date('d/m/Y H:i') }}</span>
+                                </div>
+                                <div class="text-sm text-grey-300 line-clamp-5 leading-snug">
+                                    {{ comment.content }}
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <span class="px-2 py-1 rounded-full text-xs bg-blue-600/10 text-blue-500 border border-blue-600">
+                                    Commentaire
+                                </span>
+                            </div>
                         </div>
                     {% endfor %}
-                {% endfor %}
+                </div>
             </div>
-            {# Modal #}
+
+            {# Réponses #}
             <div>
-                <!-- MODAL Email -->
-                <div id="editEmailModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
-                    <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
-                        <h2 class="text-xl font-semibold mb-4">Edit your email</h2>
-                        <form method="POST" action="{{ path('app_update_email', { id: user.id }) }}">
-                            <input type="text" name="name" value="{{ user.email }}" class="w-full px-4 py-2 border rounded-md bg-white text-black-950" required>
-                            <div class="flex justify-end gap-3 mt-4">
-                                <button role="button" type="button" onclick="toggleModalEmail()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cacnel</button>
-                                <button role="button" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
+                <h3 class="text-lg font-semibold text-white mb-2">Réponses</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for reply in user.reponse|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                        <div class="bg-grey-900 dark:bg-black-900 rounded-xl shadow-md hover:shadow-lg transition-shadow p-4 flex flex-col justify-between h-full text-white">
+                            <div class="flex flex-col gap-2 mb-2">
+                                <div class="flex justify-between items-center text-xs text-grey-500">
+                                    <p>
+                                        En réponse à :
+                                        <a href="{{ path('liste_show', { id: reply.post.commentaire.id }) }}"
+                                        class="text-blue-500 hover:underline hover:text-blue-400 transition-colors">
+                                            {{ reply.post.commentaire.name ?? 'Collection #' ~ reply.post.commentaire.id }}
+                                        </a>
+                                    </p>
+                                    <span class="italic">{{ reply.dateCreation|date('d/m/Y H:i') }}</span>
+                                </div>
+                                <div class="text-sm text-grey-300 line-clamp-5 leading-snug">
+                                    {{ reply.content }}
+                                </div>
                             </div>
-                        </form>
-                    </div>
-                </div>
-                <!-- MODAL Nom -->
-                <div id="editNameModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
-                    <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
-                        <h2 class="text-xl font-semibold mb-4">Edit your name</h2>
-                        <form method="POST" action="{{ path('app_update_name', { id: user.id }) }}">
-                            <input type="text" name="name" value="{{ user.name }}" class="w-full px-4 py-2 border rounded-md bg-white text-black-950" required>
-                            <div class="flex justify-end gap-3 mt-4">
-                                <button role="button" type="button" onclick="toggleModalName()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
-                                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
+                            <div class="flex justify-end">
+                                <span class="px-2 py-1 rounded-full text-xs bg-green-600/10 text-green-500 border border-green-600">
+                                    Réponse
+                                </span>
                             </div>
-                        </form>
-                    </div>
-                </div>
-                <!-- MODAL Description -->
-                <div id="editDescriptionModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
-                    <div class="bg-white dark:bg-black-900 text-black dark:text-white p-6 rounded-lg w-[90%] max-w-md">
-                        <h2 class="text-xl font-semibold mb-4">Edit your description (Markdown supported)</h2>
-                        <form method="POST" action="{{ path('app_update_description', { id: user.id }) }}">
-                        <textarea 
-                            name="description" 
-                            rows="12"
-                            class="w-full px-4 py-2 border rounded-md bg-white text-black-950 
-                                focus:outline-none focus:ring-0 active:outline-none active:ring-0 resize-none"
-                            placeholder="Décrivez votre univers..."
-                            required>{{ user.description }}</textarea>
-                            <div class="flex justify-end gap-3 mt-4">
-                                <button role="button" type="button" onclick="toggleModalDescription()" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Cancel</button>
-                                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-grey-800">Save</button>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
-            <script>
-                function toggleModalName() {
-                    const modal = document.getElementById('editNameModal');
-                    modal.classList.toggle('hidden');
-                }
-                function toggleModalEmail() {
-                    const modal = document.getElementById('editEmailModal');
-                    modal.classList.toggle('hidden');
-                }
-                function toggleModalDescription() {
-                    const modal = document.getElementById('editDescriptionModal');
-                    modal.classList.toggle('hidden');
-                }
-                document.querySelectorAll('.flash-dismissable').forEach((el) => {
-                    setTimeout(() => {
-                        el.classList.remove('opacity-100');
-                        el.classList.add('opacity-0');
-                        setTimeout(() => el.remove(), 1000); // correspond à duration-500
-                    }, 4000);
-                });
-            </script>
-    </section>
-    <section class=" bg-slate-50 dark:bg-black-950 dark:text-white px-6 py-12">
-        <!-- Trait -->
-        <div class="w-full h-px bg-white opacity-20 my-4"></div>
-
-        <!-- Commentaires rédigés -->
-        <div class="w-full flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Commentaires rédigés</h2>
         </div>
+    {% else %}
+        <p class="text-sm italic text-grey-500">Aucun commentaire rédigé pour le moment.</p>
+    {% endif %}
 
-        {% set hasComments = user.posts|length > 0 or user.reponse|length > 0 %}
 
-        {% if hasComments %}
-            <div class="w-full flex flex-col gap-4">
-                {# --- Posts principaux (commentaires directs) --- #}
-                {% for comment in user.posts|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                    <div class="bg-white dark:bg-black-900 p-4 rounded-lg shadow text-black-950 dark:text-white">
-                        <div class="flex justify-between items-center text-sm text-grey-500 mb-1">
-                            <p>Sur : 
-                                <a href="{{ path('liste_show', { id: comment.commentaire.id }) }}" class="text-blue-500 hover:underline">
-                                    {{ comment.commentaire.name ?? 'Collection #' ~ comment.commentaire.id }}
+    <!-- Séparateur -->
+    <div class="w-full h-px bg-grey-500 opacity-30 my-6"></div>
+    
+    <!-- Collections créées -->
+    <div class="w-full flex justify-between items-center mb-4">
+        <h2 class="text-xl sm:text-2xl font-semibold dark:text-white text-black-950">Collections créées</h2>
+    </div>
+
+    {% if user.listes is not empty %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full ">
+            {% for collection in user.listes|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                <div class="bg-grey-900 dark:bg-black-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between text-white tilt-card">
+                    <div>
+                        <a href="{{ path('liste_show', { id: collection.id }) }}">
+                            <img src="{{ asset('uploads/' ~ collection.image) }}"
+                                alt="{{ collection.name }}"
+                                class="rounded-lg mb-3 h-32 w-full object-cover shadow-sm border border-grey-800 hover:opacity-90 transition-opacity duration-200">
+                        </a>
+                        <h3 class="text-lg font-semibold truncate text-white">
+                            {{ collection.name }}
+                        </h3>
+                        <p class="text-xs italic text-grey-400">
+                            Par 
+                            {% if collection.usser is not null %}
+                                <a href="{{ path('app_profil_visiteur', { id: collection.usser.id }) }}"
+                                class="text-blue-500 hover:underline hover:text-blue-400 transition-colors">
+                                    {{ collection.usser.name }}
                                 </a>
-                            </p>
-                            <p class="italic">{{ comment.dateCreation|date('d/m/Y H:i') }}</p>
-                        </div>
-                        <div class="text-sm leading-relaxed whitespace-pre-wrap">
-                            {{ comment.content }}
-                        </div>
-                        <span class="inline-block mt-2 px-2 py-1 rounded text-xs bg-blue-100 text-blue-600 font-semibold">Commentaire</span>
-                    </div>
-                {% endfor %}
-
-                {# --- Réponses (SousPost) --- #}
-                {% for reply in user.reponse|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                    <div class="bg-white dark:bg-black-900 p-4 rounded-lg shadow text-black-950 dark:text-white">
-                        <div class="flex justify-between items-center text-sm text-grey-500 mb-1">
-                            <p>En réponse à :
-                                <a href="{{ path('liste_show', { id: reply.post.commentaire.id }) }}" class="text-blue-500 hover:underline">
-                                    {{ reply.post.commentaire.name ?? 'Collection #' ~ reply.post.commentaire.id }}
-                                </a>
-                            </p>
-                            <p class="italic">{{ reply.dateCreation|date('d/m/Y H:i') }}</p>
-                        </div>
-                        <div class="text-sm leading-relaxed whitespace-pre-wrap">
-                            {{ reply.content }}
-                        </div>
-                        <span class="inline-block mt-2 px-2 py-1 rounded text-xs bg-green-100 text-green-600 font-semibold">Réponse</span>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-sm italic text-grey-400">Aucun commentaire rédigé pour le moment.</p>
-        {% endif %}
-
-        <!-- Trait -->
-        <div class="w-full h-px bg-white opacity-20 my-4"></div>
-
-        <!-- Collections créées -->
-        <div class="w-full flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Collections créées</h2>
-        </div>
-
-        {% if user.listes is not empty %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
-                {% for collection in user.listes|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                    <div class="bg-white dark:bg-black-900 p-4 rounded-lg shadow text-black-950 dark:text-white">
-                        <img src="{{ asset('uploads/' ~ collection.image) }}" alt="{{ collection.name }}" class="rounded-md mb-2 h-32 w-full object-cover">
-                        <h3 class="text-lg font-bold truncate">{{ collection.name }}</h3>
-                        <p class="text-sm text-grey-500 truncate">{{ collection.description|default('Aucune description') }}</p>
-                        <div class="text-xs text-grey-400 mt-2 flex justify-between">
-                            <span>{{ collection.dateCreation|date('d/m/Y') }}</span>
-                            <span>{{ collection.favorisCount }} favoris</span>
-                        </div>
-                        <a href="{{ path('liste_show', { id: collection.id }) }}" class="inline-block mt-2 text-sm text-blue-500 hover:underline">Voir plus →</a>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-sm italic text-grey-400">Aucune collection créée pour le moment.</p>
-        {% endif %}
-
-
-        <!-- Trait -->
-        <div class="w-full h-px bg-white opacity-20 my-4"></div>
-
-        <!-- Collections en favoris -->
-        <div class="w-full flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Collections en favoris</h2>
-        </div>
-
-        {% if user.favoris is not empty %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
-                {% for collection in user.favoris|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                    <div class="bg-white dark:bg-black-900 p-4 rounded-lg shadow text-black-950 dark:text-white">
-                        <img src="{{ asset('uploads/' ~ (collection.image ?? 'collection_template.webp')) }}" 
-                            alt="{{ collection.name }}" 
-                            class="rounded-md mb-2 h-32 w-full object-cover">
-                        
-                        <h3 class="text-lg font-bold truncate">{{ collection.name }}</h3>
-                        <p class="text-sm text-grey-500 truncate">
+                            {% else %}
+                                <span class="text-red-400 italic">Utilisateur supprimé</span>
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-grey-400 truncate">
                             {{ collection.description|default('Aucune description') }}
                         </p>
-                        
-                        <div class="text-xs text-grey-400 mt-2 flex justify-between">
-                            <span>{{ collection.dateCreation|date('d/m/Y') }}</span>
-                            <span>{{ collection.favorisCount }} favoris</span>
-                        </div>
-                        
-                        <a href="{{ path('liste_show', { id: collection.id }) }}" 
-                        class="inline-block mt-2 text-sm text-blue-500 hover:underline">
-                        Voir plus →
-                        </a>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-sm italic text-grey-400">Aucune collection en favoris pour le moment.</p>
-        {% endif %}
 
-        <!-- Trait -->
-        <div class="w-full h-px bg-white opacity-20 my-4"></div>
+                    <div class="mt-4 flex justify-between text-xs text-grey-500">
+                        <span>{{ collection.dateCreation|date('d/m/Y') }}</span>
+                        <span>{{ collection.favorisCount }} favoris</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-sm italic text-grey-400">Aucune collection créée pour le moment.</p>
+    {% endif %}
+
+    <!-- Séparateur -->
+    <div class="w-full h-px bg-grey-500 opacity-30 my-6"></div>
+
+    <!-- Collections en favoris -->
+    <div class="w-full flex justify-between items-center mb-4">
+        <h2 class="text-xl sm:text-2xl font-semibold dark:text-white text-black-950">Collections en favoris</h2>
+    </div>
+
+    {% if user.favoris is not empty %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+            {% for collection in user.favoris|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
+                <div class="bg-grey-900 dark:bg-black-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between text-white tilt-card">
+                    <div>
+                        <a href="{{ path('liste_show', { id: collection.id }) }}">
+                            <img src="{{ asset('uploads/' ~ (collection.image ?? 'collection_template.webp')) }}"
+                                alt="{{ collection.name }}"
+                                class="rounded-lg mb-3 h-32 w-full object-cover shadow-sm border border-grey-800 hover:opacity-90 transition-opacity duration-200">
+                        </a>
+                        <h3 class="text-lg font-semibold truncate text-white">
+                            {{ collection.name }}
+                        </h3>
+                        <p class="text-xs italic text-grey-400">
+                            Par 
+                            {% if collection.usser is not null %}
+                                {% if app.user and app.user.id == collection.usser.id %}
+                                    <span>{{ collection.usser.name }}</span>
+                                {% else %}
+                                    <a href="{{ path('app_profil_visiteur', { id: collection.usser.id }) }}"
+                                    class="text-blue-500 hover:underline hover:text-blue-400 transition-colors">
+                                        {{ collection.usser.name }}
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-red-400 italic">Utilisateur supprimé</span>
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-grey-400 truncate">
+                            {{ collection.description|default('Aucune description') }}
+                        </p>
+                    </div>
+
+                    <div class="mt-4 flex justify-between text-xs text-grey-500">
+                        <span>{{ collection.dateCreation|date('d/m/Y') }}</span>
+                        <span>{{ collection.favorisCount }} favoris</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-sm italic text-grey-400">Aucune collection en favoris pour le moment.</p>
+    {% endif %}
+
+
+    <!-- Séparateur -->
+    <div class="w-full h-px bg-grey-500 opacity-30 my-6"></div>
 
         <!-- Statistiques personnelles -->
         <div class="w-full mb-4">
-            <h2 class="text-xl font-semibold mb-2">Mon activité</h2>
+            <h2 class="text-xl sm:text-2xl font-semibold dark:text-white text-black-950">Mon activité</h2>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-center text-black-950 dark:text-white">
-            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4 tilt-card">
                 <p class="text-3xl font-bold">{{ user.listes|length }}</p>
                 <p class="text-sm text-grey-500">Collections créées</p>
             </div>
-            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4 tilt-card">
                 <p class="text-3xl font-bold">{{ user.posts|length }}</p>
                 <p class="text-sm text-grey-500">Commentaires postés</p>
             </div>
-            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4 tilt-card">
                 <p class="text-3xl font-bold">{{ user.reponse|length }}</p>
                 <p class="text-sm text-grey-500">Réponses envoyées</p>
             </div>
-            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4 tilt-card">
                 <p class="text-3xl font-bold">{{ user.sousPosts|length }}</p>
                 <p class="text-sm text-grey-500">Commentaires likés</p>
             </div>
-            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-black-900 rounded-lg shadow p-4 tilt-card">
                 <p class="text-3xl font-bold">{{ user.favoris|length }}</p>
                 <p class="text-sm text-grey-500">Collections en favoris</p>
             </div>
         </div>
 
-    </section>
+</section>
+
+<script type="module">
+    import initAddonScript from '{{ asset("js/asset/profilSideBarre.js") }}';
+    initAddonScript();
+</script>
+<script type="module">
+    import initAddonScript from '{{ asset("js/asset/orIcon.js") }}';
+    initAddonScript(20);
+</script>
 {% endblock %}
