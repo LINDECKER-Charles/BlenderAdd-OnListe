@@ -19,7 +19,7 @@
         <div>
             <p class="font-semibold text-lg">Description :</p>
             <p class="text-gray-600 dark:text-gray-300">
-                {{ liste.description ?: 'Aucune description fournie.' }}
+                {{ liste.description ? liste.description|nl2br|raw : 'Aucune description fournie.' }}
             </p>
         </div>
         {% if app.user and app.user == liste.usser %}
@@ -122,19 +122,7 @@
         </button>
     </form>
     
-    
-    {# Message d'erreur #}
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="flash-dismissable transition-opacity duration-500 opacity-100 px-4 py-2 mb-4 rounded shadow text-white
-                        {% if label == 'success' %} bg-green-500
-                        {% elseif label == 'error' %} bg-red-500
-                        {% elseif label == 'warning' %} bg-yellow-500
-                        {% else %} bg-gray-500 {% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endfor %}
+
 
     {# Ajout d'add-on #}
     <h2 class="text-2xl font-semibold mb-3">Ajouter un Add-on à la collection</h2>

@@ -1,5 +1,5 @@
 export default function initAddonScript(val) {
-    console.log("Script orIcon.js chargé ✅");
+    console.log("Script orIcon.js chargé ✅", val);
     
   const cards = document.querySelectorAll(".tilt-card");
 

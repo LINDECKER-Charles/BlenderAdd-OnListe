@@ -19,6 +19,11 @@ export default function initModalScript() {
             if (targetElement) {
                 modalContent.innerHTML = targetElement.innerHTML;
                 modal.classList.remove('hidden');
+
+                gsap.fromTo(modal,
+                    { y: -20, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }
+                );
             }
             });
         });

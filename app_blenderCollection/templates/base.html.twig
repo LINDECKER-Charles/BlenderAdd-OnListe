@@ -88,7 +88,7 @@
       {% include "partials/header.html.twig" %}    
       {% block body %}{% endblock %}
       {# Toast Container (position fixed) #}
-      <div id="toast-container" class="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-3">
+      <div id="toast-container" class="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-3 mb-10">
           {% for label, messages in app.flashes %}
               {% for message in messages %}
                   <div class="flash-dismissable px-4 py-2 rounded-xl shadow-lg text-sm max-w-xs w-fit transition-opacity duration-500 opacity-100

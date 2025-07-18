@@ -76,7 +76,7 @@ export default function initModalScript() {
             }
         });
 
-        // ✨ Support du système `data-*`
+        // Support du système `data-*`
         document.querySelectorAll('.open-modal-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const { title, action, fieldName, value } = btn.dataset;
