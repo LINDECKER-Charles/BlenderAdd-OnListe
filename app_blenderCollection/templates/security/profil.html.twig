@@ -173,13 +173,11 @@
                     <div class="flex items-center gap-4 px-4 py-2 bg-grey-900 dark:bg-grey-950 rounded-xl shadow-sm max-w-fit">
                         <h1
                             {% if isEditable %}
-                            class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition"
-                            onclick="openModal({
-                                title: 'Modifier le nom',
-                                action: '{{ path("app_update_name", { id: user.id }) }}',
-                                fieldName: 'name',
-                                value: '{{ user.name|e('js') }}'
-                            })" 
+                                class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition open-modal-btn"
+                                data-title="Modifier le nom"
+                                data-action="{{ path('app_update_name', { id: user.id }) }}"
+                                data-field-name="name"
+                                data-value="{{ user.name|e('html_attr') }}"
                             {% endif %}>
                                 {{ user.name }}
                         </h1>
@@ -188,13 +186,11 @@
                     <div class="flex items-center gap-4 px-4 py-2 bg-grey-900 dark:bg-grey-950 rounded-xl shadow-sm max-w-fit">
                         <p 
                             {% if isEditable %}
-                                class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition"
-                                onclick='openModal({
-                                    title: "Modifier ladresse mail",
-                                    action: "{{ path('app_update_email', { id: user.id }) }}",
-                                    fieldName: "email",
-                                    value: "{{ user.email|e('js') }}"
-                                })'
+                                class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition open-modal-btn"
+                                data-title="Modifier l'adresse mail"
+                                data-action="{{ path('app_update_email', { id: user.id }) }}"
+                                data-field-name="email"
+                                data-value="{{ user.email|e('html_attr') }}"
                             {% endif %}>
                             {{ user.email }}
                         </p>
@@ -235,15 +231,13 @@
                             <div class="flex flex-row items-center gap-2">
                                 <h2 
                                     {% if isEditable %}
-                                        onclick='openModal({
-                                            title: "Modifier la description",
-                                            action: "{{ path('app_update_description', { id: user.id }) }}",
-                                            fieldName: "description",
-                                            value: "{{ user.description }}"
-                                        })'
+                                        data-title="Modifier la description"
+                                        data-action="{{ path('app_update_description', { id: user.id }) }}"
+                                        data-field-name="description"
+                                        data-value="{{ user.description|e('html_attr') }}"
                                         role="button"
                                         title="Modifier la description"
-                                        class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition"
+                                        class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition open-modal-btn"
                                     {% else %}
                                         class="text-xl font-semibold mb-2"
                                     {% endif %}
@@ -449,14 +443,10 @@
                         <p class="text-xs italic text-grey-400">
                             Par 
                             {% if collection.usser is not null %}
-                                {% if app.user and app.user.id == collection.usser.id %}
-                                    <span>{{ collection.usser.name }}</span>
-                                {% else %}
-                                    <a href="{{ path('app_profil_visiteur', { id: collection.usser.id }) }}"
-                                    class="text-blue-500 hover:underline hover:text-blue-400 transition-colors">
-                                        {{ collection.usser.name }}
-                                    </a>
-                                {% endif %}
+                                <a href="{{ path('app_profil_visiteur', { id: collection.usser.id }) }}"
+                                class="text-blue-500 hover:underline hover:text-blue-400 transition-colors">
+                                    {{ collection.usser.name }}
+                                </a>
                             {% else %}
                                 <span class="text-red-400 italic">Utilisateur supprimé</span>
                             {% endif %}
@@ -512,7 +502,15 @@
 </section>
 
 <script type="module">
-    import initAddonScript from '{{ asset("js/asset/profilSideBarre.js") }}';
+    import initAddonScript from '{{ asset("js/profil/profilModal.js") }}';
+    initAddonScript();
+</script>
+<script type="module">
+    import initAddonScript from '{{ asset("js/profil/profilImgLum.js") }}';
+    initAddonScript();
+</script>
+<script type="module">
+    import initAddonScript from '{{ asset("js/profil/profilSideBarre.js") }}';
     initAddonScript();
 </script>
 <script type="module">
