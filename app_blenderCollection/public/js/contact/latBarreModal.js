@@ -1,13 +1,12 @@
 export default function initModalScript() {
-
-    
-    document.addEventListener('turbo:load', () => {
-
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
         const closeBtn = document.getElementById('modal-close');
 
-        if (!modal || !modalContent || !closeBtn)return;
+        if (!modal || !modalContent || !closeBtn){
+            console.log("Script latBarreModal.js non chargé");
+            return;
+        }
 
         console.log("Script latBarreModal.js chargé ✅");
         
@@ -40,5 +39,4 @@ export default function initModalScript() {
             modalContent.innerHTML = '';
             }
         });
-    });
 }
