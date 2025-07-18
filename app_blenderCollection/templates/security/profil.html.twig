@@ -170,30 +170,42 @@
                 <!-- Nom + Email + Role -->
                 <div class=" flex flex-col gap-4 justify-center items-center">
                     {# Nom #}
-                    <div class="flex items-center gap-4 px-4 py-2 bg-grey-900 dark:bg-grey-950 rounded-xl shadow-sm max-w-fit">
-                        <h1
-                            {% if isEditable %}
-                                class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition open-modal-btn"
-                                data-title="Modifier le nom"
-                                data-action="{{ path('app_update_name', { id: user.id }) }}"
-                                data-field-name="name"
-                                data-value="{{ user.name|e('html_attr') }}"
-                            {% endif %}>
-                                {{ user.name }}
-                        </h1>
+                    <div class="flex items-center gap-4 px-4 py-2 bg-grey-900 dark:bg-grey-950 rounded-xl shadow-sm max-w-fit justify-center">
+                        <h1 class="text-xl font-semibold text-white truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
+                            {{ user.name }}
+                        </h1>                        
+                        {% if isEditable %}
+                            <button
+                            class="w-9 h-9 flex items-center justify-center rounded-full bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500/50 open-modal-btn"
+                            data-title="Modifier le nom"
+                            data-action="{{ path('app_update_name', { id: user.id }) }}"
+                            data-field-name="name"
+                            data-value="{{ user.name|e('html_attr') }}">
+                                <svg width="20" viewBox="0 0 55 55" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white">
+                                    <path d="M50.1997 14.0001L26.3497 37.85C23.9747 40.225 16.9247 41.325 15.3497 39.75C13.7747 38.175 14.8497 31.125 17.2247 28.75L41.0998 4.87505C41.6885 4.2327 42.4013 3.71635 43.1953 3.3571C43.989 2.99785 44.8475 2.8031 45.7187 2.78475C46.5897 2.76643 47.4558 2.92478 48.264 3.2503C49.0723 3.57583 49.8063 4.06183 50.4215 4.67883C51.0368 5.29583 51.5207 6.03107 51.844 6.84022C52.1672 7.6494 52.3235 8.51565 52.3027 9.38677C52.282 10.2579 52.0848 11.1159 51.7235 11.9087C51.362 12.7016 50.8437 13.4131 50.1997 14.0001Z" stroke="currentColor" stroke-width="3.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M24.5 8H12C9.34782 8 6.80445 9.05355 4.92907 10.9289C3.05372 12.8043 2 15.3478 2 18V43C2 45.6522 3.05372 48.1957 4.92907 50.071C6.80445 51.9465 9.34782 53 12 53H39.5C45.025 53 47 48.5 47 43V30.5" stroke="currentColor" stroke-width="3.75" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        {% endif %}
                     </div>
                     {# Email #}
                     <div class="flex items-center gap-4 px-4 py-2 bg-grey-900 dark:bg-grey-950 rounded-xl shadow-sm max-w-fit">
-                        <p 
-                            {% if isEditable %}
-                                class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition open-modal-btn"
+                        <p class="text-xl font-semibold text-white truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
+                            {{ user.email }}
+                        </p>                        
+                        {% if isEditable %}
+                            <button
+                            class="w-9 h-9 flex items-center justify-center rounded-full bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500/50 open-modal-btn"
                                 data-title="Modifier l'adresse mail"
                                 data-action="{{ path('app_update_email', { id: user.id }) }}"
                                 data-field-name="email"
-                                data-value="{{ user.email|e('html_attr') }}"
-                            {% endif %}>
-                            {{ user.email }}
-                        </p>
+                                data-value="{{ user.email|e('html_attr') }}">
+                                <svg width="20" viewBox="0 0 55 55" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white">
+                                    <path d="M50.1997 14.0001L26.3497 37.85C23.9747 40.225 16.9247 41.325 15.3497 39.75C13.7747 38.175 14.8497 31.125 17.2247 28.75L41.0998 4.87505C41.6885 4.2327 42.4013 3.71635 43.1953 3.3571C43.989 2.99785 44.8475 2.8031 45.7187 2.78475C46.5897 2.76643 47.4558 2.92478 48.264 3.2503C49.0723 3.57583 49.8063 4.06183 50.4215 4.67883C51.0368 5.29583 51.5207 6.03107 51.844 6.84022C52.1672 7.6494 52.3235 8.51565 52.3027 9.38677C52.282 10.2579 52.0848 11.1159 51.7235 11.9087C51.362 12.7016 50.8437 13.4131 50.1997 14.0001Z" stroke="currentColor" stroke-width="3.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M24.5 8H12C9.34782 8 6.80445 9.05355 4.92907 10.9289C3.05372 12.8043 2 15.3478 2 18V43C2 45.6522 3.05372 48.1957 4.92907 50.071C6.80445 51.9465 9.34782 53 12 53H39.5C45.025 53 47 48.5 47 43V30.5" stroke="currentColor" stroke-width="3.75" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        {% endif %}
                     </div>
                     {# Role + Verification #}
                     <div class=" flex flex-row font-thin text-grey-500 mb-2 gap-1 justify-center items-center text-center">
@@ -203,7 +215,9 @@
                                     {% if role == 'ROLE_USER' %}
                                         {% set role = 'Membre' %}
                                     {% endif %}
-                                    <span class="px-2 py-1 rounded border border-grey-500 text-xs text-grey-400">{{ role|lower|capitalize }}</span>
+                                    {% if role != 'USER' %}
+                                        <span class="px-2 py-1 rounded border border-grey-500 text-xs text-grey-400">{{ role|lower|capitalize }}</span>
+                                    {% endif %}
                                 {% endfor %}
                             {% endif %}
                         </div>
@@ -228,29 +242,30 @@
                     </div>
                     <div class="flex flex-row font-thin text-grey-500 mb-2 gap-1 justify-center items-center text-center">
                         <div class="max-w-2xl mx-auto mt-6 text-black-950 dark:text-white bg-white dark:bg-black-900 p-6 rounded-lg shadow text-left">
-                            <div class="flex flex-row items-center gap-2">
-                                <h2 
-                                    {% if isEditable %}
+                            <div class="flex flex-row items-center gap-2 mb-4">
+                                <p class="text-xl font-semibold text-white truncate max-w-[200px] sm:max-w-xs md:max-w-sm">
+                                    Description
+                                </p>                        
+                                {% if isEditable %}
+                                    <button
+                                    class="w-9 h-9 flex items-center justify-center rounded-full bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500/50 open-modal-btn"
                                         data-title="Modifier la description"
                                         data-action="{{ path('app_update_description', { id: user.id }) }}"
                                         data-field-name="description"
                                         data-value="{{ user.description|e('html_attr') }}"
                                         role="button"
-                                        title="Modifier la description"
-                                        class="text-xl mb-2 text-purple-500 hover:underline cursor-pointer transition open-modal-btn"
-                                    {% else %}
-                                        class="text-xl font-semibold mb-2"
-                                    {% endif %}
-                                >
-                                    Description
-                                </h2>
+                                        title="Modifier la description">
+                                        <svg width="20" viewBox="0 0 55 55" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white">
+                                            <path d="M50.1997 14.0001L26.3497 37.85C23.9747 40.225 16.9247 41.325 15.3497 39.75C13.7747 38.175 14.8497 31.125 17.2247 28.75L41.0998 4.87505C41.6885 4.2327 42.4013 3.71635 43.1953 3.3571C43.989 2.99785 44.8475 2.8031 45.7187 2.78475C46.5897 2.76643 47.4558 2.92478 48.264 3.2503C49.0723 3.57583 49.8063 4.06183 50.4215 4.67883C51.0368 5.29583 51.5207 6.03107 51.844 6.84022C52.1672 7.6494 52.3235 8.51565 52.3027 9.38677C52.282 10.2579 52.0848 11.1159 51.7235 11.9087C51.362 12.7016 50.8437 13.4131 50.1997 14.0001Z" stroke="currentColor" stroke-width="3.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M24.5 8H12C9.34782 8 6.80445 9.05355 4.92907 10.9289C3.05372 12.8043 2 15.3478 2 18V43C2 45.6522 3.05372 48.1957 4.92907 50.071C6.80445 51.9465 9.34782 53 12 53H39.5C45.025 53 47 48.5 47 43V30.5" stroke="currentColor" stroke-width="3.75" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </button>
+                                {% endif %}
                             </div>
 
                             <div class="prose dark:prose-invert max-w-none">
                                 {% if user.description %}
                                     {{ descriptionHtml|raw }}
-                                {% elseif isEditable %}
-                                    <p class="italic text-sm text-grey-500">Clique ici pour ajouter une description à ton profil.</p>
                                 {% else %}
                                     <p class="italic text-sm text-grey-500">Pas de description renseignée.</p>
                                 {% endif %}
@@ -507,19 +522,19 @@
 
 </section>
 
-<script type="module">
+<script type="module" data-reload>
     import initAddonScript from '{{ asset("js/profil/profilModal.js") }}';
     initAddonScript();
 </script>
-<script type="module">
+<script type="module" data-reload>
     import initAddonScript from '{{ asset("js/profil/profilImgLum.js") }}';
     initAddonScript();
 </script>
-<script type="module">
+<script type="module" data-reload>
     import initAddonScript from '{{ asset("js/profil/profilSideBarre.js") }}';
     initAddonScript();
 </script>
-<script type="module">
+<script type="module" data-reload>
     import initAddonScript from '{{ asset("js/asset/orIcon.js") }}';
     initAddonScript(20);
 </script>

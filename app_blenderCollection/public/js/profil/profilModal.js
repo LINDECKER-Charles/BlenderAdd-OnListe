@@ -1,12 +1,9 @@
 export default function initModalScript() {
-    document.addEventListener('turbo:load', () => {
-        
-
         /* 🔧 Modale Édition Générique */
         const dynamicModal = document.getElementById('genericEditModal');
+        const fieldContainer = dynamicModal.querySelector('#genericModalField');
         const modalTitle = dynamicModal.querySelector('#genericModalTitle');
         const modalForm = dynamicModal.querySelector('form');
-        const fieldContainer = dynamicModal.querySelector('#genericModalField');
 
         const domElements = {
             dynamicModal: 'genericEditModal',
@@ -89,5 +86,4 @@ export default function initModalScript() {
                 });
             });
         });
-    });
 }

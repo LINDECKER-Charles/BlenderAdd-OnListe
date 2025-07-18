@@ -1,6 +1,5 @@
 
 export default function initModalScript() {
-    document.addEventListener('turbo:load', () => {
 
         const avatarImg = document.querySelector('#upload-avatar-form img');
         const svgIcon = document.querySelector('#upload-avatar-form svg');
@@ -62,5 +61,4 @@ export default function initModalScript() {
             svgIcon.classList.add(isDark ? 'text-white' : 'text-black-950');
         };
         
-    });
 }

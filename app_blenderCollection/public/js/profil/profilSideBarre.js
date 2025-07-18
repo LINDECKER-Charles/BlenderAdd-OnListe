@@ -1,6 +1,5 @@
 
 export default function initModalScript() {
-    document.addEventListener('turbo:load', () => {
         const isDesktop = window.innerWidth >= 1024;
         const sidebar = document.getElementById("adminSidebar");
         const openBtn = document.getElementById("toggleSidebarBtn");
@@ -109,6 +108,4 @@ export default function initModalScript() {
                 hideModal();
             }
         });
-        
-    });
 }

@@ -64,6 +64,10 @@
                     500: "#0585DC",
                     600: "#71D6FF"
                   },
+/*                   purple: {
+                    500: "#0585DC", 
+                    600: "#71D6FF"  
+                  }, */
                   purple: {
                     500: "#9F6EFF", // Accent discret inspiré de Blender Studio
                     600: "#B59CFF"  // Variante plus claire pour hover ou backgrounds doux
@@ -82,6 +86,10 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
+    <script type="module">
+      import initAddonScript from '{{ asset("js/reload.js") }}';
+      initAddonScript();
+    </script>
     <body id="top" class="transition-colors duration-300 ease-in-out flex flex-col justify-center items-center
      bg-slate-50 text-black-950 dark:bg-black-950 dark:text-white">
 

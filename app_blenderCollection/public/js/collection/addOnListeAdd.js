@@ -1,5 +1,4 @@
 export default function initAddonScript() {
-
   console.log("Script addOnListeAdd.js chargé ✅");
   const input = document.querySelector("#addon_url");
   const preview = document.querySelector("#addon-preview");
@@ -76,30 +75,34 @@ export default function initAddonScript() {
   }
 
   function renderAddOnTable(data) {
-    addOnListe.innerHTML = `
-      <table class="w-full h-full text-sm text-left text-white border border-grey-700 rounded">
-        <thead class="bg-grey-800 uppercase text-xs text-grey-400">
-          <tr>
-            <th scope="col" class="px-4 py-3">#</th>
-            <th scope="col" class="px-4 py-3">Add-on URL</th>
-            <th scope="col" class="px-4 py-3 text-center">Action</th>
-          </tr>
-        </thead>
-        <tbody class="bg-black-950 divide-y divide-grey-700">
-          ${data.map((addon, index) => `
-            <tr>
-              <td class="px-4 py-3 text-sm text-center text-grey-400">${index + 1}</td>
-              <td class="px-4 py-3 break-all">${addon[0]}</td>
-              <td class="px-4 py-3 text-center">
-                <a data-url="${addon[0]}" class="delete-addon hover:cursor-pointer bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded">
-                  Supprimer
-                </a>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
+addOnListe.innerHTML = `
+  <table class="min-w-full text-sm text-left border text-black-950 border-[#1B1C1C] rounded overflow-hidden">
+    <thead class="bg-[#25282D] text-xs uppercase text-[#888C96]">
+      <tr>
+        <th class="px-4 py-2 font-semibold">#</th>
+        <th class="px-4 py-2 font-semibold">Add-on URL</th>
+        <th class="px-4 py-2 text-center font-semibold">Action</th>
+      </tr>
+    </thead>
+    <tbody class="bg-[#30353B] divide-y divide-[#1B1C1C]">
+      ${data.map((addon, index) => `
+        <tr class="hover:bg-[#25282D] transition-colors duration-200">
+          <td class="px-4 py-2 text-center text-[#888C96]">${index + 1}</td>
+          <td class="px-4 py-2 text-[#BDC1C7] break-words max-w-[200px]">${addon[0]}</td>
+          <td class="px-4 py-2 text-center">
+            <button 
+              data-url="${addon[0]}"
+              class="delete-addon bg-red-600 hover:bg-red-700 text-[#F3F6F7] text-xs font-semibold px-3 py-1 rounded shadow-sm transition">
+              Supprimer
+            </button>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+`;
+
     attachDeleteEvents();
   }
+
 }

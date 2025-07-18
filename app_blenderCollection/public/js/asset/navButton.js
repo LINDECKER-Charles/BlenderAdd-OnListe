@@ -1,10 +1,6 @@
 
 
 export default function initModalScript() {
-    document.addEventListener('turbo:load', () => {
-
-        
-
         const btn = document.getElementById("createCollectionBtn");
 
         if(!btn){
@@ -80,5 +76,4 @@ export default function initModalScript() {
 
         addHoverAnim(profil, "#3B82F6");  // bleu Tailwind
         addHoverAnim(logout, "#EF4444");  // rouge Tailwind
-    });
 }

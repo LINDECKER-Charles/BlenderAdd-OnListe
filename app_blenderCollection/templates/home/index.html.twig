@@ -12,28 +12,35 @@
 {# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
 {% block body %}
-    <section class=" w-full  flex justify-center items-center
-        bg-[url('/img/bg2.jpg')] bg-[length:190%_auto] bg-[20%_69%]">
-        <article id="hero" class="w-2/3 h-[350px] lg:h-[450px]
-         flex flex-col justify-center px-12">
-            <h1 class=" font-bold text-4xl md:text-5xl lg:text-7xl text-white">Blender Add-on Collection</h1>
-            <h2 class=" text-lg md:text-xl lg:text-2xl mt-2 text-white">Find free and open source add-on collections.</h2>
-            <div class=" mt-4 flex flex-row gap-2">
-                <a class=" bg-white rounded-md px-16 py-2
-                 flex flex-row items-center justify-center gap-2" href="{{ path('app_collection')}}">
+    <section class="w-full flex justify-center items-center relative bg-[url('/img/bg2.jpg')] bg-cover bg-center bg-fixed">
+        <div class="absolute inset-0 bg-black bg-opacity-60 z-0"></div> {# Floutage / assombrissement #}
+
+        <article id="hero" class="relative z-10 w-full max-w-5xl h-[350px] lg:h-[500px] flex flex-col justify-center px-6 md:px-12">
+            <h1 class="font-bold text-4xl md:text-5xl lg:text-7xl text-white leading-tight drop-shadow-lg">
+                Blender Add-on Collection
+            </h1>
+            <h2 class="text-lg md:text-xl lg:text-2xl mt-3 text-white font-medium drop-shadow">
+                Find free and open source add-on collections.
+            </h2>
+
+            <div class="mt-6 flex flex-row flex-wrap gap-4">
+                <a href="{{ path('create_collection') }}"
+                class="bg-white text-black-950 rounded-lg px-8 py-3 flex items-center gap-2 shadow-md hover:shadow-xl transition hover:scale-[1.03] active:scale-100">
                     <svg width="26" height="31" viewBox="0 0 26 31" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M2.55208 22.7917H23.3854V2.99999H4.63542C4.08288 2.99999 3.55298 3.21948 3.16228 3.61019C2.77158 4.00089 2.55208 4.53079 2.55208 5.08333V22.7917ZM4.63542 0.916656H24.4271C24.7034 0.916656 24.9683 1.0264 25.1637 1.22175C25.359 1.4171 25.4688 1.68206 25.4688 1.95832V23.8333C25.4688 24.1096 25.359 24.3746 25.1637 24.5699C24.9683 24.7653 24.7034 24.875 24.4271 24.875H1.51042L0.46875 26.7479V5.08333C0.46875 3.97826 0.907737 2.91845 1.68914 2.13705C2.47054 1.35564 3.53035 0.916656 4.63542 0.916656Z" fill="#1B1C1C"/>
                         <path d="M4.11458 24.875C3.70018 24.875 3.30275 25.0396 3.00973 25.3326C2.7167 25.6257 2.55208 26.0231 2.55208 26.4375C2.55208 26.8519 2.7167 27.2493 3.00973 27.5423C3.30275 27.8354 3.70018 28 4.11458 28H23.3854V24.875H4.11458ZM4.11458 22.7917H25.4688V28C25.4688 28.5525 25.2493 29.0824 24.8586 29.4731C24.4679 29.8638 23.938 30.0833 23.3854 30.0833H4.11458C3.14765 30.0833 2.22032 29.6992 1.53659 29.0155C0.852864 28.3318 0.46875 27.4044 0.46875 26.4375C0.46875 25.4706 0.852864 24.5432 1.53659 23.8595C2.22032 23.1758 3.14765 22.7917 4.11458 22.7917ZM8.80208 2.99999V11.1667L11.9271 8.66666L15.0521 11.1667V2.99999H8.80208ZM6.71875 0.916656H17.1354V13.3333C17.1351 13.5293 17.0796 13.7213 16.9751 13.8871C16.8706 14.053 16.7214 14.186 16.5447 14.2708C16.3681 14.3557 16.171 14.389 15.9762 14.3669C15.7815 14.3447 15.5969 14.2681 15.4438 14.1458L11.9271 11.3333L8.41042 14.1458C8.25725 14.2681 8.07268 14.3447 7.87792 14.3669C7.68316 14.389 7.48612 14.3557 7.30943 14.2708C7.13274 14.186 6.98358 14.053 6.8791 13.8871C6.77461 13.7213 6.71903 13.5293 6.71875 13.3333V0.916656Z" fill="#1B1C1C"/>
                     </svg>
-                    <p class=" text-black-950 text-lg">Create Yours</p>
+                    <span class="text-lg font-medium">Create Yours</span>
                 </a>
-                <button class="bg-grey-850 bg-opacity-25 rounded-md px-12 py-2
-                 flex flex-row items-center justify-center gap-2">
-                    <p class=" text-white text-lg">Learn More</p>
-                </button>
+
+                <a href="#learn-more"
+                class="bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white rounded-lg px-8 py-3 flex items-center gap-2 shadow-md hover:shadow-xl transition hover:scale-[1.03] active:scale-100">
+                    <span class="text-lg font-medium">Learn More</span>
+                </a>
             </div>
         </article>
     </section>
+
     <section class=" px-12 mt-4 flex flex-col gap-8">
         <article class=" bg-white dark:bg-black-900 p-6 rounded-lg
         flex flex-col gap-4">
@@ -65,9 +72,11 @@
                     }
                 ] %}
 
-                {% for addon in addons %}
-                    <div class="relative w-2/4 h-[200px] lg:h-[300px] rounded-lg overflow-hidden p-4 flex flex-col justify-end bg-cover bg-center"
-                        style="background-image: url('/img/exemple/{{ addon.bg }}');">
+                {% for collection in collections|slice(0, 2) %}
+                    <a href="{{ path('liste_show', { id: collection.id }) }}"
+                    class="relative w-2/4 h-[200px] lg:h-[300px] rounded-lg overflow-hidden p-4 flex flex-col justify-end bg-cover bg-center"
+                    style="background-image: url('/uploads/{{ collection.image }}');">
+                        
                         <div class="absolute bottom-0 left-0 w-full h-32 z-10 pointer-events-none"
                             style="
                                 backdrop-filter: blur(4px);
@@ -76,20 +85,24 @@
                                 -webkit-mask-image: linear-gradient(to top, black 80%, transparent);
                             ">
                         </div>
+
                         <div class="relative z-20 text-white">
-                            <h3 class="text-3xl font-semibold">{{ addon.title }}</h3>
+                            <h3 class="text-3xl font-semibold">{{ collection.name }}</h3>
                             <div class="mt-2">
                                 <p class="flex items-center gap-2 text-sm">
-                                    by {{ addon.author }} | <span>{{ addon.views }}</span>
+                                    by {{ collection.usser.name ?? 'Unknown' }} |
+                                    <span>{{ collection.download ?? 0 }}</span>
                                     <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M8.50007 1V12.25M8.50007 12.25L12.7858 8.5M8.50007 12.25L4.21436 8.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M1 9.4375V15.0625C1 15.5803 1.4797 16 2.07143 16H14.9286C15.5203 16 16 15.5803 16 15.0625V9.4375" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M8.5 1V12.25M8.5 12.25L12.7858 8.5M8.5 12.25L4.21436 8.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                 </p>
-                                <p class="text-sm">{{ addon.desc }}</p>
+                                <p class="text-sm line-clamp-2">
+                                    {{ collection.description|slice(0, 100) ~ (collection.description and collection.description|length > 100 ? '...' : '') }}
+                                </p>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 {% endfor %}
 
             </div>
