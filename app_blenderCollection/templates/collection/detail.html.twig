@@ -2,11 +2,20 @@
 
 {% block title %}Détail de la liste - {{ liste.name }}{% endblock %}
 
-{% set isEditable =
-    liste.usser.id == app.user.id
-    or ('ADMIN' in app.user.roles and 'ADMIN' not in liste.usser)
-    or ('MODO' in app.user.roles and 'ADMIN' not in liste.usser and 'MODO' not in liste.usser)
-%}
+{% if liste.usser == null %}
+    {% set isEditable =
+        ('ADMIN' in app.user.roles and 'ADMIN' not in liste.usser)
+        or ('MODO' in app.user.roles and 'ADMIN' not in liste.usser and 'MODO' not in liste.usser)
+    %}
+{% else %}
+    {% set isEditable =
+        liste.usser.id == app.user.id
+        or ('ADMIN' in app.user.roles and 'ADMIN' not in liste.usser)
+        or ('MODO' in app.user.roles and 'ADMIN' not in liste.usser and 'MODO' not in liste.usser)
+    %}
+{% endif %}
+
+
 
 {% block body %}
 <main class="container mx-auto my-12 px-6 w-full lg:w-2/3">

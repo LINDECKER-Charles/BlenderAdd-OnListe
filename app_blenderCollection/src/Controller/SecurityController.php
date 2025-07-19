@@ -25,9 +25,12 @@ use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationExc
 
 class SecurityController extends AbstractController
 {
-    public function __construct(private EmailVerifier $emailVerifier)
-    {
-    }
+    public function __construct(
+        private EmailVerifier $emailVerifier,
+        private readonly ProfilEditor $profilEditor,
+        private readonly UserAccesChecker $uac,
+        private readonly MarkdownService $md
+        ){}
 
     /**
      * Affiche la page de connexion utilisateur.
@@ -43,9 +46,9 @@ class SecurityController extends AbstractController
      */
 
     #[Route(path: '/login', name: 'app_login')]
-    public function login(UserAccesChecker $uac, AuthenticationUtils $authenticationUtils, Request $request): Response
+    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
-        if ($uac->isConnected()) {
+        if ($this->uac->isConnected()) {
             return $this->redirectToRoute('app_home');
         }
         // get the login error if there is one
@@ -84,17 +87,17 @@ class SecurityController extends AbstractController
      * @return Response                Page de profil utilisateur.
      */
     #[Route('/profil', name: 'app_profil')]
-    public function profil(UserAccesChecker $uac, MarkdownService $md): Response
+    public function profil(): Response
     {
-/*         if (!$uac->isConnected()) {
+        if (!$this->uac->isConnected()) {
             return $this->redirectToRoute('app_login');
-        } */
-        $user = $this->getUser();
-        $htmlDescription = $md->toHtml($user->getDescription() ?? '');
+        }
 
+        $user = $this->getUser();
+        
         return $this->render('security/profil.html.twig', [
             'user' => $user,
-            'descriptionHtml' => $htmlDescription,
+            'descriptionHtml' => $this->md->toHtml($user->getDescription() ?? ''),
         ]);
     }
     /**
@@ -109,14 +112,15 @@ class SecurityController extends AbstractController
      * @return Response             Page de profil en lecture seule.
      */
     #[Route('/profil/{id}', name: 'app_profil_visiteur')]
-    public function profilVisiteur(MarkdownService $md, ?User $user): Response
+    public function profilVisiteur(?User $user): Response
     {
         if (!$user) {
             return $this->redirectToRoute('app_home');
         }
+
         return $this->render('security/profil.html.twig', [
             'user' => $user,
-            'descriptionHtml' => $md->toHtml($user->getDescription() ?? ''),
+            'descriptionHtml' => $this->md->toHtml($user->getDescription() ?? ''),
         ]);
     }
     /**
@@ -126,81 +130,42 @@ class SecurityController extends AbstractController
      * Empêche l’usage d’un nom déjà existant, puis met à jour la base.
      * Affiche des messages flash selon le résultat.
      *
-     * @param UserAccesChecker $uac     Vérifie les autorisations.
      * @param User $user                Utilisateur à modifier.
      * @param Request $request          Requête contenant le nouveau nom.
-     * @param EntityManagerInterface $em Gestionnaire d'entités Doctrine.
-     * @param UserRepository $userRepository Pour vérifier l’unicité du nom.
      *
      * @return Response                 Redirection vers la page de profil.
      */
     #[Route('/updateName/{id}', name: 'app_update_name', methods: ['POST'])]
-    public function updateName(UserAccesChecker $uac, User $user, Request $request, EntityManagerInterface $em, UserRepository $userRepository): Response
+    public function updateName(User $user, Request $request): Response
     {
-        if (!($uac->isConnected($user) || $uac->isStaff())) {
-            return $uac->redirectingGlobal();
+        if (!($this->uac->isConnected($user) || $this->uac->isStaff())) {
+            return $this->uac->redirectingGlobal();
         }
 
-        $newName = trim($request->request->get('name'));
-        if($userRepository->findOneBy(['name' => $newName])){
-
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('error', 'Name is taken!');
-            return $this->redirectToRoute('app_profil');
-        }
-        if ($newName && $user) {
-            $user->setName($newName);
-            $em->flush();
-
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('success', 'Name updated !');
-        }else{
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('error', 'Error cannot updated name !');
-        }
+        $this->profilEditor->updateName($user, trim($request->request->get('name')));
 
         return $this->redirectToRoute('app_profil_visiteur', ['id' => $user->getId()]);
     }
+
     /**
      * Met à jour l’adresse e-mail de l’utilisateur et déclenche un e-mail de confirmation.
      *
      * Remet le compte en non-vérifié et envoie un lien de validation à la nouvelle adresse.
      * Affiche des messages flash selon la réussite de l’opération.
      *
-     * @param UserAccesChecker $uac         Vérifie les autorisations.
      * @param User $user                    Utilisateur concerné.
      * @param Request $request              Requête contenant le nouvel e-mail.
-     * @param EntityManagerInterface $em   Gestionnaire d'entités Doctrine.
      *
      * @return Response                     Redirection vers la page de profil.
      */
     #[Route('/updateEmail/{id}', name: 'app_update_email', methods: ['POST'])]
-    public function updateEmail(UserAccesChecker $uac, User $user ,Request $request, EntityManagerInterface $em): Response
+    public function updateEmail(User $user, Request $request): Response
     {
-        if (!($uac->isConnected($user) || $uac->isStaff())) {
-            return $uac->redirectingGlobal();
+        if (!($this->uac->isConnected($user) || $this->uac->isStaff())) {
+            return $this->uac->redirectingGlobal();
         }
 
-        $newEmail = trim($request->request->get('name'));
-        if ($newEmail && $user) {
-            $user->setEmail($newEmail);
-            $user->setIsVerified(false);
-            $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
-                (new TemplatedEmail())
-                    ->from(new Address('no-reply@blender-collection.com', 'Blender Collection Mail Bot'))
-                    ->to((string) $user->getEmail())
-                    ->subject('Please Confirm your Email')
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
-            );
-            $em->flush();
-
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('success', 'Email updated !');
-            $this->addFlash('warning', 'You need to verify your new email !');
-        }else{
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('error', 'Error cannot updated email !');
-        }
+        $this->profilEditor->updateEmail($user, trim($request->request->get('email')));
 
         return $this->redirectToRoute('app_profil_visiteur', ['id' => $user->getId()]);
     }
@@ -210,34 +175,23 @@ class SecurityController extends AbstractController
      * Vérifie les droits d’accès, enregistre la nouvelle description Markdown en base.
      * Affiche un message flash selon le succès ou l’échec.
      *
-     * @param UserAccesChecker $uac       Vérifie les autorisations.
      * @param User $user                  Utilisateur à modifier.
      * @param Request $request            Requête contenant la description.
-     * @param EntityManagerInterface $em  Gestionnaire d'entités Doctrine.
      *
      * @return Response                   Redirection vers la page de profil.
      */
     #[Route('/updateDescription/{id}', name: 'app_update_description', methods: ['POST'])]
-    public function updateDescription(UserAccesChecker $uac, User $user, Request $request, EntityManagerInterface $em): Response
+    public function updateDescription(User $user, Request $request): Response
     {
-        if (!($uac->isConnected($user) || $uac->isStaff())) {
-            return $uac->redirectingGlobal();
+        if (!($this->uac->isConnected($user) || $this->uac->isStaff())) {
+            return $this->uac->redirectingGlobal();
         }
 
-        $newDescription = trim($request->request->get('description'));
-
-        if ($newDescription !== null && $user) {
-            $user->setDescription($newDescription);
-            $em->flush();
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('success', 'Description updated successfully!');
-        } else {
-            $request->getSession()->getFlashBag()->clear();
-            $this->addFlash('error', 'Error: Could not update description.');
-        }
+        $this->profilEditor->updateDescription($user, trim($request->request->get('description')));
 
         return $this->redirectToRoute('app_profil_visiteur', ['id' => $user->getId()]);
     }
+
 
     /**
      * Met à jour l’image de profil d’un utilisateur.
@@ -246,54 +200,26 @@ class SecurityController extends AbstractController
      * Utilise `UploadManager` pour nommer et déplacer le fichier.
      * Met à jour le chemin d’accès à l’image dans l’entité utilisateur.
      *
-     * @param UploadManager $uploadManager Service chargé de gérer les uploads.
-     * @param UserAccesChecker $uac        Vérifie les autorisations.
      * @param User $user                   Utilisateur concerné.
      * @param Request $request             Requête contenant le fichier.
-     * @param EntityManagerInterface $em   Gestionnaire d'entités Doctrine.
-     * @param SluggerInterface $slugger    Non utilisé ici (optionnel à retirer si inutile).
      *
      * @return Response                    Redirection vers la page de profil.
      */
     #[Route('/update-avatar/{id}', name: 'app_update_avatar', methods: ['POST'])]
-    public function updateAvatar(UploadManager $uploadManager, UserAccesChecker $uac, User $user, Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    public function updateAvatar(User $user, Request $request): Response
     {
-        if (!($uac->isConnected($user) || $uac->isStaff())) {
-            return $uac->redirectingGlobal();
+        if (!($this->uac->isConnected($user) || $this->uac->isStaff())) {
+            return $this->uac->redirectingGlobal();
         }
 
+        $destination = $this->getParameter('kernel.project_dir') . '/public/uploads/avatar';
         $file = $request->files->get('avatar');
 
-        if ($file && $file->isValid()) {
-            // Supprimer les anciens fichiers
-            $destination = $this->getParameter('kernel.project_dir') . '/public/uploads/avatar';
-            foreach (['png', 'jpg', 'jpeg', 'webp'] as $ext) {
-                $old = $destination . '/' . $user->getId() . '_avatar.' . $ext;
-                if (file_exists($old)) {
-                    unlink($old);
-                }
-            }
-
-            // Nom basé sur l'ID utilisateur
-            $extension = $file->guessExtension() ?: 'png';
-            $customName = $user->getId() . '_avatar.' . $extension;
-
-            // Déplacement via UploadManager
-            $savedName = $uploadManager->uploadLocalFile($file, $customName, $destination);
-
-            if ($savedName) {
-                $user->setPathImg('/uploads/avatar/' . $savedName);
-                $em->flush();
-                $this->addFlash('success', 'Image mise à jour avec succès !');
-            } else {
-                $this->addFlash('error', 'Erreur lors de l’envoi de l’image.');
-            }
-        } else {
-            $this->addFlash('error', 'Image invalide ou absente.');
-        }
+        $this->profilEditor->updateAvatar($user, $file, $destination);
 
         return $this->redirectToRoute('app_profil_visiteur', ['id' => $user->getId()]);
     }
+
     /**
      * Affiche une page invitant l’utilisateur à vérifier son e-mail.
      *

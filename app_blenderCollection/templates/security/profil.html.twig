@@ -397,7 +397,7 @@
     {% if user.listes is not empty %}
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full ">
             {% for collection in user.listes|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                <div class="bg-grey-900 dark:bg-black-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between text-white tilt-card">
+                <div class=" truncate bg-grey-900 dark:bg-black-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between text-white tilt-card">
                     <div>
                         <a href="{{ path('liste_show', { id: collection.id }) }}">
                             <img src="{{ asset('uploads/' ~ collection.image) }}"
@@ -448,7 +448,7 @@
     {% if user.favoris is not empty %}
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
             {% for collection in user.favoris|sort((a, b) => b.dateCreation <=> a.dateCreation) %}
-                <div class="bg-grey-900 dark:bg-black-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between text-white tilt-card">
+                <div class=" truncate bg-grey-900 dark:bg-black-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between text-white tilt-card">
                     <div>
                         <a href="{{ path('liste_show', { id: collection.id }) }}">
                             <img src="{{ asset('uploads/' ~ (collection.image ?? 'collection_template.webp')) }}"

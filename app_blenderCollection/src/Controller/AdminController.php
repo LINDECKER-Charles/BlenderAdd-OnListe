@@ -185,6 +185,7 @@ class AdminController extends AbstractController
         $user->getName() . ' #' . $user->getId(),
         'Rôles réinitialisés par ' . $this->getUser()->getName()
         );
+        
         $request->getSession()->getFlashBag()->clear();
         $this->addFlash('success', 'Les rôles de ' . $user->getName() . ' ont été réinitialisés.');
 
