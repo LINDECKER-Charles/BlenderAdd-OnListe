@@ -4,16 +4,16 @@ symfony server:start
 php bin/console messenger:consume async -vv
 
 Avec Docker
-
-docker run -d -p 8025:8025 -p 1025:1025 mailhog/mailhog
 docker compose up --build
 
 
 http://localhost:8000
 
-Une fois dedans
+Une fois dedans(première fois)
 docker compose exec app composer install
 docker compose exec app php bin/console doctrine:migrations:migrate
+
+Une fois dedans(chaque fois)
 docker compose exec app php bin/console messenger:consume async -vv
 
 Les mails -> http://localhost:8025
