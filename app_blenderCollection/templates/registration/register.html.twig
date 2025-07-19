@@ -131,7 +131,7 @@
                         }
                     }) }}
                     <p class="select-none text-lg">
-                        I have read and agree to the <a href="#" class="underline">Privacy Policy.</a>
+                        I have read and agree to the <a href="{{ path('app_privacy_policy') }}" class="underline">Privacy Policy.</a>
                         <span class="text-red-600">*</span>
                     </p>
                 </div>
@@ -149,14 +149,8 @@
             <p class=" w-full text-center text-xs text-black-950">Already have an account? <a href="{{ path('app_login') }}" class=" underline">Sign in</a></p>
         </div>
     </main>
-    <script>
-    window.addEventListener('turbo:load', () => {
-        // Scroll vers une div précise si besoin
-        const element = document.getElementById('content');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    });
-    </script>
-
+  <script type="module" data-reload>
+    import initAddonScript from '{{ asset("js/centerPage.js") }}';
+    initAddonScript();
+  </script>
 {% endblock %}

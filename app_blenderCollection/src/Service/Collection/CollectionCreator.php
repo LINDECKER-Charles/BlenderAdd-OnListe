@@ -35,7 +35,7 @@ class CollectionCreator
         $addons = $session->get('valid_addons', []);
 
         $rawName = $request->request->get('fullName');
-        if($rawName || $rawName === '') {
+        if(!$rawName || $rawName === '') {
             $rawName = $user->getName() . '_collection';
         }
         $rawDescription = $request->request->get('description');

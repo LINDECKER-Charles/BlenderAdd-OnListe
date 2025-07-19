@@ -67,7 +67,7 @@
 {% endblock %}
 
 {% block javascripts %}
-  <script type="module">
+  <script type="module" data-reload>
     import initAddonScript from '{{ asset("js/centerPage.js") }}';
     initAddonScript();
   </script>
