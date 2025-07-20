@@ -1,0 +1,50 @@
+name: CI Symfony
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: test22
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: pdo_pgsql
+          coverage: none
+
+      - name: 📦 Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: ⚙️ Create .env.test
+        run: |
+          echo "APP_ENV=test" > .env.test
+          echo "DATABASE_URL=pgsql://app:!ChangeMe!@localhost:5432/app?serverVersion=16&charset=utf8" >> .env.test
+
+      - name: 🛠 Run Doctrine migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
+
+      - name: ✅ Run Tests
+        run: php bin/phpunit --env=test
