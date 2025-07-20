@@ -36,7 +36,9 @@ jobs:
           coverage: none
 
       - name: 📦 Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: |
+            cd app_blenderCollection    
+            composer install --no-interaction --prefer-dist
 
       - name: ⚙️ Create .env.test
         run: |
