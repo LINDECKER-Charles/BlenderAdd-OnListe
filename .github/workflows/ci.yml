@@ -52,7 +52,11 @@ jobs:
           echo "DATABASE_URL=pgsql://app:!ChangeMe!@localhost:5432/app?serverVersion=16&charset=utf8" >> .env.test
 
       - name: 🛠 Run Doctrine migrations
-        run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
+        run: |
+            cd app_blenderCollection
+            php bin/console doctrine:migrations:migrate --no-interaction --env=test
 
       - name: ✅ Run Tests
-        run: php bin/phpunit --env=test
+        run: |
+            cd app_blenderCollection
+            php bin/phpunit --env=test
