@@ -48,8 +48,10 @@ jobs:
 
       - name: ⚙️ Create .env.test
         run: |
+          cd app_blenderCollection
           echo "APP_ENV=test" > .env.test
           echo "DATABASE_URL=pgsql://app:!ChangeMe!@localhost:5432/app?serverVersion=16&charset=utf8" >> .env.test
+          echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env.test
 
       - name: 🛠 Run Doctrine migrations
         run: |
