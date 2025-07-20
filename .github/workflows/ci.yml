@@ -56,10 +56,10 @@ jobs:
       - name: 🛠 Run Doctrine migrations
         run: |
             cd app_blenderCollection
-            php bin/console doctrine:database:create --env=test
-            php bin/console doctrine:migrations:migrate --no-interaction --env=test
+            APP_ENV=test php bin/console doctrine:database:create
+            APP_ENV=test php bin/console doctrine:migrations:migrate --no-interaction
 
       - name: ✅ Run Tests
         run: |
             cd app_blenderCollection
-            php bin/phpunit --env=test
+            APP_ENV=test php bin/phpunit
