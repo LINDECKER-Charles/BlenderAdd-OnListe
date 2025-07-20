@@ -40,6 +40,12 @@ jobs:
             cd app_blenderCollection    
             composer install --no-interaction --prefer-dist
 
+      - name: Create .env file
+        run: |
+            cd app_blenderCollection
+            echo "APP_ENV=test" > .env
+            echo "DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db" >> .env
+
       - name: ⚙️ Create .env.test
         run: |
           echo "APP_ENV=test" > .env.test
