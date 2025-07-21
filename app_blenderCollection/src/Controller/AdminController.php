@@ -251,4 +251,20 @@ class AdminController extends AbstractController
             'logs' => $repo->findBy([], ['date' => 'DESC']),
         ]);
     }
+
+    /**
+     * Affiche le hub administrateur avec accès rapide aux différentes sections.
+     *
+     * @return Response
+     */
+    #[Route('/hub', name: 'admin_hub')]
+    public function adminHub(): Response
+    {
+        if (!$this->uac->isStaff()) {
+            return $this->uac->redirectingGlobal();
+        }
+
+        return $this->render('security/hub_admin.html.twig');
+    }
+
 }

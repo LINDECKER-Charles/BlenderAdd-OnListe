@@ -3,51 +3,55 @@
 {% block title %}Logs Admin{% endblock %}
 
 {% block body %}
-    <div class="max-w-5xl mx-auto mt-12 p-6 bg-white rounded shadow">
-        <h1 class="text-2xl font-bold mb-6">📝 Historique des actions</h1>
+<section class="px-6 py-12 bg-slate-50 dark:bg-black-950 dark:text-white">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-10 text-center">📝 Historique des actions</h1>
 
         {% if logs is empty %}
-            <p class="text-gray-500">Aucun log enregistré pour le moment.</p>
+            <p class="text-grey-400 italic text-center">Aucun log enregistré pour le moment.</p>
         {% else %}
-            <table class="w-full table-auto border-collapse">
-                <thead>
-                    <tr class="bg-gray-100 text-left">
-                        <th class="p-3 border-b">Date</th>
-                        <th class="p-3 border-b">Action</th>
-                        <th class="p-3 border-b">Utilisateur</th>
-                        <th class="p-3 border-b">Cible</th>
-                        <th class="p-3 border-b">Détails</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for log in logs %}
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-3 text-sm text-gray-700">
-                                {{ log.date|date('d/m/Y H:i') }}
-                            </td>
-                            <td class="p-3 text-sm text-gray-800 font-semibold">
-                                {{ log.action }}
-                            </td>
-                            <td class="p-3 text-sm text-gray-700">
-                                {% if log.user %}
-                                    <a href="{{ path('app_profil_visiteur', { id: log.user.id }) }}"
-                                       class="text-blue-600 hover:underline">
-                                        {{ log.user.name }}
-                                    </a>
-                                {% else %}
-                                    <span class="italic text-gray-400">Utilisateur supprimé</span>
-                                {% endif %}
-                            </td>
-                            <td class="p-3 text-sm text-gray-700">
-                                {{ log.target ?? '-' }}
-                            </td>
-                            <td class="p-3 text-sm text-gray-700">
-                                {{ log.details ?? '-' }}
-                            </td>
+            <div class="overflow-x-auto rounded-xl shadow border border-grey-700 bg-grey-900">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-grey-800 text-left uppercase text-xs text-grey-400">
+                        <tr>
+                            <th class="px-4 py-3">Date</th>
+                            <th class="px-4 py-3">Action</th>
+                            <th class="px-4 py-3">Utilisateur</th>
+                            <th class="px-4 py-3">Cible</th>
+                            <th class="px-4 py-3">Détails</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr class="border-t border-grey-700 hover:bg-black-800 transition">
+                                <td class="px-4 py-3 text-grey-300 whitespace-nowrap">
+                                    {{ log.date|date('d/m/Y H:i') }}
+                                </td>
+                                <td class="px-4 py-3 text-white font-semibold">
+                                    {{ log.action }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    {% if log.user %}
+                                        <a href="{{ path('app_profil_visiteur', { id: log.user.id }) }}"
+                                           class="text-purple-400 hover:underline transition">
+                                            {{ log.user.name }}
+                                        </a>
+                                    {% else %}
+                                        <span class="italic text-grey-500">Utilisateur supprimé</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-grey-300">
+                                    {{ log.target ?? '—' }}
+                                </td>
+                                <td class="px-4 py-3 text-grey-300">
+                                    {{ log.details ?? '—' }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% endif %}
     </div>
+</section>
 {% endblock %}
