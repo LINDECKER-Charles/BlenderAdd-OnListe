@@ -8,8 +8,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      APP_ENV: test 
 
     services:
       postgres:
@@ -36,6 +34,11 @@ jobs:
           php-version: 8.3
           extensions: pdo_pgsql
           coverage: none
+        
+      - name: Create .env file
+        run: |
+            cd app_blenderCollection
+            echo "APP_ENV=test" > .env
 
       - name: ⚙️ Create .env.test
         run: |
@@ -43,19 +46,19 @@ jobs:
           echo "APP_ENV=test" > .env.test
           echo "DATABASE_URL=pgsql://app:test22@localhost:5432/app?serverVersion=16&charset=utf8" >> .env.test
           echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env.test
-
+  
       - name: 📦 Install Composer dependencies
         run: |
-          cd app_blenderCollection
-          composer install --no-interaction --prefer-dist
+            cd app_blenderCollection    
+            composer install --no-interaction --prefer-dist
 
       - name: 🛠 Run Doctrine migrations
         run: |
-          cd app_blenderCollection
-          php bin/console doctrine:database:create
-          php bin/console doctrine:migrations:migrate --no-interaction
+            cd app_blenderCollection
+            APP_ENV=test php bin/console doctrine:database:create
+            APP_ENV=test php bin/console doctrine:migrations:migrate --no-interaction
 
       - name: ✅ Run Tests
         run: |
-          cd app_blenderCollection
-          php bin/phpunit
+            cd app_blenderCollection
+            APP_ENV=test php bin/phpunit
