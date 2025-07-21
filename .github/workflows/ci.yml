@@ -66,6 +66,12 @@ jobs:
             APP_ENV=test php bin/console doctrine:database:create
             APP_ENV=test php bin/console doctrine:migrations:migrate --no-interaction
 
+      - name:  Lint YAML, Twig and Container
+        run: |
+          php bin/console lint:yaml config
+          php bin/console lint:twig templates
+          php bin/console lint:container
+
       - name: ✅ Run Tests
         run: |
             cd app_blenderCollection
