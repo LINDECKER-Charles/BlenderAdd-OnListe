@@ -68,6 +68,7 @@ jobs:
 
       - name:  Lint YAML, Twig and Container
         run: |
+          cd app_blenderCollection
           php bin/console lint:yaml config
           php bin/console lint:twig templates
           php bin/console lint:container
