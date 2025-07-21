@@ -42,13 +42,6 @@ jobs:
           echo "DATABASE_URL=pgsql://app:test22@localhost:5432/app?serverVersion=16&charset=utf8" >> .env.test
           echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env.test
       
-      - name: Cache Composer
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.composer/cache
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-php-
       
       - name: 📦 Install Composer dependencies
         run: |
