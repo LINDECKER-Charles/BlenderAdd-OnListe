@@ -24,7 +24,8 @@ final class HomeController extends AbstractController
     {
 
         return $this->render('home/index.html.twig', [
-            'collections' => $listeRepository->findBy(['isVisible' => true])
+            'collections' => $listeRepository->findBy(['isVisible' => true]),
+            'bg' => random_int(1, 4)
         ]);
     }
 
