@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+
 final class CollectionController extends AbstractController
 {
     /* index.html.twig */
@@ -208,6 +209,27 @@ final class CollectionController extends AbstractController
         }
 
         return $this->json(array_values($addons));
+    }
+
+    #[Route('/api/addon', name: 'api_get_addon', methods: ['POST'])]
+    public function getAddons(
+        UserAccesChecker $uac,
+        SessionInterface $session,
+        Request $request,
+        AddonsScraper $scrp,
+        AddonsManager $am
+    ): JsonResponse {
+        if (!$uac->isConnected()) {
+            return $uac->redirectingGlobalJson();
+        }
+
+        $url = $request->request->get('url');
+        
+        if (!$url || !$am->isValidAddonUrl($url)) {
+            return $this->json(['empty' => true]);
+        }
+
+        return $this->json($scrp->getAddOn($url));
     }
 
 
