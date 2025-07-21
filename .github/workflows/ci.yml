@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: app
-          POSTGRES_PASSWORD: test22
-          POSTGRES_DB: app
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
         ports:
           - 5432:5432
         options: >-
@@ -44,7 +44,7 @@ jobs:
       - name: ⚙️ Create .env.test
         run: |
           echo "APP_ENV=test" > .env.test
-          echo "DATABASE_URL=pgsql://app:test22@localhost:5432/app?serverVersion=16&charset=utf8" >> .env.test
+          echo "DATABASE_URL=pgsql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}?serverVersion=16&charset=utf8" >> .env.test
           echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env.test
 
       - name: 💾 Cache Composer
