@@ -267,17 +267,6 @@ class SecurityController extends AbstractController
 
             $this->addFlash('success', 'Le compte a été supprimé avec succès.');
 
-            $referer = $request->headers->get('referer');
-
-            if ($referer && filter_var($referer, FILTER_VALIDATE_URL)) {
-                $allowedHosts = ['localhost', '127.0.0.1', 'blend-collection.com'];
-                $host = parse_url($referer, PHP_URL_HOST);
-
-                if (in_array($host, $allowedHosts, true)) {
-                    return new RedirectResponse($referer);
-                }
-            }
-
             return $this->redirectToRoute('admin_users');
         }
 
