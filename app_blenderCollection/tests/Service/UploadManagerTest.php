@@ -6,13 +6,14 @@ use App\Service\UploadManager;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\String\UnicodeString;
 
 class UploadManagerTest extends TestCase
 {
     private function createUploadManager(string $uploadDir = '/tmp'): UploadManager
     {
         $slugger = $this->createMock(SluggerInterface::class);
-        $slugger->method('slug')->willReturn('image_name');
+        $slugger->method('slug')->willReturn(new UnicodeString('image_name'));
 
         return new UploadManager($uploadDir, $slugger);
     }
@@ -62,7 +63,8 @@ class UploadManagerTest extends TestCase
             );
 
         $slugger = $this->createMock(SluggerInterface::class);
-        $slugger->method('slug')->with('custom_filename', '_')->willReturn('custom_filename');
+        $slugger->method('slug')->with('custom_filename.png', '_')->willReturn(new UnicodeString('custom_filename'));
+
 
         $uploadManager = new UploadManager('/tmp', $slugger);
         $result = $uploadManager->uploadLocalFile($file, 'custom_filename.png');
