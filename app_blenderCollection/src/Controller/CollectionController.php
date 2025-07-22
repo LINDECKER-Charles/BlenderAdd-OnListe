@@ -110,7 +110,6 @@ final class CollectionController extends AbstractController
 
     /* API */
     
-    /* Rajouter un add-on dans la session */
     /**
      * API pour ajouter un add-on à la session.
      *

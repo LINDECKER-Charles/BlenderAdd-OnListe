@@ -111,7 +111,7 @@
                                     src="/uploads/{{ collection.image }}"
                                     alt="Image {{ collection.name }}">
 
-                                <h3 class="text-xl font-bold relative w-fit text-white transition-colors 
+                                <h3 class="text-xl font-bold relative w-fit dark:text-white text-black-950 transition-colors 
                                         after:content-[''] after:absolute after:left-0 after:-bottom-0.5 
                                         after:h-0.5 after:w-0 after:bg-purple-500 
                                         after:transition-all after:duration-300 
@@ -119,7 +119,7 @@
                                     {{ collection.name }}
                                 </h3>
 
-                                <p class="flex items-center gap-2 text-sm text-white">
+                                <p class="flex items-center gap-2 text-sm dark:text-white text-black-950">
                                     <span>by 
                                         <span class="text-blue-400 hover:underline hover:text-blue-300 transition-colors">
                                             {{ collection.usser.name ?? 'Unknown' }}
@@ -162,7 +162,7 @@
             <hr class="border-t-2 border-black-900 mt-2">
             <div class="flex flex-col mt-4 gap-8">
                     <div class="flex flex-row justify-center gap-8 flex-wrap">
-                        {% for collection in collections %}
+                        {% for collection in collections|slice(0, 12) %}
                             {% if collection %}
                                 <div class="rounded-2xl overflow-hidden border border-grey-700 dark:bg-grey-950 bg-white hover:border-white/30 hover:shadow-xl transition-all duration-300 dark:text-white text-black-950 flex flex-col w-[300px] h-[475px]">
                                     <a href="{{ path('liste_show', { id: collection.id }) }}"

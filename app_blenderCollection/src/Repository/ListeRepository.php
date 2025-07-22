@@ -24,6 +24,21 @@ class ListeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function countByCreationDate(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = '
+            SELECT DATE(date_creation) as date, COUNT(id) as count
+            FROM liste
+            GROUP BY date
+            ORDER BY date ASC
+        ';
+        $result = $conn->executeQuery($sql)->fetchAllAssociative();
+
+        return $result;
+    }
+
 //    /**
 //     * @return Liste[] Returns an array of Liste objects
 //     */

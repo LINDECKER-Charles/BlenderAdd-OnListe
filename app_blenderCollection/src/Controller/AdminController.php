@@ -23,6 +23,8 @@ class AdminController extends AbstractController
         private readonly RoleManager $roleManager,
         private readonly EntityManagerInterface $em,
         private AdminLogger $logger,
+        private UserRepository $userRepository,
+        private ListeRepository $listeRepository
     ) {}
 
     /**
@@ -264,7 +266,11 @@ class AdminController extends AbstractController
             return $this->uac->redirectingGlobal();
         }
 
-        return $this->render('security/hub_admin.html.twig');
+        return $this->render('security/hub_admin.html.twig',[
+            'listes' => $this->listeRepository->findAll(),
+            'collectionRaw' => array_map(fn($c) => ['date' => $c->getDateCreation()->format('Y-m-d H:i:s')],$this->listeRepository->findAll()),
+            'collectionStats' => $this->listeRepository->countByCreationDate()
+        ]);
     }
 
 }

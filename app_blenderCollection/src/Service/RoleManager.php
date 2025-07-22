@@ -45,8 +45,6 @@ class RoleManager
         $this->em->flush();
     }
 
-    // --- Fonctions publiques pour manipuler les rôles spécifiques ---
-
     /**
      * Ajoute le rôle "ROLE_MODO" à un utilisateur sans écraser ses rôles existants.
      *
@@ -57,18 +55,6 @@ class RoleManager
     public function giveModo(User $user): void
     {
         $this->giveRole($user, 'MODO');
-    }
-
-    /**
-     * Ajoute le rôle "ROLE_ADMIN" à un utilisateur sans écraser ses rôles existants.
-     *
-     * @param User $user L'utilisateur à modifier.
-     * 
-     * @return void
-     */
-    public function giveAdmin(User $user): void
-    {
-        $this->giveRole($user, 'ADMIN');
     }
 
     /**

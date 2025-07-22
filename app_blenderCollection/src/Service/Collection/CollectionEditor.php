@@ -468,8 +468,6 @@ class CollectionEditor
         );
     }
 
-
-
     private function slugify(string $text): string
     {
         return preg_replace('/[^a-zA-Z0-9_-]/', '_', $text);
