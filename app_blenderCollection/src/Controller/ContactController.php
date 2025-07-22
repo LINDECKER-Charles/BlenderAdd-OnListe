@@ -60,16 +60,23 @@ class ContactController extends AbstractController
             $name = sanitizeHeaderInput(strip_tags(trim($request->request->get('name'))));
             $email = sanitizeHeaderInput($request->request->get('email'));
             $message = strip_tags(trim($request->request->get('message')));
+
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 throw new \InvalidArgumentException("Email invalide.");
             }
 
-            // Création de l'email
+            $text = sprintf(
+                "Nom : [%s]\nEmail : [%s]\n\n%s",
+                $name,
+                $email,
+                $message
+            );
+
             $mail = (new Email())
                 ->from($email)
                 ->to('charles.lindecker@outlook.fr')
                 ->subject('Nouveau message de contact')
-                ->text("Nom : $name\nEmail : $email\n\n$message");
+                ->text($text);
 
             // Envoi
             $mailer->send($mail);
