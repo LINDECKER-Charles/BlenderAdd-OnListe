@@ -53,10 +53,16 @@ class ContactController extends AbstractController
             }
 
             // Récupération des données
-            $name = strip_tags(trim($request->request->get('name')));
-            $email = filter_var($request->request->get('email'), FILTER_SANITIZE_EMAIL);
-            $message = strip_tags(trim($request->request->get('message')));
+            function sanitizeHeaderInput(string $value): string {
+                return str_replace(["\r", "\n"], '', $value);
+            }
 
+            $name = sanitizeHeaderInput(strip_tags(trim($request->request->get('name'))));
+            $email = sanitizeHeaderInput($request->request->get('email'));
+            $message = strip_tags(trim($request->request->get('message')));
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new \InvalidArgumentException("Email invalide.");
+            }
 
             // Création de l'email
             $mail = (new Email())
