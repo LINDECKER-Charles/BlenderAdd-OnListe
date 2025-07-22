@@ -114,11 +114,11 @@ export default function initAddonScript() {
         <tbody class="bg-[#30353B] divide-y divide-[#1B1C1C]">
           ${data.map((addon, index) => `
             <tr class="hover:bg-[#25282D] transition-colors duration-200">
-              <td class="px-4 py-2 text-center text-[#888C96]">${index + 1}</td>
+              <td class="px-4 py-2 text-center text-[#888C96]">${escapeHTML(index + 1)}</td>
               <td class="px-4 py-2 text-[#BDC1C7] break-words max-w-[200px]">${escapeHTML(addon[0])}</td>
               <td class="px-4 py-2 text-center">
                 <button 
-                  data-url="${addon[0]}"
+                  data-url="${escapeHTML(addon[0])}"
                   class="delete-addon bg-red-600 hover:bg-red-700 text-[#F3F6F7] text-xs font-semibold px-3 py-1 rounded shadow-sm transition">
                   Supprimer
                 </button>
@@ -132,6 +132,7 @@ export default function initAddonScript() {
   }
 
   function escapeHTML(str) {
+    if(typeof str !== 'string') return str;
     return str
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
