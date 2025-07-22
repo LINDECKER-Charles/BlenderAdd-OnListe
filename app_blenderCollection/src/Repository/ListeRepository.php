@@ -15,7 +15,15 @@ class ListeRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Liste::class);
     }
-
+    public function findVisibleOrderByDownloadDesc(): array
+    {
+        return $this->createQueryBuilder('l')
+            ->andWhere('l.isVisible = :visible')
+            ->setParameter('visible', true)
+            ->orderBy('l.download', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 //    /**
 //     * @return Liste[] Returns an array of Liste objects
 //     */

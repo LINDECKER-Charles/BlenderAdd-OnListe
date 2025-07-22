@@ -14,11 +14,11 @@
 {% block body %}
 {# {% set bg = 4 %} #}
     {% if bg == 1 %}
-        <section class="w-full flex justify-center items-center relative bg-[url('/img/bg2.jpg')] md:bg-[length:200%] bg-cover bg-center bg-fixed">
+        <section class="w-full flex justify-center items-center relative bg-[url('/img/bg2.jpg')] md:bg-[length:100%] bg-cover bg-center bg-fixed">
     {% elseif bg == 2 %}
-        <section class="w-full flex justify-center items-center relative bg-[url('/img/bg1.jpg')] lg:bg-[length:150%] bg-no-repeat bg-fixed">
+        <section class="w-full flex justify-center items-center relative bg-[url('/img/bg1.jpg')] lg:bg-[length:100%] bg-no-repeat bg-fixed">
     {% elseif bg == 3 %}
-        <section class="w-full flex justify-center items-center relative bg-[url('/img/bg4.webp')] lg:bg-[length:150%] bg-no-repeat bg-fixed">
+        <section class="w-full flex justify-center items-center relative bg-[url('/img/bg4.webp')] lg:bg-[length:100%] bg-no-repeat bg-fixed">
     {% elseif bg == 4 %}
         <section class="w-full flex justify-center items-center relative bg-[url('/img/bg5.webp')] bg-[length:100%] bg-center bg-fixed bg-no-repeat">
     {% endif %}
@@ -43,7 +43,7 @@
                     <span class="text-lg font-medium">Create Yours</span>
                 </a>
 
-                <a href="#learn-more"
+                <a href="{{ path('app_terms_service') }}"
                 class="bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white rounded-lg px-8 py-3 flex items-center gap-2 shadow-md hover:shadow-xl transition hover:scale-[1.03] active:scale-100">
                     <span class="text-lg font-medium">Learn More</span>
                 </a>
