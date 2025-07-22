@@ -131,10 +131,7 @@ class AddonsScraper
     public function getAddOn(string $url): array
     {
         $client = HttpClient::create();
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new \InvalidArgumentException('URL invalide.');
-        }
-        $response = $client->request('GET', $url);
+        $response = $client->request('GET', filter_var($url, FILTER_VALIDATE_URL));
         $html = $response->getContent();
 
         $crawler = new Crawler($html);
