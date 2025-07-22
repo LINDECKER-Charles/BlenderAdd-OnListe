@@ -26,7 +26,7 @@ export default function initAddonScript() {
       const data = await res.json();
 
       if (data.error) {
-        preview.innerHTML = `<p class="text-red-500">${data.error}</p>`;
+        preview.innerHTML = `<p class="text-red-500">${escapeHTML(data.error)}</p>`;
         return;
       }
 
@@ -62,12 +62,12 @@ export default function initAddonScript() {
   function renderAddonPreview(addon) {
     preview.innerHTML = `
       <div class="flex items-center gap-4 w-full bg-[#30353B] rounded-xl p-3 border border-[#1B1C1C] shadow h-full">
-        <img src="${addon.image || '/img/exemple/ex3.webp'}"
-             alt="${addon.title}"
+        <img src="${escapeHTML(addon.image) || '/img/exemple/ex3.webp'}"
+             alt="${escapeHTML(addon.title)}"
              class="h-20 w-20 rounded-lg object-cover border-2 border-white/20 shadow" />
         <div class="flex flex-col justify-center text-[#F3F6F7]">
-          <p class="text-sm font-bold leading-snug">${addon.title}</p>
-          <p class="text-xs text-[#888C96] mt-1">${addon.tags?.join(', ') || 'Aucun tag'}</p>
+          <p class="text-sm font-bold leading-snug">${escapeHTML(addon.title)}</p>
+          <p class="text-xs text-[#888C96] mt-1">${escapeHTML(addon.tags?.join(', ')) || 'Aucun tag'}</p>
           ${addon.size ? `<p class="text-xs text-[#BDC1C7] mt-1">~ ${addon.size}</p>` : ''}
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function initAddonScript() {
           ${data.map((addon, index) => `
             <tr class="hover:bg-[#25282D] transition-colors duration-200">
               <td class="px-4 py-2 text-center text-[#888C96]">${index + 1}</td>
-              <td class="px-4 py-2 text-[#BDC1C7] break-words max-w-[200px]">${addon[0]}</td>
+              <td class="px-4 py-2 text-[#BDC1C7] break-words max-w-[200px]">${escapeHTML(addon[0])}</td>
               <td class="px-4 py-2 text-center">
                 <button 
                   data-url="${addon[0]}"
@@ -129,5 +129,14 @@ export default function initAddonScript() {
       </table>
     `;
     attachDeleteEvents();
+  }
+
+  function escapeHTML(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 }

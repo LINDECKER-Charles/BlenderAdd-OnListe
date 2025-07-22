@@ -53,9 +53,10 @@ class ContactController extends AbstractController
             }
 
             // Récupération des données
-            $name = $request->request->get('name');
-            $email = $request->request->get('email');
-            $message = $request->request->get('message');
+            $name = strip_tags(trim($request->request->get('name')));
+            $email = filter_var($request->request->get('email'), FILTER_SANITIZE_EMAIL);
+            $message = strip_tags(trim($request->request->get('message')));
+
 
             // Création de l'email
             $mail = (new Email())

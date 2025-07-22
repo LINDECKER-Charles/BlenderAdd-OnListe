@@ -222,7 +222,7 @@ final class CollectionController extends AbstractController
             return $uac->redirectingGlobalJson();
         }
 
-        $url = $request->request->get('url');
+        $url = trim($request->request->get('url'));
         
         if (!$url || !$am->isValidAddonUrl($url)) {
             return $this->json(['empty' => true]);

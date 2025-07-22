@@ -267,8 +267,8 @@ class SecurityController extends AbstractController
 
             $this->addFlash('success', 'Le compte a été supprimé avec succès.');
 
-            // 🔁 On récupère l'URL précédente
             $referer = $request->headers->get('referer');
+            $referer = filter_var($referer, FILTER_VALIDATE_URL) ? $referer : null;
             return $referer
                 ? new RedirectResponse($referer)
                 : $this->redirectToRoute('admin_users');
