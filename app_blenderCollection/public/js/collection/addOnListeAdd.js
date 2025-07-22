@@ -68,7 +68,7 @@ export default function initAddonScript() {
         <div class="flex flex-col justify-center text-[#F3F6F7]">
           <p class="text-sm font-bold leading-snug">${escapeHTML(addon.title)}</p>
           <p class="text-xs text-[#888C96] mt-1">${escapeHTML(addon.tags?.join(', ')) || 'Aucun tag'}</p>
-          ${addon.size ? `<p class="text-xs text-[#BDC1C7] mt-1">~ ${addon.size}</p>` : ''}
+          ${escapeHTML(addon.size) ? `<p class="text-xs text-[#BDC1C7] mt-1">~ ${escapeHTML(addon.size)}</p>` : ''}
         </div>
       </div>
     `;
@@ -114,7 +114,7 @@ export default function initAddonScript() {
         <tbody class="bg-[#30353B] divide-y divide-[#1B1C1C]">
           ${data.map((addon, index) => `
             <tr class="hover:bg-[#25282D] transition-colors duration-200">
-              <td class="px-4 py-2 text-center text-[#888C96]">${escapeHTML(index + 1)}</td>
+              <td class="px-4 py-2 text-center text-[#888C96]">${isInteger(index + 1)}</td>
               <td class="px-4 py-2 text-[#BDC1C7] break-words max-w-[200px]">${escapeHTML(addon[0])}</td>
               <td class="px-4 py-2 text-center">
                 <button 
@@ -132,7 +132,6 @@ export default function initAddonScript() {
   }
 
   function escapeHTML(str) {
-    if(typeof str !== 'string') return str;
     return str
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
