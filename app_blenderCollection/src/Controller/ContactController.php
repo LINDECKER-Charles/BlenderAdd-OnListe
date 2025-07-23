@@ -69,7 +69,6 @@ class ContactController extends AbstractController
                 throw new \InvalidArgumentException("Email invalide.");
             }
 
-            $name = filter_var(trim($request->request->get('name')), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $text = sprintf(
                 "Nom : [%s]\nEmail : [%s]\n\n%s",
                 $name,
