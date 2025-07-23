@@ -12,9 +12,9 @@
 {# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
 {% block body %}
-{# {% set bg = 4 %} #}
+{% set bg = 4 %}
     {% if bg == 1 %}
-        <section class="w-full flex justify-center items-center relative bg-[url('/img/bg2.jpg')] md:bg-[length:100%] bg-cover bg-center bg-fixed">
+        <section class="w-full flex justify-center items-center relative bg-[url('/img/bg2.jpg')] md:bg-[length:250%] bg-cover bg-center bg-fixed">
     {% elseif bg == 2 %}
         <section class="w-full flex justify-center items-center relative bg-[url('/img/bg1.jpg')] lg:bg-[length:100%] bg-no-repeat bg-fixed">
     {% elseif bg == 3 %}
