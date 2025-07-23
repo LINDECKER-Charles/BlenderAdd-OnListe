@@ -17,3 +17,15 @@ Une fois dedans(chaque fois)
 docker compose exec app php bin/console messenger:consume async -vv
 
 Les mails -> http://localhost:8025
+
+
+Prod
+
+sudo supervisorctl status
+
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start messenger-worker
+
+tail -n 50 /var/log/supervisor/messenger-worker.err.log
+tail -n 50 /var/log/supervisor/messenger-worker.out.log
