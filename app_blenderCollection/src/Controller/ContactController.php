@@ -61,9 +61,9 @@ class ContactController extends AbstractController
             $email = sanitizeHeaderInput($request->request->get('email'));
             $message = strip_tags(trim($request->request->get('message')));
 
-            $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
-            $email = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
-            $message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+            $name = htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $email = htmlspecialchars($email, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $message = htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 throw new \InvalidArgumentException("Email invalide.");
