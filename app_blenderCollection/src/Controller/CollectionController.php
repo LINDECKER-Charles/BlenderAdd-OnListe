@@ -224,7 +224,8 @@ final class CollectionController extends AbstractController
             return $uac->redirectingGlobalJson();
         }
 
-        $url = trim($request->request->get('url'));
+        parse_str($request->getContent(), $params);
+        $url = trim($params['url'] ?? '');
         // $url est validée par isValidAddonUrl() pour éviter les attaques SSRF (schéma, domaine, chemin, IP)
         if (!$url || !$am->isValidAddonUrl($url)) {
             if(!$am->isValidAddonUrl($url)){
