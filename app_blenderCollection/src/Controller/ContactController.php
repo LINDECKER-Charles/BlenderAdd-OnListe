@@ -81,7 +81,7 @@ class ContactController extends AbstractController
                 ->from('noreply@blender-collection.fr') // ✅ adresse interne contrôlée
                 ->to('charles.lindecker@outlook.fr')
                 ->subject('Nouveau message de contact')
-                /* ->text($text) */;
+                ->text($text);
 
             // Envoi
             $mailer->send($mail);
