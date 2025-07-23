@@ -89,3 +89,27 @@ jobs:
           git merge origin/dev --no-ff -m "CI: merge dev into main"
           git push origin main
 
+  deploy:
+    needs: test
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛡️ Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+
+      - name: 🔐 Add known_hosts
+        run: |
+          ssh-keyscan -H www.blend-collection.com >> ~/.ssh/known_hosts
+
+      - name: 🚀 Deploy to production server
+        run: |
+          ssh root@www.blend-collection.com "
+            cd /var/www/blend/app_blenderCollection &&
+            git pull origin main &&
+            php bin/console cache:clear --env=prod &&
+            php bin/console doctrine:migrations:migrate --no-interaction --env=prod &&
+            /usr/bin/supervisorctl restart messenger-worker
+          "
