@@ -130,32 +130,31 @@ class AddonsScraper
      */
     public function getAddOn(string $url): array
     {
+
         $url = filter_var($url, FILTER_VALIDATE_URL);
         if (!$url) {
             throw new \InvalidArgumentException('URL invalide.');
         }
 
-        $host = parse_url($url, PHP_URL_HOST);
-        $ip = gethostbyname($host);
-        if (isPrivateIp($ip)) {
-            throw new \Exception('Accès interdit à une IP privée.');
+        $parsed = parse_url($url);
+        $allowedSchemes = ['http', 'https'];
+        if (!in_array($parsed['scheme'] ?? '', $allowedSchemes, true)) {
+            throw new \Exception('Schéma non autorisé.');
         }
-        // Liste des IP interdites (privées, locales, etc.)
-        $blacklist = [
-            '127.0.0.1',     // localhost
-            '::1',           // IPv6 localhost
-            '0.0.0.0',
-            '169.254.169.254', // AWS metadata
-            'localhost',
-        ];
 
-        foreach ($blacklist as $forbidden) {
-            if ($ip === $forbidden || $host === $forbidden) {
-                throw new \Exception('Accès interdit à cette ressource interne.');
-            }
+        $host = $parsed['host'];
+
+        $allowedHosts = ['extensions.blender.org'];
+        if (!in_array($host, $allowedHosts, true)) {
+            throw new \Exception('Hôte non autorisé.');
         }
 
         $client = HttpClient::create();
+        $response = $client->request('GET', $url, [
+            'max_redirects' => 0,
+            'timeout' => 2.0,
+        ]);
+        
         $response = $client->request('GET', $url);
         $html = $response->getContent();
 
@@ -168,7 +167,7 @@ class AddonsScraper
             'image' => $this->getFirstImage($crawler),
         ];
     }
-    
+
     /**
      * Vérifie si une adresse IP est privée ou réservée (ex : LAN, localhost, etc.).
      *
