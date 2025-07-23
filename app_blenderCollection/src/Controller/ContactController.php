@@ -68,6 +68,9 @@ class ContactController extends AbstractController
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 throw new \InvalidArgumentException("Email invalide.");
             }
+            if (strlen($name) > 100 || strlen($message) > 1000) {
+                throw new \InvalidArgumentException("Données trop longues");
+            }
             $name = filter_var($name, FILTER_SANITIZE_SPECIAL_CHARS);
             $text = sprintf(
                 "Nom : [%s]\nEmail : [%s]\n\n%s",
@@ -75,6 +78,7 @@ class ContactController extends AbstractController
                 $email,
                 $message
             );
+
 
             $mail = (new Email())
                 ->from('noreply@blender-collection.fr') // ✅ adresse interne contrôlée
