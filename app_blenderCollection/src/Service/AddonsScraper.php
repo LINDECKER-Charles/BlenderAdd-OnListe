@@ -130,8 +130,33 @@ class AddonsScraper
      */
     public function getAddOn(string $url): array
     {
+        $url = filter_var($url, FILTER_VALIDATE_URL);
+        if (!$url) {
+            throw new \InvalidArgumentException('URL invalide.');
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+        $ip = gethostbyname($host);
+        if (isPrivateIp($ip)) {
+            throw new \Exception('Accès interdit à une IP privée.');
+        }
+        // Liste des IP interdites (privées, locales, etc.)
+        $blacklist = [
+            '127.0.0.1',     // localhost
+            '::1',           // IPv6 localhost
+            '0.0.0.0',
+            '169.254.169.254', // AWS metadata
+            'localhost',
+        ];
+
+        foreach ($blacklist as $forbidden) {
+            if ($ip === $forbidden || $host === $forbidden) {
+                throw new \Exception('Accès interdit à cette ressource interne.');
+            }
+        }
+
         $client = HttpClient::create();
-        $response = $client->request('GET', filter_var($url, FILTER_VALIDATE_URL));
+        $response = $client->request('GET', $url);
         $html = $response->getContent();
 
         $crawler = new Crawler($html);
@@ -142,6 +167,17 @@ class AddonsScraper
             'size' => $this->getSize($crawler),
             'image' => $this->getFirstImage($crawler),
         ];
+    }
+    
+    /**
+     * Vérifie si une adresse IP est privée ou réservée (ex : LAN, localhost, etc.).
+     *
+     * @param string $ip Adresse IP à analyser (ex : '192.168.0.1').
+     * @return bool true si l’IP est privée ou réservée, false sinon.
+     */
+    function isPrivateIp($ip) {
+        return
+            filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
     }
 
 }
