@@ -31,7 +31,12 @@ export default function initAddonScript() {
       }
 
       const [addonsRes, addonDataRes] = await Promise.all([
-        fetch("/api/get-session-addons"),
+        fetch("/api/get-session-addons", { 
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          }
+        }),
         fetch("/api/addon", {
           method: "POST",
           headers: {
