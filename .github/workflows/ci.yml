@@ -86,6 +86,6 @@ jobs:
 
           git fetch --all
           git checkout main
-          git merge origin/dev --no-ff --allow-unrelated-histories -m "CI: merge dev into main"
+          git merge origin/dev --no-ff -m "CI: merge dev into main"
           git push origin main
 
