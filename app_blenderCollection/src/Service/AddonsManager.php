@@ -63,10 +63,24 @@ class AddonsManager
         // Vérifie que l'URL est valide et commence bien par le domaine cible
         $parsedUrl = parse_url($url);
 
-        return isset($parsedUrl['scheme'], $parsedUrl['host'], $parsedUrl['path'])
-            && $parsedUrl['scheme'] === 'https'
-            && $parsedUrl['host'] === 'extensions.blender.org'
-            && str_starts_with($parsedUrl['path'], '/add-ons/');
+        if (
+            !isset($parsedUrl['scheme'], $parsedUrl['host'], $parsedUrl['path']) ||
+            $parsedUrl['scheme'] !== 'https' ||
+            $parsedUrl['host'] !== 'extensions.blender.org' ||
+            !str_starts_with($parsedUrl['path'], '/add-ons/')
+        ) {
+            return false;
+        }
+
+        $ip = gethostbyname($parsedUrl['host']);
+        return $this->isPublicIp($ip);
+
     }
+
+    private function isPublicIp(string $ip): bool
+    {
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
+    }
+
 }
 

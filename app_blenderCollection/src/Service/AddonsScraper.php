@@ -131,30 +131,7 @@ class AddonsScraper
     public function getAddOn(string $url): array
     {
 
-        $url = filter_var($url, FILTER_VALIDATE_URL);
-        if (!$url) {
-            throw new \InvalidArgumentException('URL invalide.');
-        }
-
-        $parsed = parse_url($url);
-        $allowedSchemes = ['http', 'https'];
-        if (!in_array($parsed['scheme'] ?? '', $allowedSchemes, true)) {
-            throw new \Exception('Schéma non autorisé.');
-        }
-
-        $host = $parsed['host'];
-
-        $allowedHosts = ['extensions.blender.org'];
-        if (!in_array($host, $allowedHosts, true)) {
-            throw new \Exception('Hôte non autorisé.');
-        }
-
         $client = HttpClient::create();
-        $response = $client->request('GET', $url, [
-            'max_redirects' => 0,
-            'timeout' => 2.0,
-        ]);
-        
         $response = $client->request('GET', $url);
         $html = $response->getContent();
 

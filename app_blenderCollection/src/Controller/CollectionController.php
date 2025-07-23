@@ -18,7 +18,6 @@ use App\Repository\ListeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Service\Collection\CollectionEditor;
-use Symfony\Component\HttpClient\HttpClient;
 use App\Service\Collection\CollectionCreator;
 use App\Service\Collection\CollectionRenamer;
 use Symfony\Component\HttpFoundation\Request;
@@ -228,33 +227,6 @@ final class CollectionController extends AbstractController
         if (!$url || !$am->isValidAddonUrl($url)) {
             return $this->json(['empty' => true]);
         }
-        
-        $url = filter_var($url, FILTER_VALIDATE_URL);
-        if (!$url) {
-            throw new \InvalidArgumentException('URL invalide.');
-        }
-
-        $parsed = parse_url($url);
-        $allowedSchemes = ['http', 'https'];
-        if (!in_array($parsed['scheme'] ?? '', $allowedSchemes, true)) {
-            throw new \Exception('Schéma non autorisé.');
-        }
-
-        $host = $parsed['host'];
-
-        $allowedHosts = ['extensions.blender.org'];
-        if (!in_array($host, $allowedHosts, true)) {
-            throw new \Exception('Hôte non autorisé.');
-        }
-
-        $client = HttpClient::create();
-        $response = $client->request('GET', $url, [
-            'max_redirects' => 0,
-            'timeout' => 2.0,
-        ]);
-        
-        $response = $client->request('GET', $url);
-        $html = $response->getContent();
 
         return $this->json($scrp->getAddOn($url));
     }
