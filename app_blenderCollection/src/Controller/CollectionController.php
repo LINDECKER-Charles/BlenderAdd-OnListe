@@ -123,7 +123,7 @@ final class CollectionController extends AbstractController
      *
      * @return JsonResponse Réponse JSON contenant le succès ou une erreur
      */
-    #[Route('/api/add-addon', name: 'api_add_addon', methods: ['GET', 'POST'])]
+    #[Route('/api/add-addon', name: 'api_add_addon', methods: ['POST'])]
     public function addAddon(
         UserAccesChecker $uac, 
         Request $request, 
@@ -161,7 +161,7 @@ final class CollectionController extends AbstractController
      *
      * @return JsonResponse Réponse JSON confirmant la suppression
      */
-    #[Route('/api/remove-addon', name: 'api_remove_addon', methods: ['GET', 'POST'])]
+    #[Route('/api/remove-addon', name: 'api_remove_addon', methods: ['POST'])]
     public function removeAddon(
         UserAccesChecker $uac, 
         Request $request, 
@@ -194,7 +194,7 @@ final class CollectionController extends AbstractController
     *
     * @psalm-taint-escape ssrf $url
     */
-    #[Route('/api/get-session-addons', name: 'api_get_session_addons', methods: ['GET', 'POST'])]
+    #[Route('/api/get-session-addons', name: 'api_get_session_addons', methods: ['POST'])]
     public function getSessionAddons(
         UserAccesChecker $uac, 
         SessionInterface $session
@@ -212,7 +212,7 @@ final class CollectionController extends AbstractController
         return $this->json(array_values($addons));
     }
 
-    #[Route('/api/addon', name: 'api_get_addon', methods: ['GET', 'POST'])]
+    #[Route('/api/addon', name: 'api_get_addon', methods: ['POST'])]
     public function getAddons(
         UserAccesChecker $uac,
         SessionInterface $session,
