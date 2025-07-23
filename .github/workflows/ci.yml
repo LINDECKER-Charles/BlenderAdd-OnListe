@@ -106,9 +106,10 @@ jobs:
 
       - name: 🚀 Deploy to production server
         run: |
-          ssh root@www.blend-collection.com "
-            cd /var/www/blend/app_blenderCollection &&
-            git pull origin main &&
-            php bin/console cache:clear --env=prod &&
-            php bin/console doctrine:migrations:migrate --no-interaction --env=prod &&
+          ssh root@www.blend-collection.com "\
+            cd /var/www/blend/app_blenderCollection && \
+            git pull origin main && \
+            php bin/console cache:clear --env=prod && \
+            php bin/console doctrine:migrations:migrate --no-interaction --env=prod \
           "
+
