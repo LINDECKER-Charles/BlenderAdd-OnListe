@@ -111,5 +111,4 @@ jobs:
             git pull origin main &&
             php bin/console cache:clear --env=prod &&
             php bin/console doctrine:migrations:migrate --no-interaction --env=prod &&
-            /usr/bin/supervisorctl restart messenger-worker
           "
