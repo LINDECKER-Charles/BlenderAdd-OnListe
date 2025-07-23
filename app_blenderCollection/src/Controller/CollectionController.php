@@ -223,7 +223,7 @@ final class CollectionController extends AbstractController
         }
 
         $url = trim($request->request->get('url'));
-        
+        // $url est validée par isValidAddonUrl() pour éviter les attaques SSRF (schéma, domaine, chemin, IP)
         if (!$url || !$am->isValidAddonUrl($url)) {
             return $this->json(['empty' => true]);
         }
