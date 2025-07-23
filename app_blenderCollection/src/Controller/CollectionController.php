@@ -191,6 +191,8 @@ final class CollectionController extends AbstractController
     * @param SessionInterface $session Session utilisateur
     *
     * @return JsonResponse Liste des add-ons en session
+    *
+    * @psalm-taint-escape ssrf $url
     */
     #[Route('/api/get-session-addons', name: 'api_get_session_addons')]
     public function getSessionAddons(
