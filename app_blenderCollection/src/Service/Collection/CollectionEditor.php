@@ -5,6 +5,7 @@ use App\Entity\Post;
 use App\Entity\Addon;
 use App\Entity\Liste;
 use App\Entity\SousPost;
+use App\Service\AddonsManager;
 use App\Service\AdminLogger;
 use App\Service\AddonsScraper;
 use App\Service\UploadManager;
@@ -27,6 +28,7 @@ class CollectionEditor
         private readonly AddonsScraper $scraper,
         private readonly Security $security,
         private AdminLogger $logger,
+        private readonly AddonsManager $am,
     ) {}
 
     /**
@@ -223,7 +225,7 @@ class CollectionEditor
     {
         $url = trim($request->request->get('idBlender'));
 
-        if (empty($url)) {
+        if (!$url || !$this->am->isValidAddonUrl($url)) {
             return 'invalid_url';
         }
 
