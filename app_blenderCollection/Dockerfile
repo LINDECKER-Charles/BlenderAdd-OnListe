@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm
 
 # Installation des dépendances système et extensions PHP
 RUN apt-get update && apt-get install -y \
