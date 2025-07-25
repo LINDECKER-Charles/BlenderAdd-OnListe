@@ -3,7 +3,9 @@ name: CI Symfony
 on:
   push:
     branches:
-      - main
+      - dev
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -29,6 +31,8 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
@@ -73,3 +77,39 @@ jobs:
       - name: ✅ Run Tests
         run: |
             APP_ENV=test php bin/phpunit
+
+      - name: ⬆️ Merge dev into main if tests pass
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch --all
+          git checkout main
+          git merge origin/dev --no-ff -m "CI: merge dev into main"
+          git push origin main
+
+  deploy:
+    needs: test
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛡️ Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+
+      - name: 🔐 Add known_hosts
+        run: |
+          ssh-keyscan -H www.blend-collection.com >> ~/.ssh/known_hosts
+
+      - name: 🚀 Deploy to production server
+        run: |
+          ssh root@www.blend-collection.com "\
+            cd /var/www/blend/app_blenderCollection && \
+            git pull origin main && \
+            php bin/console cache:clear --env=prod && \
+            php bin/console doctrine:migrations:migrate --no-interaction --env=prod \
+          "
+

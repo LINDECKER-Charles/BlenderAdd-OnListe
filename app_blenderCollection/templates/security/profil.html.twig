@@ -12,15 +12,22 @@
 {# {% block og_image %}/images/og-default.jpg{% endblock %} #} 
 {# {% block twitter_image %}/images/twitter-default.jpg{% endblock %} #}
 
-{% set isEditable =
-    user.id == app.user.id
-    or ('ADMIN' in app.user.roles and 'ADMIN' not in user.roles)
-    or ('MODO' in app.user.roles and 'ADMIN' not in user.roles and 'MODO' not in user.roles)
-%}
+{% if app.user %}
+    {% set isSelf = user.id == app.user.id %}
+    {% set isAdmin = 'ADMIN' in app.user.roles %}
+    {% set isModo = 'MODO' in app.user.roles %}
+    {% set isEditable =
+        isSelf
+        or (isAdmin and 'ADMIN' not in user.roles)
+        or (isModo and 'ADMIN' not in user.roles and 'MODO' not in user.roles)
+    %}
+{% else %}
+    {% set isSelf = false %}
+    {% set isAdmin = false %}
+    {% set isModo = false %}
+    {% set isEditable = false %}
+{% endif %}
 
-{% set isAdmin = 'ADMIN' in app.user.roles %}
-{% set isModo = 'MODO' in app.user.roles %}
-{% set isSelf = user.id == app.user.id %}
 
 {% block body %}
 <section class=" bg-white-muted dark:bg-black-950 dark:text-white px-6 pt-12 pb-2 w-3/4">

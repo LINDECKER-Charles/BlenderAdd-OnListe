@@ -1,6 +1,43 @@
 <!DOCTYPE html>
 <html class=" dark" lang="en">
     <head>
+        {# Tarte au citron #}
+        <script src="/tarteaucitron/tarteaucitron.min.js"></script>
+        <script type="text/javascript">
+          tarteaucitron.init({
+            privacyUrl: "/privacy-policy",
+            orientation: "bottom",
+            showIcon: true,
+            iconPosition: "BottomRight",
+            highPrivacy: true,
+            DenyAllCta: false,
+            AcceptAllCta: false,
+            mandatory: true,
+            useExternalCss: false,
+            showDetailsOnClick: false,
+            groupServices: false,
+            cookieslist: false,
+            cookieslistEmbed: false,
+          });
+
+          tarteaucitron.services.nocookies = {
+            key: "nocookies",
+            type: "other", // ✅ type valide
+            name: "Aucun cookie tiers",
+            uri: "/privacy-policy",
+            needConsent: false,
+            cookies: [],
+            js: function () {},
+            fallback: function () {
+              document.getElementById('tarteaucitronInfo').innerHTML =
+                '<p style="text-align:center;padding:1rem;">✅ Ce site n’utilise aucun cookie tiers. Aucune donnée personnelle n’est collectée.</p>';
+            }
+          };
+
+          tarteaucitron.job = tarteaucitron.job || [];
+          tarteaucitron.job.push('nocookies');
+        </script>
+
         <meta charset="UTF-8">
 
         <title>{% block title %}{{ title|default('Titre par défaut') }}{% endblock %}</title>

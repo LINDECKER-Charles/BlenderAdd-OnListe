@@ -60,13 +60,24 @@ class AddonsManager
      */
     public function isValidAddonUrl(string $url): bool
     {
-        // Vérifie que l'URL est valide et commence bien par le domaine cible
-        $parsedUrl = parse_url($url);
-
-        return isset($parsedUrl['scheme'], $parsedUrl['host'], $parsedUrl['path'])
-            && $parsedUrl['scheme'] === 'https'
-            && $parsedUrl['host'] === 'extensions.blender.org'
-            && str_starts_with($parsedUrl['path'], '/add-ons/');
+        if (!preg_match('#^https://extensions\.blender\.org/add-ons/#', $url)) {
+            return false;
+        }
+        $parsed = parse_url($url);
+        if (strpos(($parsed['host'] ?? ''), '@') !== false) {
+            return false;
+        }
+        $ip = gethostbyname($parsed['host']);
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            return false;
+        }
+        // IP multicast/broadcast ?
+        $octets = array_map('intval', explode('.', $ip));
+        if ($octets[0] >= 224 && $octets[0] <= 239) {
+            return false;
+        }
+        return true;
     }
+
 }
 

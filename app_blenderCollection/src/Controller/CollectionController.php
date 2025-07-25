@@ -191,8 +191,10 @@ final class CollectionController extends AbstractController
     * @param SessionInterface $session Session utilisateur
     *
     * @return JsonResponse Liste des add-ons en session
+    *
+    * @psalm-taint-escape ssrf $url
     */
-    #[Route('/api/get-session-addons', name: 'api_get_session_addons')]
+    #[Route('/api/get-session-addons', name: 'api_get_session_addons', methods: ['POST'])]
     public function getSessionAddons(
         UserAccesChecker $uac, 
         SessionInterface $session
@@ -222,10 +224,24 @@ final class CollectionController extends AbstractController
             return $uac->redirectingGlobalJson();
         }
 
-        $url = trim($request->request->get('url'));
-        
+        parse_str($request->getContent(), $params);
+        $url = trim($params['url'] ?? '');
+        // $url est validée par isValidAddonUrl() pour éviter les attaques SSRF (schéma, domaine, chemin, IP)
         if (!$url || !$am->isValidAddonUrl($url)) {
-            return $this->json(['empty' => true]);
+            return $this->json([
+                'debug' => [
+                    'method' => $request->getMethod(),
+                    'content_type' => $request->headers->get('Content-Type'),
+                    'raw' => $request->getContent(),
+                    'parsed_body' => $request->request->all(),
+                    'params_via_parse_str' => (function () use ($request) {
+                        parse_str($request->getContent(), $params);
+                        return $params;
+                    })(),
+                    'url_final' => $url,
+                    'url_valid' => $am->isValidAddonUrl($url),
+                ],
+            ]);
         }
 
         return $this->json($scrp->getAddOn($url));

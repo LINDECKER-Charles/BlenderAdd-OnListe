@@ -61,10 +61,17 @@ class ContactController extends AbstractController
             $email = sanitizeHeaderInput($request->request->get('email'));
             $message = strip_tags(trim($request->request->get('message')));
 
+            $name = htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $email = htmlspecialchars($email, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $message = htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 throw new \InvalidArgumentException("Email invalide.");
             }
-
+            if (strlen($name) > 100 || strlen($message) > 1000) {
+                throw new \InvalidArgumentException("Données trop longues");
+            }
+            $name = filter_var($name, FILTER_SANITIZE_SPECIAL_CHARS);
             $text = sprintf(
                 "Nom : [%s]\nEmail : [%s]\n\n%s",
                 $name,
@@ -72,8 +79,9 @@ class ContactController extends AbstractController
                 $message
             );
 
+
             $mail = (new Email())
-                ->from($email)
+                ->from('noreply@blender-collection.fr') // ✅ adresse interne contrôlée
                 ->to('charles.lindecker@outlook.fr')
                 ->subject('Nouveau message de contact')
                 ->text($text);

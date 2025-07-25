@@ -130,8 +130,9 @@ class AddonsScraper
      */
     public function getAddOn(string $url): array
     {
+
         $client = HttpClient::create();
-        $response = $client->request('GET', filter_var($url, FILTER_VALIDATE_URL));
+        $response = $client->request('GET', $url);
         $html = $response->getContent();
 
         $crawler = new Crawler($html);
@@ -142,6 +143,17 @@ class AddonsScraper
             'size' => $this->getSize($crawler),
             'image' => $this->getFirstImage($crawler),
         ];
+    }
+
+    /**
+     * Vérifie si une adresse IP est privée ou réservée (ex : LAN, localhost, etc.).
+     *
+     * @param string $ip Adresse IP à analyser (ex : '192.168.0.1').
+     * @return bool true si l’IP est privée ou réservée, false sinon.
+     */
+    function isPrivateIp($ip) {
+        return
+            filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
     }
 
 }
