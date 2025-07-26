@@ -16,7 +16,7 @@ class DeleteZipMessageHandler
 
     public function __invoke(DeleteZipMessage $message): void
     {
-        $this->logger->info('Suppression du ZIP : ' . $message->getZipName());
+        $this->logger->info(message: 'Suppression du ZIP : ' . $message->getZipName());
         $this->downloader->deleteZip($message->getZipName());
     }
 }
