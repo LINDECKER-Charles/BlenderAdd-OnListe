@@ -90,10 +90,13 @@ final class CollectionController extends AbstractController
         if ($request->isMethod('POST')) {
             $limit = $rateLimiter->consume($request);
 
-            if ((!$limit->isAccepted() || $uac->isAdmin($user)) ) {
-                $this->addFlash('error', $rateLimiter->getErrorMessage($limit));
-                return $uac->redirectingGlobal($user);
+            if(!$uac->isAdmin($user)){
+                if (!$limit->isAccepted()) {
+                    $this->addFlash('error', $rateLimiter->getErrorMessage($limit));
+                    return $uac->redirectingGlobal($user);
+                }
             }
+
 
             try {
                 $liste = $creator->handle($request, $user);
