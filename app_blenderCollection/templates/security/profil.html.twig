@@ -144,6 +144,7 @@
             <!-- Avatar -->
             <form id="upload-avatar-form" method="POST" enctype="multipart/form-data" action="{{ path('app_update_avatar', { id: user.id }) }}">
                 <input id="avatar-input" type="file" name="avatar" accept="image/*" class="hidden" onchange="document.getElementById('upload-avatar-form').submit()">
+                <label for="avatar-input" class=" sr-only">Image de Profile</label>
                 {% if isEditable %}
                     <div class="group relative w-96 h-96 md:w-56 md:h-56 rounded-full overflow-hidden border-4 dark:border-white border-black-950 cursor-pointer" onclick="document.getElementById('avatar-input').click()">
                         {% if user.pathImg %}
