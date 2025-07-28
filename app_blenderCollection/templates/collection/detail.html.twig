@@ -1,6 +1,9 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Détail de la liste - {{ liste.name }}{% endblock %}
+{% block og_type %}website{% endblock %}
+{# --- Directive SEO pour robots --- #}
+{% block meta_robots %}index, follow{% endblock %}
 
 {% if liste.usser == null %}
     {% set isEditable =
