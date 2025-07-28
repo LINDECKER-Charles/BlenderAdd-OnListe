@@ -10,6 +10,7 @@ export default function initModalScript() {
 
         console.log("Script latBarreModal.js chargé ✅");
         
+        /* Affichage du modal */
         document.querySelectorAll('[data-modal-id]').forEach(button => {
             button.addEventListener('click', () => {
             const targetId = button.getAttribute('data-modal-id');
@@ -27,6 +28,7 @@ export default function initModalScript() {
             });
         });
 
+        /* Ferme le modal et le vide quand button fermeture cliqué */
         closeBtn.addEventListener('click', () => {
             modal.classList.add('hidden');
             modalContent.innerHTML = '';

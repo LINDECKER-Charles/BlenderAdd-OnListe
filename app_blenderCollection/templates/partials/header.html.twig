@@ -45,7 +45,7 @@
                     {# L'utilisateur est connecté #}
                     <div class=" flex flex-row gap-2 items-center justify-center">
                         <p class=" justify-center items-center">
-                            <a id="btnLogout" href="{{ path('app_profil') }}" class="group flex flex-col items-center justify-center transition duration-300 rounded-full">
+                            <a aria-label="Button de profil" id="btnLogout" href="{{ path('app_profil') }}" class="group flex flex-col items-center justify-center transition duration-300 rounded-full">
                                 <svg width="35" class="text-black-950 dark:text-white group-hover:text-blue-500 transition duration-300" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M49.6876 54H10.3145C8.19535 54 6.63046 51.9089 7.42974 49.9859C11.1383 41.0939 19.8508 36 29.9996 36C40.1514 36 48.8639 41.0939 52.5724 49.9859C53.3717 51.9089 51.8068 54 49.6876 54ZM17.75 18C17.75 11.382 23.247 5.99995 29.9996 5.99995C36.7552 5.99995 42.2491 11.382 42.2491 18C42.2491 24.618 36.7552 30 29.9996 30C23.247 30 17.75 24.618 17.75 18ZM59.867 52.9079C57.6407 42.8309 50.6768 35.3939 41.5111 32.0189C46.368 28.1879 49.2007 21.9928 48.1595 15.2098C46.9529 7.34079 40.2708 1.04393 32.2045 0.125931C21.0696 -1.14307 11.6252 7.34695 11.6252 18C11.6252 23.67 14.3079 28.7219 18.4911 32.0189C9.3223 35.3939 2.36149 42.8309 0.132072 52.9079C-0.676399 56.5709 2.337 60 6.16192 60H53.8372C57.6652 60 60.6786 56.5709 59.867 52.9079Z" fill="currentColor"/>
                                 </svg>
@@ -53,7 +53,7 @@
                             </a>
                         </p>
                         <p class=" justify-center items-center">
-                            <a id="btnProfil" href="{{ path('app_logout') }}" class="group flex flex-col items-center justify-center transition duration-300 rounded-full">
+                            <a aria-label="Button de déconnexion" id="btnProfil" href="{{ path('app_logout') }}" class="group flex flex-col items-center justify-center transition duration-300 rounded-full">
                                 <svg width="55" class="text-black-950 dark:text-white group-hover:text-blue-500 transition duration-300" viewBox="0 0 61 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M25.2043 0.0185547H18.5173C14.2348 0.0185547 10.6416 2.92902 9.58319 6.87754H0.561279V11.6791H9.58319C10.6426 15.6266 14.2358 18.5371 18.5173 18.5371H25.2043V14.0151H30.2463V4.54164H25.2043V0.0185547Z" fill="currentColor"/>
                                     <path d="M51.5384 6.87754C50.4799 2.92902 46.8877 0.0185547 42.6052 0.0185547H35.9182V18.537H42.6052C46.8877 18.537 50.4791 15.6265 51.5384 11.6789H60.5612V6.87742L51.5384 6.87754Z" fill="currentColor"/>
