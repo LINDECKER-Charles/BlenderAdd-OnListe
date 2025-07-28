@@ -101,6 +101,26 @@
 
         <!-- Colonne droite -->
         <div class="flex flex-col justify-start gap-4 text-sm">
+            
+<form method="POST" action="{{ path('toggle_favoris', { id: liste.id }) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('toggle_favoris_' ~ liste.id) }}">
+    <button type="submit"
+        class="px-4 py-2 rounded-md text-sm font-semibold flex items-center gap-2
+               {{ liste.users.contains(app.user) ? 'bg-red-500 hover:bg-red-600' : 'bg-purple-500 hover:bg-purple-600' }}">
+        {% if liste.users.contains(app.user) %}
+            <svg width="20" viewBox="0 0 51 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M35.1051 2.99364C43.0301 2.99364 48.3551 10.4436 48.3551 17.3936C48.3551 31.4686 26.2551 42.9936 25.8551 42.9936C25.4551 42.9936 3.35508 31.4686 3.35508 17.3936C3.35508 10.4436 8.68008 2.99364 16.6051 2.99364C21.1551 2.99364 24.1301 5.26864 25.8551 7.26864C27.5801 5.26864 30.5551 2.99364 35.1051 2.99364Z"/>
+            </svg>
+            Retirer des favoris
+        {% else %}
+            <svg width="20" viewBox="0 0 51 46" fill="none" stroke="currentColor" stroke-width="5" xmlns="http://www.w3.org/2000/svg">
+                <path d="M35.1051 2.99364C43.0301 2.99364 48.3551 10.4436 48.3551 17.3936C48.3551 31.4686 26.2551 42.9936 25.8551 42.9936C25.4551 42.9936 3.35508 31.4686 3.35508 17.3936C3.35508 10.4436 8.68008 2.99364 16.6051 2.99364C21.1551 2.99364 24.1301 5.26864 25.8551 7.26864C27.5801 5.26864 30.5551 2.99364 35.1051 2.99364Z"/>
+            </svg>
+            Ajouter aux favoris
+        {% endif %}
+    </button>
+</form>
+
             <p class="text-white">
                 <strong class="text-grey-500">Date de création :</strong>
                 {{ liste.dateCreation|date('d/m/Y') }}
