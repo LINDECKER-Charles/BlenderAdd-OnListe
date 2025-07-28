@@ -60,7 +60,7 @@
     {{ collectionRaw|json_encode|raw }}
 </script>
 
-<script>
+<script data-reload>
     const dataScript = document.getElementById('collection-data');
     const rawData = JSON.parse(dataScript.textContent); // ici on récupère ton JSON proprement
 
@@ -98,7 +98,7 @@
         }
     });
 </script>
-<script>
+<script data-reload>
     const rawHourlyData = JSON.parse(document.getElementById('collection-hourly-data').textContent);
     const select = document.getElementById('day-select');
     const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
