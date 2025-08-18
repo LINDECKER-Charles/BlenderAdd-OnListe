@@ -50,7 +50,7 @@ class AddonDownloader
                 true
             );
         }
-        /* dd($urls); */
+
         foreach ($urls as $url) {
             $this->downloadAddon($url);
         }

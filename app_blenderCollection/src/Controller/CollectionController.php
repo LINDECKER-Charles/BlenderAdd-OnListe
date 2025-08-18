@@ -82,6 +82,7 @@ final class CollectionController extends AbstractController
         Request $request, 
         CollectionCreator $creator
         ): Response {
+            
         $user = $this->getUser();
         if (!$uac->isVerified($user) || !$uac->isAllowed($user)) {
             return $uac->redirectingGlobal($user);
@@ -96,7 +97,6 @@ final class CollectionController extends AbstractController
                     return $uac->redirectingGlobal($user);
                 }
             }
-
 
             try {
                 $liste = $creator->handle($request, $user);
