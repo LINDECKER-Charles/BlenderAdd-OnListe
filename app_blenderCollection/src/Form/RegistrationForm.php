@@ -84,7 +84,7 @@ class RegistrationForm extends AbstractType
                     'message' => 'La vérification reCAPTCHA a échoué.',
                 ]),
                 'mapped' => false,
-                'action_name' => 'register', // 👈 ici au lieu de dans la contrainte
+                'action_name' => 'register', 
             ])
         ;
     }
