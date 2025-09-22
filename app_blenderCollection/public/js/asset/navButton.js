@@ -74,6 +74,11 @@ export default function initModalScript() {
         const profil = document.getElementById("btnProfil");
         const logout = document.getElementById("btnLogout");
 
-        addHoverAnim(profil, "#3B82F6");  // bleu Tailwind
-        addHoverAnim(logout, "#EF4444");  // rouge Tailwind
+        if (profil) {
+            addHoverAnim(profil, "#3B82F6");  // bleu Tailwind
+        }
+
+        if (logout) {
+            addHoverAnim(logout, "#EF4444");  // rouge Tailwind
+        }
 }
