@@ -119,7 +119,7 @@ export default function initAddonScript() {
         <tbody class="bg-[#30353B] divide-y divide-[#1B1C1C]">
           ${data.map((addon, index) => `
             <tr class="hover:bg-[#25282D] transition-colors duration-200">
-              <td class="px-4 py-2 text-center text-[#888C96]">${Number.isInteger(index + 1)}</td>
+              <td class="px-4 py-2 text-center text-[#888C96]">${index + 1}</td>
               <td class="px-4 py-2 text-[#BDC1C7] break-words max-w-[200px]">${escapeHTML(addon[0])}</td>
               <td class="px-4 py-2 text-center">
                 <button 
