@@ -61,67 +61,94 @@
                     <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
                 {% endfor %}
 
-                {# Password #}
-                <div class="mb-4" style="position: relative;">                
-                    <label for="{{ registrationForm.plainPassword.vars.id }}" class="font-bold text-xl">
-                        Password <span class="text-red-600">*</span>
-                    </label>
-                    {{ form_widget(registrationForm.plainPassword, {
-                        'attr': {
-                            'placeholder': 'Enter your password',
-                            'class': 'block p-2 rounded px-6 bg-white w-full mt-3'
-                        }
-                    }) }}
-                    <i id="togglePassword" class="fas fa-eye"
-                        onclick="togglePassword()"
-                        style="position: absolute; top: 65%; right: 1rem; transform: translateY(-25%); cursor: pointer;">
-                    </i>
-                    {% for error in registrationForm.plainPassword.vars.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
-                    {% endfor %}
-                </div>
-                <script>
-                    function togglePassword() {
-                    const passwordInput = document.getElementById("registration_form_plainPassword");
-                    const toggleIcon = document.getElementById("togglePassword");
-                    const isPassword = passwordInput.type === "password";
+{# Password #}
+<div class="mb-4 relative">
+    <label for="{{ registrationForm.plainPassword.vars.id }}" class="font-bold text-xl">
+        Password <span class="text-red-600">*</span>
+    </label>
 
-                    passwordInput.type = isPassword ? "text" : "password";
-                    toggleIcon.classList.toggle("fa-eye");
-                    toggleIcon.classList.toggle("fa-eye-slash");
-                    }
-                </script>
+    {{ form_widget(registrationForm.plainPassword, {
+        'attr': {
+            'placeholder': 'Enter your password',
+            'class': 'block p-2 rounded px-6 bg-white w-full mt-3',
+            'type': 'password'
+        }
+    }) }}
 
-                {# Confirm Password #}
-                <div class="mb-4" style="position: relative;">                
-                    <label for="{{ registrationForm.confirmPassword.vars.id }}" class="font-bold text-xl">
-                        Confirm Password <span class="text-red-600">*</span>
-                    </label>
-                    {{ form_widget(registrationForm.confirmPassword, {
-                        'attr': {
-                            'placeholder': 'Confirm your password',
-                            'class': 'block p-2 rounded px-6 bg-white w-full mt-3'
-                        }
-                    }) }}
-                    <i id="togglePassword2" class="fas fa-eye"
-                        onclick="togglePassword2()"
-                        style="position: absolute; top: 65%; right: 1rem; transform: translateY(-25%); cursor: pointer;">
-                    </i>
-                    {% for error in registrationForm.confirmPassword.vars.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
-                    {% endfor %}
-                </div>
-                <script>
-                    function togglePassword2() {
-                    const passwordInput = document.getElementById("registration_form_confirmPassword");
-                    const toggleIcon = document.getElementById("togglePassword2");
-                    const isPassword = passwordInput.type === "password";
+    <button type="button" 
+        class="absolute top-[75%] right-4 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+        onclick="togglePassword('registration_form_plainPassword', this)"
+        aria-label="Toggle password visibility">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 icon-eye" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden icon-eye-off" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.06 10.06 0 012.641-4.362M9.88 9.88A3 3 0 0114.12 14.12M3 3l18 18" />
+        </svg>
+    </button>
 
-                    passwordInput.type = isPassword ? "text" : "password";
-                    toggleIcon.classList.toggle("fa-eye");
-                    toggleIcon.classList.toggle("fa-eye-slash");
-                    }
-                </script>
+    {% for error in registrationForm.plainPassword.vars.errors %}
+        <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+    {% endfor %}
+</div>
+
+
+{# Confirm Password #}
+<div class="mb-4 relative">
+    <label for="{{ registrationForm.confirmPassword.vars.id }}" class="font-bold text-xl">
+        Confirm Password <span class="text-red-600">*</span>
+    </label>
+
+    {{ form_widget(registrationForm.confirmPassword, {
+        'attr': {
+            'placeholder': 'Confirm your password',
+            'class': 'block p-2 rounded px-6 bg-white w-full mt-3',
+            'type': 'password'
+        }
+    }) }}
+
+    <button type="button" 
+        class="absolute top-[75%] right-4 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+        onclick="togglePassword('registration_form_confirmPassword', this)"
+        aria-label="Toggle password visibility">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 icon-eye" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden icon-eye-off" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.06 10.06 0 012.641-4.362M9.88 9.88A3 3 0 0114.12 14.12M3 3l18 18" />
+        </svg>
+    </button>
+
+    {% for error in registrationForm.confirmPassword.vars.errors %}
+        <p class="text-red-600 text-sm mt-1">{{ error.message }}</p>
+    {% endfor %}
+</div>
+
+<script>
+    function togglePassword(inputId, button) {
+        const input = document.getElementById(inputId);
+        const eye = button.querySelector('.icon-eye');
+        const eyeOff = button.querySelector('.icon-eye-off');
+        const isPassword = input.type === 'password';
+
+        input.type = isPassword ? 'text' : 'password';
+        eye.classList.toggle('hidden');
+        eyeOff.classList.toggle('hidden');
+    }
+</script>
+
 
                 {# Agree Terms #}
                 <div class="flex flex-row justify-start items-center gap-4">
