@@ -239,23 +239,67 @@
                 To get started, clone the repository and install the dependencies:
             </p>
 
-            <pre class="bg-black-950 text-white p-4 rounded-lg text-sm overflow-x-auto"><code>
-    git clone https://github.com/LINDECKER-Charles/BlenderAdd-OnListe.git
-    cd app_blenderCollection
-    git checkout dev
-    composer install
-            </code></pre>
+            <pre class="relative bg-black-950 text-white p-4 rounded-lg text-sm overflow-x-auto font-mono leading-relaxed group">
+                <button
+                    type="button"
+                    class="absolute top-2 right-2 text-xs text-white bg-purple-600 hover:bg-purple-700 active:bg-purple-800 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-left"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+
+                <code>
+            git clone https://github.com/LINDECKER-Charles/BlenderAdd-OnListe.git
+            cd app_blenderCollection
+            git checkout dev
+            composer install
+                </code>
+            </pre>
+
+            <script>
+            function copyCode(button) {
+                const codeBlock = button.parentElement.querySelector('code');
+                const text = codeBlock.innerText.trim();
+
+                // Copie dans le presse-papiers
+                navigator.clipboard.writeText(text).then(() => {
+                    button.textContent = 'Copied!';
+                    button.classList.add('bg-green-600');
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                        button.classList.remove('bg-green-600');
+                    }, 1500);
+                }).catch(() => {
+                    button.textContent = 'Error';
+                    button.classList.add('bg-red-600');
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                        button.classList.remove('bg-red-600');
+                    }, 1500);
+                });
+            }
+            </script>
 
             <p class="text-lg leading-relaxed text-white">
                 You can then run the local development server with:
             </p>
+            {# --- Bloc Docker --- #}
+            <pre class="relative bg-black-950 text-white p-4 rounded-lg text-sm overflow-x-auto font-mono leading-relaxed group">
+                <button
+                    type="button"
+                    class="absolute top-2 right-2 text-xs text-white bg-purple-600 hover:bg-purple-700 active:bg-purple-800 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
 
-            <pre class="bg-black-950 text-white p-4 rounded-lg text-sm overflow-x-auto"><code>
-    docker compose up
-    docker compose exec app composer install
-    docker compose exec app php bin/console doctrine:migrations:migrate
-    docker compose exec app php bin/console messenger:consume async -vv
-            </code></pre>
+                <code>
+            docker compose up
+            docker compose exec app composer install
+            docker compose exec app php bin/console doctrine:migrations:migrate
+            docker compose exec app php bin/console messenger:consume async -vv
+                </code>
+            </pre>
         </article>
 
         {# Étape 3 — Proposer une contribution #}
@@ -265,9 +309,20 @@
                 Once your environment is ready, create a new branch describing your modification:
             </p>
 
-            <pre class="bg-black-950 text-white p-4 rounded-lg text-sm overflow-x-auto"><code>
-    git checkout -b feature/add-new-filter
-            </code></pre>
+            {# --- Bloc Git --- #}
+            <pre class="relative bg-black-950 text-white p-4 rounded-lg text-sm overflow-x-auto font-mono leading-relaxed group">
+                <button
+                    type="button"
+                    class="absolute top-2 right-2 text-xs text-white bg-purple-600 hover:bg-purple-700 active:bg-purple-800 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    onclick="copyCode(this)"
+                >
+                    Copy
+                </button>
+
+                <code>
+            git checkout -b feature/add-new-filter
+                </code>
+            </pre>
 
             <p class="text-lg leading-relaxed text-white">
                 When your changes are complete, push your branch and open a Pull Request on GitHub.
