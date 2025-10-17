@@ -35,23 +35,49 @@
             <label for="email" class="font-bold text-xl">Email <span class="text-red-600">*</span></label>
             <input type="email" id="email" name="_username" placeholder="name@example.com" class="block p-2 rounded px-6 bg-white focus:outline-none focus:ring-0 active:outline-none active:ring-0" value="{{ last_username }}" required autofocus autocomplete="email" />
             <label id="password_label" for="password" class="font-bold text-xl">Password <span class="text-red-600">*</span></label>
-            <div class="mb-4" style="position: relative;"> 
-                <input type="password" id="_password" name="_password" placeholder="Enter your password" class=" w-full block p-2 rounded px-6 bg-white focus:outline-none focus:ring-0 active:outline-none active:ring-0" required autocomplete="current-password" />
-                <i id="togglePassword" class="fas fa-eye"
-                    onclick="togglePassword()"
-                    style="position: absolute; top: 40%; right: 1rem; transform: translateY(-25%); cursor: pointer;">
-                </i>
+            <div class="mb-4 relative"> 
+                <input
+                    type="password"
+                    id="_password"
+                    name="_password"
+                    placeholder="Enter your password"
+                    class="w-full block p-2 rounded px-6 bg-white focus:outline-none focus:ring-0"
+                    required
+                    autocomplete="current-password"
+                />
+                
+                <!-- Icône SVG visible par défaut -->
+                <button type="button" id="togglePassword" 
+                    class="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"
+                    aria-label="Toggle password visibility">
+                    <!-- Icône œil ouverte -->
+                    <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <!-- Icône œil barrée, cachée -->
+                    <svg id="icon-eye-off" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.06 10.06 0 012.641-4.362M9.88 9.88A3 3 0 0114.12 14.12M3 3l18 18" />
+                    </svg>
+                </button>
             </div>
             <script>
-                function togglePassword() {
                 const passwordInput = document.getElementById("_password");
-                const toggleIcon = document.getElementById("togglePassword");
-                const isPassword = passwordInput.type === "password";
+                const toggleButton = document.getElementById("togglePassword");
+                const eyeIcon = document.getElementById("icon-eye");
+                const eyeOffIcon = document.getElementById("icon-eye-off");
 
-                passwordInput.type = isPassword ? "text" : "password";
-                toggleIcon.classList.toggle("fa-eye");
-                toggleIcon.classList.toggle("fa-eye-slash");
-                }
+                toggleButton.addEventListener("click", () => {
+                    const isPassword = passwordInput.type === "password";
+                    passwordInput.type = isPassword ? "text" : "password";
+                    eyeIcon.classList.toggle("hidden");
+                    eyeOffIcon.classList.toggle("hidden");
+                });
             </script>
 
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
