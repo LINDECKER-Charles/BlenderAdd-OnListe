@@ -29,6 +29,12 @@ final class HomeController extends AbstractController
         ]);
     }
 
+    #[Route('/tutorial', name: 'app_tuto')]
+    public function tutorial(): Response
+    {
+        return $this->render('home/tutorial.html.twig', []);
+    }
+
 }
 
 /* 
