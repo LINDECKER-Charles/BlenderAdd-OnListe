@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% set title = "Contact"%}
-{% set meta_description = "Une question, une suggestion ? Contactez notre équipe via notre formulaire dédié. Nous vous répondrons rapidement." %}
+{% set meta_description = "Have a question or suggestion? Contact our team using the dedicated form — we’ll get back to you shortly." %}
 
 {% block og_type %}website{% endblock %}
 {# --- Directive SEO pour robots --- #}
@@ -21,7 +21,7 @@
             </div>
         </a>
     <div class="w-3/4 bg-[#CDD5D9] bg-opacity-90 flex flex-col justify-center rounded-lg p-6 text-black-900 lg:w-1/3">
-        <h2 class="text-lg mb-6">Contactez <span class="font-bold">Blender Collection</span></h2>
+        <h2 class="text-lg mb-6">Contact <span class="font-bold">Blender Collection</span></h2>
         <form method="post" action="{{ path('app_contact') }}" class="flex flex-col gap-4">
         {# Message d'erreur #}    
         {% for type, messages in app.flashes %}
@@ -31,7 +31,7 @@
                 </div>
             {% endfor %}
         {% endfor %}
-            <label for="name" class="font-bold text-xl">Nom <span class="text-red-600">*</span></label>
+            <label for="name" class="font-bold text-xl">Name <span class="text-red-600">*</span></label>
             <input type="text" id="name" name="name" class="block p-2 rounded px-6 bg-white" required />
 
             <label for="email" class="font-bold text-xl">Email <span class="text-red-600">*</span></label>
@@ -42,7 +42,7 @@
             
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('contact_form') }}">
 
-            <button type="submit" class="block text-white font-bold py-2 px-4 rounded bg-[linear-gradient(to_right,#4AA5F7_0%,#6086FF_100%)] mb-8 mt-1">Envoyer</button>
+            <button type="submit" class="block text-white font-bold py-2 px-4 rounded bg-[linear-gradient(to_right,#4AA5F7_0%,#6086FF_100%)] mb-8 mt-1">Send</button>
         </form>
     </div>
 </main>

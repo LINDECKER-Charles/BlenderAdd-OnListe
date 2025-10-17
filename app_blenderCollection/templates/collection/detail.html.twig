@@ -66,7 +66,7 @@
                     </p>
                     <button id="toggleDescription"
                             class="mt-2 text-sm text-purple-500 hover:underline hidden">
-                    Voir plus
+                    See more
                     </button>
                 </div>
                 {% if isEditable %}
@@ -85,13 +85,13 @@
             <!-- Visibilité -->
             <div class="flex items-center gap-3">
                 <p class="text-lg font-semibold text-white">
-                    Visibilité :
+                    Visibility :
                     <span class="{{ liste.isVisible ? 'text-emerald-400' : 'text-red-500' }}">
-                    {{ liste.isVisible ? 'Publique' : 'Privée' }}
+                    {{ liste.isVisible ? 'Public' : 'Private' }}
                     </span>
                 </p>
                 {% if isEditable %}
-                    <button onclick="toggleModal('editVisibilityModal')" title="Modifier la visibilité"
+                    <button onclick="toggleModal('editVisibilityModal')" title="Edit visibility"
                     class="w-9 h-9 flex items-center justify-center rounded-full bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500/50">
                             <svg width="20" viewBox="0 0 55 55" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white">
                                 <path d="M50.1997 14.0001L26.3497 37.85C23.9747 40.225 16.9247 41.325 15.3497 39.75C13.7747 38.175 14.8497 31.125 17.2247 28.75L41.0998 4.87505C41.6885 4.2327 42.4013 3.71635 43.1953 3.3571C43.989 2.99785 44.8475 2.8031 45.7187 2.78475C46.5897 2.76643 47.4558 2.92478 48.264 3.2503C49.0723 3.57583 49.8063 4.06183 50.4215 4.67883C51.0368 5.29583 51.5207 6.03107 51.844 6.84022C52.1672 7.6494 52.3235 8.51565 52.3027 9.38677C52.282 10.2579 52.0848 11.1159 51.7235 11.9087C51.362 12.7016 50.8437 13.4131 50.1997 14.0001Z"
@@ -116,29 +116,29 @@
             <svg width="20" viewBox="0 0 51 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M35.1051 2.99364C43.0301 2.99364 48.3551 10.4436 48.3551 17.3936C48.3551 31.4686 26.2551 42.9936 25.8551 42.9936C25.4551 42.9936 3.35508 31.4686 3.35508 17.3936C3.35508 10.4436 8.68008 2.99364 16.6051 2.99364C21.1551 2.99364 24.1301 5.26864 25.8551 7.26864C27.5801 5.26864 30.5551 2.99364 35.1051 2.99364Z"/>
             </svg>
-            Retirer des favoris
+            Remove from favorites
         {% else %}
             <svg width="20" viewBox="0 0 51 46" fill="none" stroke="currentColor" stroke-width="5" xmlns="http://www.w3.org/2000/svg">
                 <path d="M35.1051 2.99364C43.0301 2.99364 48.3551 10.4436 48.3551 17.3936C48.3551 31.4686 26.2551 42.9936 25.8551 42.9936C25.4551 42.9936 3.35508 31.4686 3.35508 17.3936C3.35508 10.4436 8.68008 2.99364 16.6051 2.99364C21.1551 2.99364 24.1301 5.26864 25.8551 7.26864C27.5801 5.26864 30.5551 2.99364 35.1051 2.99364Z"/>
             </svg>
-            Ajouter aux favoris
+            Add to favorites
         {% endif %}
     </button>
 </form>
 
             <p class="text-white">
-                <strong class="text-grey-500">Date de création :</strong>
+                <strong class="text-grey-500">Creation date :</strong>
                 {{ liste.dateCreation|date('d/m/Y') }}
                 </p>
                 <p class="text-white">
-                <strong class="text-grey-500">Propriétaire :</strong>
+                <strong class="text-grey-500">Owner :</strong>
                 {% if liste.usser %}
                     <a href="{{ path('app_profil_visiteur', { id: liste.usser.id }) }}"
                     class="text-blue-500 hover:underline">
                     {{ liste.usser.name }}
                     </a>
                 {% else %}
-                    <span class="italic text-grey-500">Inconnu</span>
+                    <span class="italic text-grey-500">Unknown</span>
                 {% endif %}
             </p>
         </div>
@@ -154,11 +154,11 @@
                 onclick="document.getElementById('liste-image-input').click()">
                 {% if liste.image %}
                     <img src="{{ asset('uploads/' ~ liste.image) }}"
-                        alt="Image de la liste"
+                        alt="Collection image"
                         class="w-full h-full object-cover transition duration-300 ease-in-out group-hover:blur-sm">
                 {% else %}
                     <img src="/img/profil_template.png"
-                        alt="Image par défaut"
+                        alt="Default image"
                         class="w-full h-full object-cover transition duration-300 ease-in-out group-hover:blur-sm">
                 {% endif %}
                 <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -175,11 +175,11 @@
         <div class="w-96 max-w-full rounded-xl shadow-lg overflow-hidden">
             {% if liste.image %}
                 <img src="{{ asset('uploads/' ~ liste.image) }}"
-                    alt="Image de la liste"
+                    alt="Collection image"
                     class="w-full h-full object-cover">
             {% else %}
                 <img src="/img/profil_template.png"
-                    alt="Image par défaut"
+                    alt="Default image"
                     class="w-full h-full object-cover">
             {% endif %}
         </div>
@@ -192,7 +192,7 @@
 
     {# En-tête avec titre et bouton à droite #}
     <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-white">Add-ons liés à cette collection</h2>
+        <h2 class="text-2xl font-bold text-white">Add-ons linked to this collection</h2>
 
         <form method="POST" action="{{ path('liste_download_addons', { id: liste.id }) }}" data-turbo="false">
         <input type="hidden" name="_token" value="{{ csrf_token('download_addons_' ~ liste.id) }}">
@@ -202,7 +202,7 @@
                 <path d="M17 52.0005H37C44.071 52.0005 47.6065 52.0005 49.8032 49.8037C52 47.6072 52 44.0715 52 37.0005V34.5005C52 27.4295 52 23.894 49.8032 21.6972C47.8822 19.7763 44.9375 19.5352 39.5 19.5049M14.5 19.5049C9.06243 19.5352 6.11765 19.7763 4.1967 21.6972C2 23.894 2 27.4295 2 34.5005V37.0005C2 44.0715 2 47.6072 4.1967 49.8037C4.9462 50.5532 5.85155 51.047 7 51.3725" stroke="currentColor" stroke-width="3.75" stroke-linecap="round"/>
                 <path d="M27 2V34.5M27 34.5L19.5 25.75M27 34.5L34.5 25.75" stroke="currentColor" stroke-width="3.75" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Télécharger tous les add-ons
+            Download all add-ons
         </button>
         </form>
     </div>
@@ -212,7 +212,7 @@
         <form method="POST" action="{{ path('add_addon_to_liste', { id: liste.id }) }}"
             class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
         <div class="w-full sm:w-2/3">
-            <label for="addon_input" class="block mb-1 text-sm font-medium text-grey-500">ID Blender de l’add-on</label>
+            <label for="addon_input" class="block mb-1 text-sm font-medium text-grey-500">Blender Add-on ID</label>
             <input type="text" name="idBlender" id="addon_input" required
                 class="w-full px-4 py-2 rounded-md bg-grey-850 text-black-950 border border-grey-700 text-black-950">
         </div>
@@ -224,7 +224,7 @@
                     <path d="M34.956 27.6347H27.456M27.456 27.6347H19.956M27.456 27.6347V20.1347M27.456 27.6347V35.1347" stroke="currentColor" stroke-width="3.75" stroke-linecap="round"/>
                     <path d="M14.956 5.97928C18.6332 3.85215 22.9025 2.63473 27.456 2.63473C41.263 2.63473 52.456 13.8276 52.456 27.6347C52.456 41.4417 41.263 52.6347 27.456 52.6347C13.6489 52.6347 2.456 41.4417 2.456 27.6347C2.456 23.0812 3.67342 18.8119 5.80055 15.1347" stroke="currentColor" stroke-width="3.75" stroke-linecap="round"/>
                 </svg>
-                Ajouter
+                Add
             </button>
         </div>
         </form>
@@ -255,14 +255,14 @@
                 {% if isEditable %}
                     <td class="px-4 py-2 text-center flex items-center justify-center">
                     <form method="POST" action="{{ path('remove_addon_from_liste', { id: liste.id, addonId: addon.id }) }}"
-                            onsubmit="return confirm('Supprimer cet add-on ?')">
+                            onsubmit="return confirm('Delete this add-on?')">
                         <input type="hidden" name="_token" value="{{ csrf_token('remove_addon_' ~ addon.id) }}">
                         <button type="submit"
                                 class="text-red-500 hover:text-red-600 text-sm font-semibold transition flex flex-row gap-2 items-center justify-center">
                             <svg width="25" class=" inline" viewBox="0 0 46 50" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M18 25L28 35M28 25L18 35M3 10H43M33 10L32.3235 7.97017C31.6677 6.00312 31.3398 5.0196 30.7318 4.29245C30.1948 3.65032 29.5052 3.1533 28.7262 2.84695C27.844 2.5 26.8075 2.5 24.734 2.5H21.266C19.1925 2.5 18.156 2.5 17.2738 2.84695C16.4948 3.1533 15.8052 3.65032 15.2682 4.29245C14.6601 5.0196 14.3323 6.00312 13.6766 7.97017L13 10M38 10V35.5C38 39.7005 38 41.8005 37.1825 43.405C36.4635 44.8162 35.3162 45.9635 33.905 46.6825C32.3005 47.5 30.2005 47.5 26 47.5H20C15.7996 47.5 13.6994 47.5 12.0951 46.6825C10.6839 45.9635 9.5365 44.8162 8.81745 43.405C8 41.8005 8 39.7005 8 35.5V10" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            Supprimer
+                            Delete
                         </button>
                     </form>
                     </td>
@@ -273,17 +273,17 @@
         </table>
         </div>
     {% else %}
-        <p class="text-grey-500 italic mt-4">Aucun add-on associé à cette liste.</p>
+        <p class="text-grey-500 italic mt-4">No add-ons linked to this collection.</p>
     {% endif %}
     </div>
 
 
     {# Ajout de commentaire #}
     {% if app.user %}
-    <h3 class="text-lg font-semibold mt-8 mb-3 text-white">Ajouter un commentaire</h3>
+    <h3 class="text-lg font-semibold mt-8 mb-3 text-white">Add a comment</h3>
 
     <form action="{{ path('liste_comment', {'id': liste.id}) }}" method="post" class="flex flex-col gap-4">
-        <textarea name="content" rows="4" placeholder="Exprime-toi ici..."class="w-full px-4 py-3 text-sm rounded-md bg-grey-850 text-black-950 border border-grey-700 focus:outline-none focus:ring-2 focus:ring-purple-500/50 placeholder-grey-500"></textarea>
+        <textarea name="content" rows="4" placeholder="Express yourself here..."class="w-full px-4 py-3 text-sm rounded-md bg-grey-850 text-black-950 border border-grey-700 focus:outline-none focus:ring-2 focus:ring-purple-500/50 placeholder-grey-500"></textarea>
 
         <input type="hidden" name="_token" value="{{ csrf_token('add_comment_' ~ liste.id) }}">
 
@@ -292,15 +292,15 @@
             <svg width="17" class=" inline text-white" viewBox="0 0 42 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M22.5 0.0910854L41.7011 17.9207L38.2989 21.5847L25 9.23429L25 29.7527C25 39.2163 17.488 46.9254 8.10162 47.2425L7.5 47.2527H0V42.2527H7.5C14.2219 42.2527 19.7045 36.9469 19.9885 30.2949L20 29.7527L19.9999 9.23441L6.70113 21.5847L3.29887 17.9207L22.5 0.0910854Z" fill="currentColor"/>
             </svg>
-            Publier
+            Publish
         </button>
     </form>
     {% else %}
-        <p class="text-grey-500 italic mt-8">Connecte-toi pour écrire un commentaire.</p>
+        <p class="text-grey-500 italic mt-8">Log in to write a comment.</p>
     {% endif %}
 
 
-    <h2 class="text-2xl font-bold text-white mb-4 mt-4">Commentaires</h2>
+    <h2 class="text-2xl font-bold text-white mb-4 mt-4">Comments</h2>
 
     {% for post in liste.posts %}
     <div class="bg-grey-900 border border-grey-700 rounded-xl p-4 mb-6 shadow-sm text-white">
@@ -316,7 +316,7 @@
                 <svg width="17" class=" inline" viewBox="0 0 46 50" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M18 25L28 35M28 25L18 35M3 10H43M33 10L32.3235 7.97017C31.6677 6.00312 31.3398 5.0196 30.7318 4.29245C30.1948 3.65032 29.5052 3.1533 28.7262 2.84695C27.844 2.5 26.8075 2.5 24.734 2.5H21.266C19.1925 2.5 18.156 2.5 17.2738 2.84695C16.4948 3.1533 15.8052 3.65032 15.2682 4.29245C14.6601 5.0196 14.3323 6.00312 13.6766 7.97017L13 10M38 10V35.5C38 39.7005 38 41.8005 37.1825 43.405C36.4635 44.8162 35.3162 45.9635 33.905 46.6825C32.3005 47.5 30.2005 47.5 26 47.5H20C15.7996 47.5 13.6994 47.5 12.0951 46.6825C10.6839 45.9635 9.5365 44.8162 8.81745 43.405C8 41.8005 8 39.7005 8 35.5V10" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                Supprimer
+                Delete
             </button>
             </form>
         {% endif %}
@@ -348,7 +348,7 @@
                 <svg width="13" class=" inline text-purple-600" viewBox="0 0 42 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M22.5 0.0910854L41.7011 17.9207L38.2989 21.5847L25 9.23429L25 29.7527C25 39.2163 17.488 46.9254 8.10162 47.2425L7.5 47.2527H0V42.2527H7.5C14.2219 42.2527 19.7045 36.9469 19.9885 30.2949L20 29.7527L19.9999 9.23441L6.70113 21.5847L3.29887 17.9207L22.5 0.0910854Z" fill="currentColor"/>
                 </svg>
-                Répondre
+                Reply
             </button>
         {% endif %}
         </div>
@@ -361,12 +361,12 @@
                 name="content" 
                 rows="3" 
                 class="w-full px-3 py-2 bg-grey-850 text-black-950 border border-grey-700 rounded-md placeholder-grey-500"
-                placeholder="Ta réponse ici..."
+                placeholder="Your reply here..."
             ></textarea>
             <input type="hidden" name="_token" value="{{ csrf_token('reply_' ~ post.id) }}">
             <button type="submit"
                     class="self-start text-sm font-semibold rounded-md bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-purple-500/50 flex flex-row justify-center items-center gap-2 text-center px-2">
-                Envoyer la réponse
+                Send reply
                 <svg width="18" class=" inline" height="44" viewBox="0 0 48 44" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.6013 21.9192H7.39736M6.96641 23.9122L4.45451 31.4157C3.07876 35.5252 2.39089 37.5799 2.88454 38.8452C3.31321 39.9442 4.23394 40.7772 5.37006 41.0944C6.67834 41.4594 8.65434 40.5702 12.6063 38.7919L37.9423 27.3907C41.7998 25.6547 43.7286 24.7869 44.3246 23.5812C44.8426 22.5337 44.8426 21.3044 44.3246 20.2569C43.7286 19.0514 41.7998 18.1834 37.9423 16.4476L12.5626 5.02677C8.62254 3.25375 6.65251 2.36722 5.34554 2.7309C4.21049 3.04672 3.28986 3.8776 2.85969 4.97442C2.36434 6.2374 3.04486 8.28772 4.40594 12.3884L6.97129 20.1174C7.20504 20.8217 7.32194 21.1739 7.36806 21.5339C7.40901 21.8537 7.40859 22.1772 7.36684 22.4967C7.31976 22.8567 7.20199 23.2084 6.96641 23.9122Z" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -407,7 +407,7 @@
                             <svg width="17" class=" inline" viewBox="0 0 46 50" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M18 25L28 35M28 25L18 35M3 10H43M33 10L32.3235 7.97017C31.6677 6.00312 31.3398 5.0196 30.7318 4.29245C30.1948 3.65032 29.5052 3.1533 28.7262 2.84695C27.844 2.5 26.8075 2.5 24.734 2.5H21.266C19.1925 2.5 18.156 2.5 17.2738 2.84695C16.4948 3.1533 15.8052 3.65032 15.2682 4.29245C14.6601 5.0196 14.3323 6.00312 13.6766 7.97017L13 10M38 10V35.5C38 39.7005 38 41.8005 37.1825 43.405C36.4635 44.8162 35.3162 45.9635 33.905 46.6825C32.3005 47.5 30.2005 47.5 26 47.5H20C15.7996 47.5 13.6994 47.5 12.0951 46.6825C10.6839 45.9635 9.5365 44.8162 8.81745 43.405C8 41.8005 8 39.7005 8 35.5V10" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            Supprimer
+                            Delete
                         </button>
                     </form>
                 {% endif %}
@@ -418,7 +418,7 @@
         {% endif %}
     </div>
     {% else %}
-    <p class="italic text-grey-500">Aucun commentaire pour le moment.</p>
+    <p class="italic text-grey-500">No comments yet.</p>
     {% endfor %}
 
 
@@ -433,13 +433,13 @@
     {# Modal #}
     <div id="editNameModal" class="modal-container fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden" data-modal-id="editNameModal">
         <div class="bg-grey-900 text-white p-6 rounded-2xl w-[90%] max-w-md shadow-xl border border-grey-700">
-            <h2 class="text-xl font-semibold mb-4">Modifier le nom</h2>
+            <h2 class="text-xl font-semibold mb-4">Edit name</h2>
             <form method="POST" action="{{ path('update_liste_name', { id: liste.id }) }}">
                 <input type="text" name="name" value="{{ liste.name }}"
                     class="w-full px-4 py-2 rounded-md bg-white text-black-950 border border-grey-700" required>
                 <div class="flex justify-end gap-3 mt-4">
-                    <button type="button" onclick="toggleModal('editNameModal')" class="px-4 py-2 bg-grey-700 hover:bg-grey-600 rounded-md text-white">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-md text-white font-semibold shadow transition-all">Enregistrer</button>
+                    <button type="button" onclick="toggleModal('editNameModal')" class="px-4 py-2 bg-grey-700 hover:bg-grey-600 rounded-md text-white">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-md text-white font-semibold shadow transition-all">Save</button>
                 </div>
             </form>
         </div>
@@ -447,13 +447,13 @@
 
     <div id="editDescriptionModal" class="modal-container fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden" data-modal-id="editDescriptionModal">
         <div class="bg-grey-900 text-white p-6 rounded-2xl w-[90%] max-w-md shadow-xl border border-grey-700">
-            <h2 class="text-xl font-semibold mb-4">Modifier la description</h2>
+            <h2 class="text-xl font-semibold mb-4">Edit description</h2>
             <form method="POST" action="{{ path('update_liste_description', { id: liste.id }) }}">
                 <textarea name="description" rows="6"
                     class="w-full px-4 py-2 rounded-md bg-white text-black-950 border border-grey-700 resize-none" required>{{ liste.description }}</textarea>
                 <div class="flex justify-end gap-3 mt-4">
-                    <button type="button" onclick="toggleModal('editDescriptionModal')" class="px-4 py-2 bg-grey-700 hover:bg-grey-600 rounded-md text-white">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-md text-white font-semibold shadow transition-all">Enregistrer</button>
+                    <button type="button" onclick="toggleModal('editDescriptionModal')" class="px-4 py-2 bg-grey-700 hover:bg-grey-600 rounded-md text-white">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-md text-white font-semibold shadow transition-all">Save</button>
                 </div>
             </form>
         </div>
@@ -461,16 +461,16 @@
 
     <div id="editVisibilityModal" class="modal-container fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden" data-modal-id="editVisibilityModal">
         <div class="bg-grey-900 text-white p-6 rounded-2xl w-[90%] max-w-md shadow-xl border border-grey-700">
-            <h2 class="text-xl font-semibold mb-4">Changer la visibilité</h2>
+            <h2 class="text-xl font-semibold mb-4">Change visibility</h2>
             <form method="POST" action="{{ path('update_liste_visibility', { id: liste.id }) }}">
                 <select name="isVisible" required
                     class="w-full px-4 py-2 rounded-md bg-white text-black-950 border border-grey-700">
-                    <option value="1" {% if liste.isVisible %}selected{% endif %}>Publique</option>
-                    <option value="0" {% if not liste.isVisible %}selected{% endif %}>Privée</option>
+                    <option value="1" {% if liste.isVisible %}selected{% endif %}>Public</option>
+                    <option value="0" {% if not liste.isVisible %}selected{% endif %}>Private</option>
                 </select>
                 <div class="flex justify-end gap-3 mt-4">
-                    <button type="button" onclick="toggleModal('editVisibilityModal')" class="px-4 py-2 bg-grey-700 hover:bg-grey-600 rounded-md text-white">Annuler</button>
-                    <button type="submit" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-md text-white font-semibold shadow transition-all">Enregistrer</button>
+                    <button type="button" onclick="toggleModal('editVisibilityModal')" class="px-4 py-2 bg-grey-700 hover:bg-grey-600 rounded-md text-white">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-md text-white font-semibold shadow transition-all">Save</button>
                 </div>
             </form>
         </div>
@@ -479,12 +479,12 @@
     <div id="modalUpload" class="modal-container fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden" data-modal-id="modalUpload">
         <div class="bg-grey-900 text-white p-6 rounded-2xl w-[90%] max-w-md shadow-xl border border-grey-700 relative">
             <button type="button" onclick="toggleModal('modalUpload')" class="absolute top-3 right-3 text-grey-500 hover:text-white text-xl">&times;</button>
-            <h2 class="text-lg font-semibold mb-4">Changer l’image de la liste</h2>
+            <h2 class="text-lg font-semibold mb-4">Change collection image</h2>
             <form method="post" action="{{ path('liste_update_image', {'id': liste.id}) }}" enctype="multipart/form-data">
                 <input type="file" name="image" accept="image/*" required
                     class="w-full p-2 border border-grey-700 bg-white text-black-950 rounded-md mb-4">
                 <button type="submit" class="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-md shadow transition-all">
-                    Mettre à jour
+                    Update
                 </button>
             </form>
         </div>
