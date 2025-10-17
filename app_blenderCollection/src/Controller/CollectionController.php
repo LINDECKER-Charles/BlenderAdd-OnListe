@@ -259,10 +259,6 @@ final class CollectionController extends AbstractController
         ListeRepository $listeRepository
         ): Response
     {
-        /* On verifie que l'utilisateur est connecté */
-        if (!$uac->isConnected()) {
-            return $uac->redirectingGlobal();
-        }
         $liste = $listeRepository->find($id);
 
         if (!$liste) {
@@ -581,11 +577,6 @@ final class CollectionController extends AbstractController
     ): BinaryFileResponse {
         if (!$this->isCsrfTokenValid('download_addons_' . $liste->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
-        }
-
-        if (!($uac->isConnected())) {
-            throw $this->createAccessDeniedException('Vous n’avez pas les droits pour télécharger cette collection.');
-
         }
 
         return $downloader->download($liste);

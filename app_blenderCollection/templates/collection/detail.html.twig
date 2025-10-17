@@ -5,26 +5,31 @@
 {# --- Directive SEO pour robots --- #}
 {% block meta_robots %}index, follow{% endblock %}
 
-{% if liste.usser == null %}
-    {% set isEditable =
-        ('ADMIN' in app.user.roles and 'ADMIN' not in liste.usser)
-        or ('MODO' in app.user.roles and 'ADMIN' not in liste.usser and 'MODO' not in liste.usser)
-        and 'BAN' not in app.user.roles
-        and 'LOCK' not in app.user.roles
-    %}
+{% if app.user %}
+    {% if liste.usser == null %}
+        {% set isEditable =
+            ('ADMIN' in app.user.roles and 'ADMIN' not in liste.usser)
+            or ('MODO' in app.user.roles and 'ADMIN' not in liste.usser and 'MODO' not in liste.usser)
+            and 'BAN' not in app.user.roles
+            and 'LOCK' not in app.user.roles
+        %}
+    {% else %}
+        {% set isEditable =
+            liste.usser.id == app.user.id
+            or ('ADMIN' in app.user.roles and 'ADMIN' not in liste.usser)
+            or ('MODO' in app.user.roles and 'ADMIN' not in liste.usser and 'MODO' not in liste.usser)
+            and 'BAN' not in app.user.roles
+            and 'LOCK' not in app.user.roles
+        %}
+    {% endif %}
+
+    {% if 'BAN' in app.user.roles or 'LOCK' in app.user.roles %}
+        {% set isEditable = 0 %}
+    {% endif %}
 {% else %}
-    {% set isEditable =
-        liste.usser.id == app.user.id
-        or ('ADMIN' in app.user.roles and 'ADMIN' not in liste.usser)
-        or ('MODO' in app.user.roles and 'ADMIN' not in liste.usser and 'MODO' not in liste.usser)
-        and 'BAN' not in app.user.roles
-        and 'LOCK' not in app.user.roles
-    %}
+    {% set isEditable = false %}
 {% endif %}
 
-{% if 'BAN' in app.user.roles or 'LOCK' in app.user.roles %}
-    {% set isEditable = 0 %}
-{% endif %}
 
 
 
