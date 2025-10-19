@@ -32,13 +32,13 @@
             {% endfor %}
         {% endfor %}
             <label for="name" class="font-bold text-xl">Name <span class="text-red-600">*</span></label>
-            <input type="text" id="name" name="name" class="block p-2 rounded px-6 bg-white" required />
+            <input type="text" id="name" name="name" placeholder="Enter your name.." class="block p-2 rounded px-6 bg-white" required />
 
             <label for="email" class="font-bold text-xl">Email <span class="text-red-600">*</span></label>
-            <input type="email" id="email" name="email" class="block p-2 rounded px-6 bg-white" required />
+            <input type="email" id="email" name="email" placeholder="Enter your email.." class="block p-2 rounded px-6 bg-white" required />
 
             <label for="message" class="font-bold text-xl">Message <span class="text-red-600">*</span></label>
-            <textarea id="message" name="message" rows="5" class="block p-2 rounded px-6 bg-white" required></textarea>
+            <textarea id="message" name="message" placeholder="Enter your message.."  rows="5" class="block p-2 rounded px-6 bg-white" required></textarea>
             
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('contact_form') }}">
 
