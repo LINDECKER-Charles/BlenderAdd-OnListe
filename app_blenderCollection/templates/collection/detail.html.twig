@@ -305,7 +305,7 @@
     {% for post in liste.posts %}
     <div class="bg-grey-900 border border-grey-700 rounded-xl p-4 mb-6 shadow-sm text-white">
         <div class="flex justify-between items-center mb-2">
-        <p class="text-sm font-semibold text-purple-500">
+        <p class="text-sm font-semibold text-purple-600">
             {{ post.commenter.name ?? 'Anonyme' }}
             <span class="text-grey-500">— {{ post.dateCreation|date('d/m/Y H:i') }}</span>
         </p>
@@ -344,7 +344,7 @@
             <button 
             type="button" 
             onclick="toggleReplyForm('{{ post.id }}')" 
-            class="text-sm text-purple-500 hover:underline transition flex flex-row justify-center items-center gap-2">
+            class="text-sm text-purple-600 hover:underline transition flex flex-row justify-center items-center gap-2">
                 <svg width="13" class=" inline text-purple-600" viewBox="0 0 42 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M22.5 0.0910854L41.7011 17.9207L38.2989 21.5847L25 9.23429L25 29.7527C25 39.2163 17.488 46.9254 8.10162 47.2425L7.5 47.2527H0V42.2527H7.5C14.2219 42.2527 19.7045 36.9469 19.9885 30.2949L20 29.7527L19.9999 9.23441L6.70113 21.5847L3.29887 17.9207L22.5 0.0910854Z" fill="currentColor"/>
                 </svg>
