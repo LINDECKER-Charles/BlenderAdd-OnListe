@@ -35,13 +35,13 @@
         {# Boutons admin — Ban & Donner rôle Modo #}
         {% if isSelf or isAdmin or isModo %}
             <div class="fixed top-1/2 -translate-y-1/2 right-6 z-50">
-                {# --- BOUTON TOGGLE (visible uniquement quand la sidebar est cachée) --- #}
+                {# --- BOUTON TOGGLE --- #}
                 <button id="toggleSidebarBtn" class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-500 hover:bg-purple-600 text-white shadow-xl transition-opacity duration-0" aria-label="Ouvrir la barre admin">
                     <svg width="23"  viewBox="0 0 46 36" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M3.4585 3.19116H43.4585M3.4585 18.1912H43.4585M3.4585 33.1912H43.4585" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
-                {# --- SIDEBAR (même conteneur que le bouton) --- #}
+                {# --- SIDEBAR --- #}
                 <div id="adminSidebar" class="hidden flex-col items-center justify-center gap-4 bg-grey-950/90 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-xl min-w-[180px]">
                     {# Bouton de fermeture #}
                     <button id="closeSidebarBtn" class=" py-1 self-end -mt-2 -mr-2 mb-2 text-white hover:text-purple-500 transition-colors" aria-label="Fermer la barre admin">
@@ -63,7 +63,7 @@
                                 </button>
                             </form>
                             <form method="POST" action="{{ path('admin_set_ban', {id: user.id}) }}"
-                                data-confirm="⚠️ Es-tu sûr de vouloir bannir cet utilisateur ? Cette action est irréversible.">
+                                data-confirm=" Es-tu sûr de vouloir bannir cet utilisateur ? Cette action est irréversible.">
                                 <input type="hidden" name="_token" value="{{ csrf_token('set_ban_' ~ user.id) }}">
                                 <button class="flex items-center gap-3 px-4 py-2 w-full rounded-lg bg-black-900 hover:bg-black-950 text-white transition-transform hover:scale-[1.02]">
                                     <svg width="25"  viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -73,7 +73,7 @@
                                 </button>
                             </form>
                             <form method="POST" action="{{ path('admin_reset_roles', {id: user.id}) }}"
-                                data-confirm="⚠️ Tous les rôles de cet utilisateur seront supprimés. Veux-tu vraiment continuer ?">
+                                data-confirm=" Tous les rôles de cet utilisateur seront supprimés. Veux-tu vraiment continuer ?">
                                 <input type="hidden" name="_token" value="{{ csrf_token('reset_roles_' ~ user.id) }}">
                                 <button class="flex items-center gap-3 px-4 py-2 w-full rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-transform hover:scale-[1.02]">
                                     <svg width="25"  viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -104,7 +104,7 @@
                         {% endif %}
                         {% if isSelf or isAdmin or isModo %}
                             <form method="POST" action="{{ path('delete_account', { id: user.id }) }}"
-                                data-confirm="⚠️ Es-tu sûr de vouloir supprimer ton compte ? Cette action est irréversible.">
+                                data-confirm=" Es-tu sûr de vouloir supprimer ton compte ? Cette action est irréversible.">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_account_' ~ user.id) }}">
                                 <button type="submit"
                                     class="mt-4 flex items-center gap-3 px-4 py-2 w-full rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-transform hover:scale-[1.02] duration-200">

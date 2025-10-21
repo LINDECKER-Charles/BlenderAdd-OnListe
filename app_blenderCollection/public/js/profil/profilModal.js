@@ -1,5 +1,5 @@
 export default function initModalScript() {
-        /* 🔧 Modale Édition Générique */
+        /* Modale Édition Générique */
         const dynamicModal = document.getElementById('genericEditModal');
         const fieldContainer = dynamicModal.querySelector('#genericModalField');
         const modalTitle = dynamicModal.querySelector('#genericModalTitle');
@@ -21,7 +21,7 @@ export default function initModalScript() {
                 : document.querySelector(selector);
 
             if (!el) {
-                console.error(`❌ Élément manquant : ${selector}`);
+                console.error(` Élément manquant : ${selector}`);
                 hasError = true;
             } else {
                 refs[key] = el;
@@ -29,9 +29,9 @@ export default function initModalScript() {
         }
 
         if (hasError) {
-            console.error("💥 Le script est interrompu à cause d’éléments DOM manquants.");
+            console.error(" Le script est interrompu à cause d’éléments DOM manquants.");
             return;
-        } else console.log("Script profilModal.js chargé ✅");
+        } else console.log("Script profilModal.js chargé ");
 
         window.openModal = function ({ title, action, fieldName, value }) {
             modalTitle.textContent = title;
